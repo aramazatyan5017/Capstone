@@ -87,6 +87,7 @@ public final class GenericComplexSentence implements Sentence {
         return constructToString(true);
     }
 
+    // TODO: 3/20/2024 should I compare truth tables?
     @Override
     public boolean equals(Object other) {
         if (other == this) return true;

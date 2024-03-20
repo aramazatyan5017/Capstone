@@ -1,10 +1,10 @@
 package org.example.truth_table;
 
-import org.example.domain.*;
+import org.example.domain.Connective;
 import org.example.domain.sentence.*;
+import org.example.domain.supplementary.TruthTableRow;
 import org.example.exception.TautologyException;
 import org.example.exception.UnsatisfiableException;
-import org.example.util.SentenceUtils;
 import org.example.util.Utils;
 
 import java.util.*;
@@ -12,10 +12,30 @@ import java.util.*;
 /**
  * @author aram.azatyan | 3/12/2024 7:42 PM
  */
-public class TruthTable {
+public class TruthTable implements Iterable<TruthTableRow> {
     private final Sentence sentence;
     private final LinkedHashSet<String> literals;
     private final LinkedHashMap<boolean[], Boolean> table;
+
+    private class TruthTableIterator implements Iterator<TruthTableRow> {
+
+        private final Iterator<Map.Entry<boolean[], Boolean>> tableIterator;
+
+        public TruthTableIterator() {
+            tableIterator = table.entrySet().iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return tableIterator.hasNext();
+        }
+
+        @Override
+        public TruthTableRow next() {
+            var entry = tableIterator.next();
+            return new TruthTableRow(entry.getKey(), entry.getValue());
+        }
+    }
 
     public TruthTable(Sentence sentence) throws UnsatisfiableException, TautologyException {
         if (sentence == null) throw new IllegalArgumentException("null param");
@@ -33,12 +53,16 @@ public class TruthTable {
 
     private void constructLiteralTable(Literal literal) {
         literals.add(literal.getName());
-        table.put(new boolean[] {false}, evaluateLiteral(false, literal));
         table.put(new boolean[] {true}, evaluateLiteral(true, literal));
+        table.put(new boolean[] {false}, evaluateLiteral(false, literal));
     }
 
     private void constructClauseTable(Clause clause) {
-        clause.getLiterals().forEach(l -> literals.add(l.getName()));
+        clause.getLiterals().stream()
+                            .map(Literal::getName)
+                            .sorted(Comparator.naturalOrder())
+                            .forEach(literals::add);
+
         List<boolean[]> literalValues = Utils.getTrueAndFalseCombinations(literals.size());
         for (boolean[] literalValuesInstance : literalValues) {
             table.put(literalValuesInstance, evaluateClause(getLiteralValueMap(literalValuesInstance), clause));
@@ -46,7 +70,11 @@ public class TruthTable {
     }
 
     private void constructCNFTable(CNFSentence cnf) {
-        cnf.getClauses().forEach(c -> c.getLiterals().forEach(l -> literals.add(l.getName())));
+        cnf.getClauses().stream()
+                        .flatMap(clause -> clause.getLiterals().stream().map(Literal::getName))
+                        .sorted(Comparator.naturalOrder())
+                        .forEach(literals::add);
+
         List<boolean[]> literalValues = Utils.getTrueAndFalseCombinations(literals.size());
         for (boolean[] literalValuesInstance : literalValues) {
             table.put(literalValuesInstance, evaluateCNF(getLiteralValueMap(literalValuesInstance), cnf));
@@ -56,7 +84,9 @@ public class TruthTable {
     private void constructGenericComplexTable(GenericComplexSentence sentence) {
         sentence.getLiterals().stream()
                 .map(Literal::getName)
+                .sorted(Comparator.naturalOrder())
                 .forEach(literals::add);
+
         List<boolean[]> literalValues = Utils.getTrueAndFalseCombinations(literals.size());
         for (boolean[] literalValuesInstance : literalValues) {
             table.put(literalValuesInstance, evaluateSentence(getLiteralValueMap(literalValuesInstance), sentence));
@@ -75,18 +105,16 @@ public class TruthTable {
 
         List<String> list = new ArrayList<>();
 
-        for (Map.Entry<boolean[], Boolean> entry : table.entrySet()) {
-            StringBuilder str = new StringBuilder();
-            for (int i = 0; i < entry.getKey().length; i++) {
-                str.append(String.format("%" + lengths.get(i) + "d", entry.getKey()[i] ? 1 : 0));
+        for (TruthTableRow truthTableRow : this) {
+            var str = new StringBuilder();
+            for (int i = 0; i < truthTableRow.literalValues().length; i++) {
+                str.append(String.format("%" + lengths.get(i) + "d", truthTableRow.literalValues()[i] ? 1 : 0));
                 str.append(" ");
             }
             str.append(" │  ");
-            str.append(entry.getValue() ? 1 : 0);
-            list.add(str.toString());
+            str.append(truthTableRow.evaluation() ? 1 : 0);
+            System.out.println(str);
         }
-        Collections.reverse(list);
-        list.forEach(System.out::println);
     }
 
     private void printDash(List<Integer> lengths, int sentenceLength) {
@@ -155,6 +183,11 @@ public class TruthTable {
         return true;
     }
 
+    @Override
+    public Iterator<TruthTableRow> iterator() {
+        return new TruthTableIterator();
+    }
+
     public Sentence getSentence() {
         return sentence;
     }
@@ -165,30 +198,5 @@ public class TruthTable {
 
     public LinkedHashMap<boolean[], Boolean> getTable() {
         return table;
-    }
-
-    public static void main(String[] args) throws Exception {
-
-//        CNFSentence cnf1 = new GenericComplexSentence("(A <=> B | C & (D | E))").convertToCNF();
-//        CNFSentence cnf2 = new GenericComplexSentence("(A | !B) & (Q | G | H) & (E)").convertToCNF();
-//        System.out.println(cnf1);
-//        System.out.println(cnf2);
-
-
-//        System.out.println(new CNFSentence("(A | B) & (!B | !A) & (!C | !D | B) & (!C | !D | !A) & (!C | !E | B) & (!C | !E | !A)").convertToCNF());
-//
-        new TruthTable(new CNFSentence("(A | B) & (!B | !A) & (!C | !D | B) & (!C | !D | !A) & (!C | !E | B) & (!C | !E | !A)")).print();
-//
-//        new TruthTable(new GenericComplexSentence("((!A | B | C) & (!A | B | D | E) & (!B | A))")).print();
-
-//
-
-
-        GenericComplexSentence sentence1 = new GenericComplexSentence(new GenericComplexSentence("(A <=> B | C & (D | E))"),
-                new CNFSentence("(A | !B) & (Q | G | H) & (E)"), Connective.BICONDITIONAL, true);
-        new TruthTable(sentence1).print(); // TODO: 3/15/2024 petq a compare anel
-
-        System.out.println(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E)"));
-
     }
 }

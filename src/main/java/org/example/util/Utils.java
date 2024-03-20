@@ -25,7 +25,7 @@ public class Utils {
     public static List<boolean[]> getTrueAndFalseCombinations(int length) {
         if (length <= 0) throw new IllegalArgumentException("invalid length");
         List<boolean[]> list = new ArrayList<>();
-        for (int i = 0; i < (1 << length); i++) {
+        for (int i = (1 << length) - 1; i >= 0; i--) {
             boolean[] arr = new boolean[length];
             for (int j = 0; j < length; j++) {
                 arr[j] = (i & (1 << (length - j - 1))) != 0;
