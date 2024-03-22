@@ -103,8 +103,6 @@ public class TruthTable implements Iterable<TruthTableRow> {
         System.out.println(sentenceStr);
         printDash(lengths, sentenceStr.length());
 
-        List<String> list = new ArrayList<>();
-
         for (TruthTableRow truthTableRow : this) {
             var str = new StringBuilder();
             for (int i = 0; i < truthTableRow.literalValues().length; i++) {
@@ -115,6 +113,31 @@ public class TruthTable implements Iterable<TruthTableRow> {
             str.append(truthTableRow.evaluation() ? 1 : 0);
             System.out.println(str);
         }
+    }
+
+    public CNFSentence getCanonicalCNF() {
+        LinkedHashSet<Clause> clauses = new LinkedHashSet<>();
+        Map<String, Literal[]> literalObjectPreservationMap = new HashMap<>();
+        for (String litStr : literals) {
+            Literal[] literalArr = new Literal[2];
+            literalArr[0] = new Literal(litStr);
+            literalArr[1] = new Literal(litStr, true);
+            literalObjectPreservationMap.put(litStr, literalArr);
+        }
+
+        table.entrySet().stream()
+                .filter(entry -> !entry.getValue())
+                .forEach(entry -> {
+                    LinkedHashSet<Literal> literalSet = new LinkedHashSet<>();
+                    boolean[] literalValues = entry.getKey();
+                    int i = 0;
+                    for (String literal : literals) {
+                        literalSet.add(literalObjectPreservationMap.get(literal)[literalValues[i++] ? 1 : 0]);
+                    }
+                    clauses.add(new Clause(literalSet));
+                });
+
+        return new CNFSentence(clauses);
     }
 
     private void printDash(List<Integer> lengths, int sentenceLength) {
@@ -193,10 +216,10 @@ public class TruthTable implements Iterable<TruthTableRow> {
     }
 
     public LinkedHashSet<String> getLiterals() {
-        return literals;
+        return new LinkedHashSet<>(literals);
     }
 
     public LinkedHashMap<boolean[], Boolean> getTable() {
-        return table;
+        return new LinkedHashMap<>(table);
     }
 }

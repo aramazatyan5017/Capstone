@@ -1,10 +1,7 @@
 package org.example.truth_table;
 
 import org.example.domain.Connective;
-import org.example.domain.sentence.CNFSentence;
-import org.example.domain.sentence.Clause;
-import org.example.domain.sentence.GenericComplexSentence;
-import org.example.domain.sentence.Literal;
+import org.example.domain.sentence.*;
 import org.example.domain.supplementary.TruthTableRow;
 import org.example.exception.TautologyException;
 import org.example.exception.UnsatisfiableException;
@@ -1234,6 +1231,25 @@ class TruthTableTest {
         }
     }
 
+    @Test
+    void getCanonicalCNFTest() {
+        try {
+            Sentence s = new GenericComplexSentence("(A) => (B | C & (D | E))");
+            assertTrue(compareMyCCNFWithTheirs(s, "(¬A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ B ∨ C ∨ D ∨ E)"));
+
+            s = new Literal("A", true);
+            assertTrue(compareMyCCNFWithTheirs(s, "¬A"));
+
+            s = new GenericComplexSentence("(A | B | !C | D)");
+            assertTrue(compareMyCCNFWithTheirs(s, "A ∨ B ∨ ¬C ∨ D"));
+
+            s = new GenericComplexSentence("(A | B) & (C | !D | E | !A) & (G | !H | !Q)");
+            assertTrue(compareMyCCNFWithTheirs(s, "(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ H ∨ Q)"));
+        } catch (Exception e) {
+            fail("shouldn't have thrown an exception");
+        }
+    }
+
     private boolean compareMyTruthTableWithTheirs(TruthTable myTable, String theirString) {
         String[] theirStringArray = theirString.split("\n");
         int i = 0;
@@ -1242,6 +1258,11 @@ class TruthTableTest {
             if (compareResult != 0) return false;
         }
         return true;
+    }
+
+    private boolean compareMyCCNFWithTheirs(Sentence mySentence, String theirCCNFString) throws Exception {
+        return new TruthTable(mySentence).getCanonicalCNF()
+                .equals(new CNFSentence(SentenceUtils.convertOnlineCalculatorString(theirCCNFString)));
     }
 
     private String getStringFromTruthTableRow(TruthTableRow row) {
