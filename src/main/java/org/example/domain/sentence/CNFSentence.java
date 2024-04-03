@@ -8,10 +8,7 @@ import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
 
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +40,7 @@ public final class CNFSentence extends AbstractSentence {
     }
 
     //-- returns true if and only if really canonical (will mostly be used for minimal CNFs)
+    // TODO: 4/3/2024 hotfix changes, check later
     public boolean isCanonical() {
         if (satisfiabilityType() != SatisfiabilityType.CONTINGENCY) return false;
 
@@ -78,8 +76,7 @@ public final class CNFSentence extends AbstractSentence {
 
     @Override
     protected CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
-        CNFSentence possCNF = Sentences.optimizeCNF(this);
-        return possCNF.isCanonical() ? Sentences.optimizeCanonicalCNF(possCNF) : possCNF;
+        return Sentences.optimizeCNF(this);
     }
 
     @Override

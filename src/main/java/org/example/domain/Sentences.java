@@ -92,7 +92,7 @@ public class Sentences {
         return new CNFSentence(clauses);
     }
 
-    // TODO: 3/19/2024 implement later
+    // TODO: 4/3/2024 check
     public static CNFSentence optimizeCanonicalCNF(CNFSentence ccnf) throws TautologyException, ContradictionException {
         if (ccnf == null) throw new IllegalArgumentException("null param");
         if (!ccnf.isCanonical()) throw new IllegalArgumentException("not canonical cnf");

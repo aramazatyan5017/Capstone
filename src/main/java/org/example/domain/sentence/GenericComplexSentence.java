@@ -113,8 +113,7 @@ public final class GenericComplexSentence extends AbstractSentence {
 
     @Override
     protected CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
-        CNFSentence possCNF = Sentences.toCNF(this);
-        return possCNF.isCanonical() ? Sentences.optimizeCanonicalCNF(possCNF) : possCNF;
+        return Sentences.toCNF(this);
     }
 
     @Override
