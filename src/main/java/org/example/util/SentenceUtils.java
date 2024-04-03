@@ -1,7 +1,10 @@
 package org.example.util;
 
-import java.util.HashSet;
-import java.util.Set;
+import org.example.domain.sentence.*;
+import org.example.exception.ContradictionException;
+import org.example.exception.TautologyException;
+
+import java.util.*;
 
 /**
  * @author aram.azatyan | 2/14/2024 9:22 AM
@@ -37,6 +40,41 @@ public class SentenceUtils {
                 .replace("→", SentenceUtils.IMPLICATION)
                 .replace("↔", SentenceUtils.BICONDITIONAL)
                 .replace("~", SentenceUtils.NOT);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static LinkedHashSet<Sentence>[] splitLinkedHashSetOfSentencesIntoTwo(LinkedHashSet<Sentence> set) {
+        if (set == null || set.size() < 2) throw new IllegalArgumentException("null param");
+
+        LinkedHashSet<Sentence>[] arr = (LinkedHashSet<Sentence>[]) new LinkedHashSet[2];
+        LinkedHashSet<Sentence> s1 = new LinkedHashSet<>();
+        LinkedHashSet<Sentence> s2 = new LinkedHashSet<>();
+
+        int halfSize = set.size() / 2;
+
+        int count = 0;
+        for (Iterator<Sentence> iterator = set.iterator(); iterator.hasNext(); count++) {
+            if (count < halfSize) s1.add(iterator.next());
+            else s2.add(iterator.next());
+        }
+
+        arr[0] = s1;
+        arr[1] = s2;
+        return arr;
+    }
+
+    public static Set<Sentence> normalizeANDConnectedSentences(Set<Sentence> sentences) throws TautologyException, ContradictionException {
+        if (sentences == null || sentences.isEmpty()) throw new IllegalArgumentException("null param");
+
+        Set<Sentence> normalizedSet = new HashSet<>();
+
+        for (Sentence sentence : sentences) {
+            try {
+                sentence.minimalCNF();
+            } catch (TautologyException ignored) {}
+        }
+
+        return null;
     }
 }
 

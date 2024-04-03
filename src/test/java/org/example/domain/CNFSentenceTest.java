@@ -1,9 +1,10 @@
 package org.example.domain;
 
+import org.example.SentenceCommon;
 import org.example.domain.sentence.CNFSentence;
 import org.example.domain.sentence.Clause;
 import org.example.exception.TautologyException;
-import org.example.exception.UnsatisfiableException;
+import org.example.exception.ContradictionException;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
@@ -16,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author aram.azatyan | 3/15/2024 10:22 PM
  */
-class CNFSentenceTest {
+class CNFSentenceTest extends SentenceCommon {
 
     @Test
-    void createCNFAbnormal() {
+    public void createAbnormal() {
         LinkedHashSet<Clause> set = null;
         assertThrows(IllegalArgumentException.class, () -> new CNFSentence(set));
 
@@ -52,102 +53,111 @@ class CNFSentenceTest {
     }
 
     @Test
-    void createCNFNormal() {
+    public void createNormal() {
         try {
             LinkedHashSet<Clause> set = new LinkedHashSet<>();
             set.add(new Clause("A"));
             set.add(new Clause("B | C | !D"));
-            CNFSentence cnf = new CNFSentence(set);
-            assertEquals(2, cnf.size());
+            CNFSentence cnfSentence = new CNFSentence(set);
+            assertEquals(2, cnfSentence.size());
 
             set = new LinkedHashSet<>();
             set.add(new Clause("A | C | D"));
             set.add(null);
             set.add(new Clause("B"));
             set.add(null);
-            cnf = new CNFSentence(set);
-            assertEquals(2, cnf.size());
+            cnfSentence = new CNFSentence(set);
+            assertEquals(2, cnfSentence.size());
 
-            cnf = new CNFSentence(new Clause("A | B"), null, new Clause("C | D"));
-            assertEquals(2, cnf.size());
+            cnfSentence = new CNFSentence(new Clause("A | B"), null, new Clause("C | D"));
+            assertEquals(2, cnfSentence.size());
 
-            cnf = new CNFSentence("a");
-            assertEquals(1, cnf.size());
+            cnfSentence = new CNFSentence("a");
+            assertEquals(1, cnfSentence.size());
 
-            cnf = new CNFSentence("(a)");
-            assertEquals(1, cnf.size());
+            cnfSentence = new CNFSentence("(a)");
+            assertEquals(1, cnfSentence.size());
 
-            cnf = new CNFSentence("a | b");
-            assertEquals(1, cnf.size());
+            cnfSentence = new CNFSentence("a | b");
+            assertEquals(1, cnfSentence.size());
 
-            cnf = new CNFSentence("(a | b)");
-            assertEquals(1, cnf.size());
+            cnfSentence = new CNFSentence("(a | b)");
+            assertEquals(1, cnfSentence.size());
 
-            cnf = new CNFSentence("(a | b) & (c | d)");
-            assertEquals(2, cnf.size());
+            cnfSentence = new CNFSentence("(a | b) & (c | d)");
+            assertEquals(2, cnfSentence.size());
 
-            cnf = new CNFSentence("a & b & c & d");
-            assertEquals(4, cnf.size());
+            cnfSentence = new CNFSentence("a & b & c & d");
+            assertEquals(4, cnfSentence.size());
 
-            cnf = new CNFSentence("(a) & (b) & (c) & (d)");
-            assertEquals(4, cnf.size());
+            cnfSentence = new CNFSentence("(a) & (b) & (c) & (d)");
+            assertEquals(4, cnfSentence.size());
+
+            cnfSentence = new CNFSentence("a & (true) & (false) & c | d");
+            assertEquals(4, cnfSentence.size());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }
     }
 
     @Test
-    void clauseListTest() {
+    public void clauseListTest() {
         try {
-            CNFSentence cnf = new CNFSentence("(a | b | c) & (D | !e | f)");
+            CNFSentence cnfSentence = new CNFSentence("(a | b | c) & (D | !e | f)");
             List<Clause> clauseList = new ArrayList<>();
             clauseList.add(new Clause("a | b | c"));
             clauseList.add(new Clause("(D | !e | f)"));
-            assertEquals(clauseList, cnf.getClauseList());
+            assertEquals(clauseList, cnfSentence.getClauseList());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }
     }
 
     @Test
-    void sentenceTypeTest() {
+    public void sentenceTypeTest() {
         try {
-            CNFSentence cnf = new CNFSentence("A | B | C");
-            assertFalse(cnf.isLiteral());
-            assertFalse(cnf.isClause());
-            assertTrue(cnf.isCnf());
-            assertFalse(cnf.isGenericComplex());
+            CNFSentence cnfSentence = new CNFSentence("A | B | C");
+            assertSame(cnfSentence.type(), SentenceType.CNF);
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }
     }
 
     @Test
-    void convertToCNFTest() {
+    public void minimalCNFTest() {
         try {
             CNFSentence cnfNotConverted = new CNFSentence("(a | B | c) & (g | !D | c)");
-            CNFSentence cnf = cnfNotConverted.convertToCNF();
-            assertEquals(2, cnf.size());
+            CNFSentence cnfSentence = cnfNotConverted.minimalCNF();
+            assertEquals(2, cnfSentence.size());
 
             LinkedHashSet<Clause> clauseSet = new LinkedHashSet<>();
             clauseSet.add(new Clause("a | B | c"));
             clauseSet.add(new Clause("(g | !D | c)"));
-            assertEquals(clauseSet, cnf.getClauses());
+            assertEquals(clauseSet, cnfSentence.getClauses());
 
             cnfNotConverted = new CNFSentence("(a | b) & (b | c | a)");
-            cnf = cnfNotConverted.convertToCNF();
-            assertEquals(1, cnf.size());
+            cnfSentence = cnfNotConverted.minimalCNF();
+            assertEquals(1, cnfSentence.size());
 
             clauseSet = new LinkedHashSet<>();
             clauseSet.add(new Clause("a | b"));
-            assertEquals(clauseSet, cnf.getClauses());
+            assertEquals(clauseSet, cnfSentence.getClauses());
+
+            cnfNotConverted = new CNFSentence("a & (b | c | TRUE) & (false | e)");
+            cnfSentence = cnfNotConverted.minimalCNF();
+            assertEquals(2, cnfSentence.size());
+
+            clauseSet = new LinkedHashSet<>();
+            clauseSet.add(new Clause("a"));
+            clauseSet.add(new Clause("e"));
+            assertEquals(clauseSet, cnfSentence.getClauses());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }
 
         try {
             CNFSentence cnfNotConverted = new CNFSentence("(a | !a | b) & (!c | e | f | c)");
-            CNFSentence cnf = cnfNotConverted.convertToCNF();
+            CNFSentence cnfSentence = cnfNotConverted.minimalCNF();
         } catch (Exception e) {
             if (!(e instanceof TautologyException)) {
                 fail("should have thrown a TautologyException");
@@ -156,87 +166,152 @@ class CNFSentenceTest {
 
         try {
             CNFSentence cnfNotConverted = new CNFSentence("!a & (!b) & !(c) & (a | b | c)");
-            CNFSentence cnf = cnfNotConverted.convertToCNF();
+            CNFSentence cnfSentence = cnfNotConverted.minimalCNF();
         } catch (Exception e) {
-            if (!(e instanceof UnsatisfiableException)) {
-                fail("should have thrown an UnsatisfiableException");
+            if (!(e instanceof ContradictionException)) {
+                fail("should have thrown a ContradictionException");
+            }
+        }
+
+        try {
+            CNFSentence cnfNotConverted = new CNFSentence("TRUE & (b | c | TRUE) & (!false | E)");
+            CNFSentence cnfSentence = cnfNotConverted.minimalCNF();
+        } catch (Exception e) {
+            if (!(e instanceof TautologyException)) {
+                fail("should have thrown a TautologyException");
+            }
+        }
+
+        try {
+            CNFSentence cnfNotConverted = new CNFSentence("a & (b | c | TRUE) & (false) & (false | E)");
+            CNFSentence cnfSentence = cnfNotConverted.minimalCNF();
+        } catch (Exception e) {
+            if (!(e instanceof ContradictionException)) {
+                fail("should have thrown a ContradictionException");
             }
         }
     }
 
     @Test
-    void isCanonicalTest() {
+    public void satisfiabilityTypeTest() {
         try {
-            CNFSentence cnf = new CNFSentence("(a | b) & (!a | c | d) & (b)");
-            assertFalse(cnf.isCanonical());
+            CNFSentence cnfSentence = new CNFSentence("(A | !A) & (B | !B | C)");
+            assertSame(cnfSentence.satisfiabilityType(), SatisfiabilityType.TAUTOLOGY);
 
-            cnf = new CNFSentence("a");
-            assertTrue(cnf.isCanonical());
+            cnfSentence = new CNFSentence("A & !A");
+            assertSame(cnfSentence.satisfiabilityType(), SatisfiabilityType.CONTRADICTION);
 
-            cnf = new CNFSentence("(a | b | c) & (!a | b | !c) & (a | !b | !c)");
-            assertTrue(cnf.isCanonical());
+            cnfSentence = new CNFSentence("(a | b | c) & (d | e) & (f)");
+            assertSame(cnfSentence.satisfiabilityType(), SatisfiabilityType.CONTINGENCY);
 
-            cnf = new CNFSentence("(a | b | c | d) & (!a | b | !c) & (a | !b | !c)");
-            assertFalse(cnf.isCanonical());
+            cnfSentence = new CNFSentence("true");
+            assertSame(cnfSentence.satisfiabilityType(), SatisfiabilityType.TAUTOLOGY);
 
-            cnf = new CNFSentence("(a | b | c) & (!a | b | !c) & (a | !b)");
-            assertFalse(cnf.isCanonical());
-
-            cnf = new CNFSentence("(a | !a | b | c)");
-            assertFalse(cnf.isCanonical());
+            cnfSentence = new CNFSentence("false");
+            assertSame(cnfSentence.satisfiabilityType(), SatisfiabilityType.CONTRADICTION);
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }
     }
 
     @Test
-    void toStringTest() {
+    public void truthTableTest() {
         try {
-            CNFSentence cnf = new CNFSentence("a | b | c");
-            assertEquals("a | b | c", cnf.toString());
+            CNFSentence cnfSentence = new CNFSentence("(A | !A) & (B | !B | C)");
+            assertThrows(TautologyException.class, cnfSentence::truthTable);
 
-            cnf = new CNFSentence("(a | b | c)");
-            assertEquals("a | b | c", cnf.toString());
+            cnfSentence = new CNFSentence("A & !A");
+            assertThrows(ContradictionException.class, cnfSentence::truthTable);
 
-            cnf = new CNFSentence("(a | b | c) & (c | d | e)");
-            assertEquals("(a | b | c) & (c | d | e)", cnf.toString());
-
-            cnf = new CNFSentence("a & b & c");
-            assertEquals("(a) & (b) & (c)", cnf.toString());
+            cnfSentence = new CNFSentence("(a | b | c) & (d | e) & (f)");
+            assertNotNull(cnfSentence.truthTable());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }
     }
 
     @Test
-    void equalsTest() {
+    public void isCanonicalTest() {
         try {
-            CNFSentence cnf1 = new CNFSentence("a | b");
-            CNFSentence cnf2 = new CNFSentence("b | a");
-            assertEquals(cnf1, cnf2);
+            CNFSentence cnfSentence = new CNFSentence("(a | b) & (!a | c | d) & (b)");
+            assertFalse(cnfSentence.isCanonical());
 
-            cnf1 = new CNFSentence("(a | c) & (c | a | d) & (e | f)");
-            cnf2 = new CNFSentence("(e | f) & (a | c | d) & (c | a)");
-            assertEquals(cnf1, cnf2);
+            cnfSentence = new CNFSentence("a");
+            assertTrue(cnfSentence.isCanonical());
 
-            cnf1 = new CNFSentence("a | b | c");
-            cnf2 = new CNFSentence("a | b | d");
-            assertNotEquals(cnf1, cnf2);
+            cnfSentence = new CNFSentence("(a | b | c) & (!a | b | !c) & (a | !b | !c)");
+            assertTrue(cnfSentence.isCanonical());
+
+            cnfSentence = new CNFSentence("(a | b | c | d) & (!a | b | !c) & (a | !b | !c)");
+            assertFalse(cnfSentence.isCanonical());
+
+            cnfSentence = new CNFSentence("(a | b | c) & (!a | b | !c) & (a | !b)");
+            assertFalse(cnfSentence.isCanonical());
+
+            cnfSentence = new CNFSentence("(a | !a | b | c)");
+            assertFalse(cnfSentence.isCanonical());
+
+            cnfSentence = new CNFSentence("(a | b | c | false) & (!a | b | !c) & (a | !b | !c)");
+            assertFalse(cnfSentence.isCanonical());
+
+            cnfSentence = new CNFSentence("(a | b | c) & (!a | b | !c) & (a | !b | !c) & true");
+            assertFalse(cnfSentence.isCanonical());
+
+            cnfSentence = new CNFSentence("(a | b | c | false) & (!a | b | !c) & (a | !b | !c) & true & (g | e | true)");
+            assertTrue(cnfSentence.minimalCNF().isCanonical());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }
     }
 
     @Test
-    void hashCodeTest() {
+    public void toStringTest() {
         try {
-            CNFSentence cnf1 = new CNFSentence("a | b");
-            CNFSentence cnf2 = new CNFSentence("b | a");
-            assertEquals(cnf1.hashCode(), cnf2.hashCode());
+            CNFSentence cnfSentence = new CNFSentence("a | b | c");
+            assertEquals("a | b | c", cnfSentence.toString());
 
-            cnf1 = new CNFSentence("(a | c) & (c | a | d) & (e | f)");
-            cnf2 = new CNFSentence("(e | f) & (a | c | d) & (c | a)");
-            assertEquals(cnf1.hashCode(), cnf2.hashCode());
+            cnfSentence = new CNFSentence("(a | b | c)");
+            assertEquals("a | b | c", cnfSentence.toString());
+
+            cnfSentence = new CNFSentence("(a | b | c) & (c | d | e)");
+            assertEquals("(a | b | c) & (c | d | e)", cnfSentence.toString());
+
+            cnfSentence = new CNFSentence("a & b & c");
+            assertEquals("(a) & (b) & (c)", cnfSentence.toString());
+        } catch (Exception e) {
+            fail("shouldn't have thrown an exception");
+        }
+    }
+
+    @Test
+    public void equalsTest() {
+        try {
+            CNFSentence cnfSentence1 = new CNFSentence("a | b");
+            CNFSentence cnfSentence2 = new CNFSentence("b | a");
+            assertEquals(cnfSentence1, cnfSentence2);
+
+            cnfSentence1 = new CNFSentence("(a | c) & (c | a | d) & (e | f)");
+            cnfSentence2 = new CNFSentence("(e | f) & (a | c | d) & (c | a)");
+            assertEquals(cnfSentence1, cnfSentence2);
+
+            cnfSentence1 = new CNFSentence("a | b | c");
+            cnfSentence2 = new CNFSentence("a | b | d");
+            assertNotEquals(cnfSentence1, cnfSentence2);
+        } catch (Exception e) {
+            fail("shouldn't have thrown an exception");
+        }
+    }
+
+    @Test
+    public void hashCodeTest() {
+        try {
+            CNFSentence cnfSentence1 = new CNFSentence("a | b");
+            CNFSentence cnfSentence2 = new CNFSentence("b | a");
+            assertEquals(cnfSentence1.hashCode(), cnfSentence2.hashCode());
+
+            cnfSentence1 = new CNFSentence("(a | c) & (c | a | d) & (e | f)");
+            cnfSentence2 = new CNFSentence("(e | f) & (a | c | d) & (c | a)");
+            assertEquals(cnfSentence1.hashCode(), cnfSentence2.hashCode());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }

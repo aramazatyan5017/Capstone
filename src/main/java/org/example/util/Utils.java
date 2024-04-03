@@ -8,16 +8,6 @@ import java.util.List;
  */
 public class Utils {
 
-    // TODO: 3/19/2024 old method
-    public static <T> List<T> fillAndGetList(T obj, int count) {
-        if (count < 0) throw new IllegalArgumentException("negative count");
-        if (count == 0) return new ArrayList<T>();
-
-        List<T> list = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) list.add(obj);
-        return list;
-    }
-
     public static boolean isNullOrBlank(String str) {
         return str == null || str.isBlank();
     }

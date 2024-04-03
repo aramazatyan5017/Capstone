@@ -118,16 +118,20 @@ public abstract class LogicalExpressionParser {
             }
             i++;
         }
-        if (!literalStringBuilder.isEmpty()) {
-            tokenList.add(new Token(LITERAL, literalStringBuilder.toString()));
-        }
-
+        checkForLiteral(literalStringBuilder, tokenList);
         return tokenList;
     }
 
     private static void checkForLiteral(StringBuilder literalStringBuilder, List<Token> tokenList) {
         if (!literalStringBuilder.isEmpty()) {
-            tokenList.add(new Token(LITERAL, literalStringBuilder.toString()));
+            String val;
+            String literalStr = literalStringBuilder.toString();
+
+            if (literalStr.equalsIgnoreCase("true")) val = "TRUE";
+            else if (literalStr.equalsIgnoreCase("false")) val = "FALSE";
+            else val = literalStr;
+
+            tokenList.add(new Token(LITERAL, val));
             literalStringBuilder.setLength(0);
         }
     }

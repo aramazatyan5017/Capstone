@@ -4,7 +4,7 @@ import org.example.domain.Connective;
 import org.example.domain.sentence.*;
 import org.example.domain.supplementary.TruthTableRow;
 import org.example.exception.TautologyException;
-import org.example.exception.UnsatisfiableException;
+import org.example.exception.ContradictionException;
 import org.example.util.SentenceUtils;
 import org.junit.jupiter.api.Test;
 
@@ -18,9 +18,9 @@ class TruthTableTest {
     @Test
     void createTruthTableAbnormal() {
         assertThrows(IllegalArgumentException.class, () -> new TruthTable(null));
-        assertThrows(UnsatisfiableException.class, () -> new TruthTable(new GenericComplexSentence("!a & !b & !c & (a | b | c)")));
-        assertThrows(UnsatisfiableException.class, () -> new TruthTable(new CNFSentence("!a & !b & !c & (a | b | c)")));
-        assertThrows(UnsatisfiableException.class, () -> new TruthTable(new GenericComplexSentence("a & !a")));
+        assertThrows(ContradictionException.class, () -> new TruthTable(new GenericComplexSentence("!a & !b & !c & (a | b | c)")));
+        assertThrows(ContradictionException.class, () -> new TruthTable(new CNFSentence("!a & !b & !c & (a | b | c)")));
+        assertThrows(ContradictionException.class, () -> new TruthTable(new GenericComplexSentence("a & !a")));
         assertThrows(TautologyException.class, () -> new TruthTable(new GenericComplexSentence("(a | !a | b) & (c | d | !c)")));
         assertThrows(TautologyException.class, () -> new TruthTable(new CNFSentence("(a | !a | b) & (c | d | !c)")));
         assertThrows(TautologyException.class, () -> new TruthTable(new Clause("(a | !a | b)")));

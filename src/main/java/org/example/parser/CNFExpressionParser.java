@@ -21,15 +21,16 @@ public class CNFExpressionParser extends LogicalExpressionParser {
 
     public static Clause parseClauseExpression(String expression) throws ParseException {
         if (Utils.isNullOrBlank(expression)) throw new ParseException("null param", -1);
-        return getClause(tokenize(expression, true));
+        return getClause(tokenize(expression, true), true);
     }
 
-    public static CNFSentence parseCNFExpression(String expression) throws ParseException {
+    public static CNFSentence parseCNFExpression(String expression, boolean isPossibleWeakCNFExpression) throws ParseException {
         if (Utils.isNullOrBlank(expression)) throw new ParseException("null param", -1);
-        return new CNFSentence(getClauses(preprocessExpression(expression)));
+        return new CNFSentence(getClauses(preprocessExpression(expression), isPossibleWeakCNFExpression));
     }
 
-    private static LinkedHashSet<Clause> getClauses(String expression) throws ParseException {
+    private static LinkedHashSet<Clause> getClauses(String expression,
+                                                    boolean isPossibleWeakCNFExpression) throws ParseException {
         if (expression.contains(SentenceUtils.IMPLICATION) || expression.contains(SentenceUtils.BICONDITIONAL)) throw
             new ParseException("not a cnf sentence", -1);
 
@@ -41,7 +42,7 @@ public class CNFExpressionParser extends LogicalExpressionParser {
         String[] possClauses = expression.split(SentenceUtils.AND);
         for (String possClause : possClauses) {
             try {
-                clauses.add(getClause(tokenize(possClause, false)));
+                clauses.add(getClause(tokenize(possClause, false), isPossibleWeakCNFExpression));
             } catch (Exception ex) {
                 throw new ParseException("invalid sentence", -1);
             }
@@ -49,7 +50,7 @@ public class CNFExpressionParser extends LogicalExpressionParser {
         return clauses;
     }
 
-    private static Clause getClause(List<Token> infixTokens) throws ParseException {
+    private static Clause getClause(List<Token> infixTokens, boolean isPossibleWeakCNFExpression) throws ParseException {
         for (Token token : infixTokens) {
             if (token.getType() == TokenType.CONNECTIVE) {
                 if (token.getValue().equals(SentenceUtils.AND) || token.getValue().equals(SentenceUtils.IMPLICATION) ||
@@ -60,6 +61,14 @@ public class CNFExpressionParser extends LogicalExpressionParser {
         List<Token> postfixTokens = getPostfixTokens(infixTokens);
         validateClausePostfixTokens(postfixTokens);
 
+        if (!isPossibleWeakCNFExpression
+                &&
+            postfixTokens.stream().anyMatch(token -> token.getType() == TokenType.CONNECTIVE)
+                &&
+            infixTokens.get(0).getType() != TokenType.OPENING_PARENTHESES) {
+            throw new ParseException("not a cnf expression", -1);
+        }
+
         LinkedHashSet<Literal> literals = new LinkedHashSet<>();
         boolean negated = false;
         String literalName = null;
@@ -69,7 +78,7 @@ public class CNFExpressionParser extends LogicalExpressionParser {
                 case NEGATION -> negated = !negated;
                 case LITERAL -> {
                     if (literalName != null) {
-                        literals.add(new Literal(literalName, negated));
+                        literals.add(getLiteral(literalName, negated));
                         negated = false;
                         literalName = token.getValue();
                     } else {
@@ -78,7 +87,7 @@ public class CNFExpressionParser extends LogicalExpressionParser {
                 }
                 case CONNECTIVE -> {
                     if (literalName != null) {
-                        literals.add(new Literal(literalName, negated));
+                        literals.add(getLiteral(literalName, negated));
                         negated = false;
                         literalName = null;
                     }
@@ -86,7 +95,7 @@ public class CNFExpressionParser extends LogicalExpressionParser {
             }
         }
 
-        if (literalName != null) literals.add(new Literal(literalName, negated));
+        if (literalName != null) literals.add(getLiteral(literalName, negated));
 
         return new Clause(literals);
     }
@@ -104,6 +113,12 @@ public class CNFExpressionParser extends LogicalExpressionParser {
             if (current.getType() == TokenType.NEGATION &&
                     previous.getType() == TokenType.CONNECTIVE) throw invalidClause;
         }
+    }
+
+    private static Literal getLiteral(String literalName, boolean negated) {
+        if (literalName.equalsIgnoreCase("true")) return negated ? Literal.FALSE : Literal.TRUE;
+        if (literalName.equalsIgnoreCase("false")) return negated ? Literal.TRUE : Literal.FALSE;
+        return new Literal(literalName, negated);
     }
 
 }

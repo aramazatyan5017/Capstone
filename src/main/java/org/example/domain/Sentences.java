@@ -1,52 +1,45 @@
-package org.example.domain.sentence;
+package org.example.domain;
 
+import org.example.algo.Resolution;
 import org.example.cnf_util.CNFConverter;
-import org.example.domain.Connective;
-import org.example.old.OldSentence;
+import org.example.domain.sentence.*;
+import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
-import org.example.exception.UnsatisfiableException;
 import org.example.parser.CNFExpressionParser;
 import org.example.parser.InfixExpressionParser;
 
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author aram.azatyan | 2/14/2024 3:42 PM
  */
 public class Sentences {
-    // TODO: 2/14/2024 old method
-    public static OldSentence combineBasics(Set<OldSentence> basicOldSentences, Connective connective) {
-        if (basicOldSentences == null || basicOldSentences.isEmpty() || connective == null) throw
-                new IllegalArgumentException("null param");
-        List<OldSentence> basicSentencesList = basicOldSentences.stream().toList();
-        if (basicSentencesList.size() == 1) return basicSentencesList.get(0);
-        var sentence = basicSentencesList.get(0);
 
-        for (int i = 1; i < basicSentencesList.size(); i++) {
-            sentence = new OldSentence(sentence, basicSentencesList.get(i), connective);
-        }
-
-        return sentence;
+    public static Literal parseLiteralExpression(String expression) throws ParseException {
+        return InfixExpressionParser.parseLiteral(expression);
     }
 
-    public static Sentence parseGenericExpression(String expression) throws ParseException {
-        return InfixExpressionParser.parse(expression);
+    public static GenericComplexSentence parseGenericExpression(String expression) throws ParseException {
+        return InfixExpressionParser.parseGeneric(expression);
     }
 
     public static Clause parseClauseExpression(String expression) throws ParseException {
         return CNFExpressionParser.parseClauseExpression(expression);
     }
 
-    public static CNFSentence parseCNFExpression(String expression) throws ParseException {
-        return CNFExpressionParser.parseCNFExpression(expression);
+    //-- a | b & c | d -> weak cnf expression, (a | b) & (c | d) -> strong cnf expression
+    public static CNFSentence parseCNFExpression(String expression,
+                                                 boolean isPossibleWeakCNFExpression) throws ParseException {
+        return CNFExpressionParser.parseCNFExpression(expression, isPossibleWeakCNFExpression);
     }
 
-    public static CNFSentence toCNF(Sentence sentence) throws UnsatisfiableException, TautologyException {
+    public static CNFSentence toCNF(Sentence sentence) throws ContradictionException, TautologyException {
         return CNFConverter.toCNF(sentence);
     }
 
-    public static CNFSentence optimizeCNF(CNFSentence sentence) throws UnsatisfiableException, TautologyException {
+    public static CNFSentence optimizeCNF(CNFSentence sentence) throws ContradictionException, TautologyException {
         if (sentence == null) throw new IllegalArgumentException("null param");
         LinkedHashSet<Clause> clauses = new LinkedHashSet<>();
         for (Clause clause : sentence.getClauses()) {
@@ -75,7 +68,7 @@ public class Sentences {
         }
 
         clauses.removeIf(toBeRemoved::contains);
-        if (clauses.isEmpty()) throw new UnsatisfiableException();
+        if (clauses.isEmpty()) throw new ContradictionException();
 
 
         clauseRefinementMap.entrySet().removeIf(entry -> !clauses.contains(entry.getKey()));
@@ -94,26 +87,30 @@ public class Sentences {
         }
 
         clauses.addAll(toBeAdded);
-        if (clauses.isEmpty()) throw new UnsatisfiableException();
+        if (clauses.isEmpty()) throw new ContradictionException();
 
         return new CNFSentence(clauses);
     }
 
     // TODO: 3/19/2024 implement later
-    public static CNFSentence optimizeCanonicalCNF(CNFSentence ccnf) {
+    public static CNFSentence optimizeCanonicalCNF(CNFSentence ccnf) throws TautologyException, ContradictionException {
         if (ccnf == null) throw new IllegalArgumentException("null param");
-        return null;
+        if (!ccnf.isCanonical()) throw new IllegalArgumentException("not canonical cnf");
+
+        Set<Sentence> set = new HashSet<>();
+        set.add(ccnf);
+        return Sentences.optimizeCNF(new CNFSentence(new LinkedHashSet<>(new Resolution(set, false).resolveAndGet())));
     }
     
     private static void optimizeForOneLiteralClause(Clause compared, Clause current,
                                                     Set<Clause> toBeRemoved,
                                                     Map<Clause, Set<Literal>> clauseRefinementMap)
-            throws UnsatisfiableException {
+            throws ContradictionException {
         if (compared.size() == 1 && current.size() == 1) {
             Literal l1 = current.getLiteralList().get(0);
             Literal l2 = compared.getLiteralList().get(0);
             if (l1.equalsIgnoreNegation(l2)) {
-                throw new UnsatisfiableException();
+                throw new ContradictionException();
             }
         } else if (compared.size() == 1 && current.size() != 1) 
             potentialRefineClause(current, compared, toBeRemoved, clauseRefinementMap);
@@ -123,7 +120,7 @@ public class Sentences {
     
     private static void potentialRefineClause(Clause larger, Clause smaller,
                                               Set<Clause> toBeRemoved, Map<Clause, Set<Literal>> clauseRefinementMap)
-            throws UnsatisfiableException {
+            throws ContradictionException {
         Literal literal = smaller.getLiteralList().get(0);
         if (larger.getLiterals().contains(literal)) toBeRemoved.add(larger);
         else if (larger.getLiterals().contains(new Literal(literal.getName(), !literal.isNegated()))) {
@@ -131,7 +128,7 @@ public class Sentences {
                 clauseRefinementMap.get(larger).add(new Literal(literal.getName(), !literal.isNegated()));
                 Set<Literal> literalSet = clauseRefinementMap.get(larger);
                 if (larger.size() == literalSet.size()) {
-                    throw new UnsatisfiableException();
+                    throw new ContradictionException();
                 }
             } else {
                 Set<Literal> set = new HashSet<>();
@@ -141,11 +138,15 @@ public class Sentences {
         }
     }
 
-    public static Clause optimizeClause(Clause clause) throws TautologyException {
+    public static Clause optimizeClause(Clause clause) throws TautologyException, ContradictionException {
         if (clause == null) throw new IllegalArgumentException("null param");
         LinkedHashSet<Literal> literals = clause.getLiterals();
+        literals.removeIf(l -> l == Literal.FALSE);
+        if (literals.isEmpty()) throw new ContradictionException();
+
         for (Literal compared : literals) {
             for (Literal current : literals) {
+                if (current == Literal.TRUE) throw new TautologyException();
                 if (compared.equals(current)) continue;
                 if (compared.equalsIgnoreNegation(current)) throw new TautologyException();
             }

@@ -3,26 +3,26 @@ package org.example.domain.supplementary;
 /**
  * @author aram.azatyan | 3/2/2024 1:22 PM
  */
-public class LiteralAndNegation {
-    private String literal;
+public class LiteralNameAndNegation {
+    private String literalName;
     private boolean negated;
 
-    public LiteralAndNegation(String literal, boolean negated) {
-        this.literal = literal;
+    public LiteralNameAndNegation(String literalName, boolean negated) {
+        this.literalName = literalName;
         this.negated = negated;
     }
 
     @Override
     public String toString() {
-        return literal;
+        return literalName;
     }
 
-    public String getLiteral() {
-        return literal;
+    public String getLiteralName() {
+        return literalName;
     }
 
-    public void setLiteral(String literal) {
-        this.literal = literal;
+    public void setLiteralName(String literalName) {
+        this.literalName = literalName;
     }
 
     public boolean isNegated() {

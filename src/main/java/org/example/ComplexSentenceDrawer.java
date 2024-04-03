@@ -3,6 +3,7 @@ package org.example;
 import org.example.domain.sentence.Literal;
 import org.example.domain.sentence.GenericComplexSentence;
 import org.example.domain.sentence.Sentence;
+import org.example.domain.SentenceType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +16,7 @@ public class ComplexSentenceDrawer extends JFrame {
 
     public ComplexSentenceDrawer(Sentence sentence) {
         if (sentence == null) throw new IllegalArgumentException("null param");
-        if (!sentence.isGenericComplex()) throw
+        if (sentence.type() != SentenceType.GENERIC_COMPLEX) throw
                 new IllegalArgumentException("not a complex sentence");
 
         this.sentence = (GenericComplexSentence) sentence;
@@ -34,7 +35,7 @@ public class ComplexSentenceDrawer extends JFrame {
     private void drawNode(Graphics g, Sentence sentence, int x, int y, int xOffset) {
         int verticalGap = 80;
 
-        if (sentence.isGenericComplex()) {
+        if (sentence.type() == SentenceType.GENERIC_COMPLEX) {
             GenericComplexSentence genericComplexSentence = (GenericComplexSentence) sentence;
             if (genericComplexSentence.getLeftSentence() != null) {
                 int newX = x - xOffset;
@@ -44,7 +45,7 @@ public class ComplexSentenceDrawer extends JFrame {
                 drawNode(g, genericComplexSentence.getLeftSentence(), newX, newY, xOffset / 2);
             }
 
-            if (sentence.isGenericComplex() && genericComplexSentence.getRightSentence() != null) {
+            if (sentence.type() == SentenceType.GENERIC_COMPLEX && genericComplexSentence.getRightSentence() != null) {
                 int newX = x + xOffset;
                 int newY = y + verticalGap;
                 g.setColor(Color.BLACK);
@@ -77,7 +78,7 @@ public class ComplexSentenceDrawer extends JFrame {
     }
 
     private String getValueAndChangeColor(Sentence sentence, Graphics g) {
-        if (sentence.isLiteral()) {
+        if (sentence.type() == SentenceType.LITERAL) {
             Literal literal = (Literal) sentence;
             g.setColor(literal.isNegated() ? new Color(255, 153, 153) : Color.GREEN);
             return (literal).getName();

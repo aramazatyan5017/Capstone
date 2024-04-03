@@ -1,10 +1,16 @@
 package org.example.domain.sentence;
 
-import org.example.domain.*;
+import org.example.domain.Connective;
+import org.example.domain.SentenceType;
+import org.example.domain.Sentences;
+import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -12,16 +18,14 @@ import java.util.stream.Collectors;
  */
 
 //--  a disjunction of literals
-public final class Clause implements Sentence {
+public final class Clause extends AbstractSentence {
     private final LinkedHashSet<Literal> literals;
-    private int nonNegatedLiteralCount = 0;
-    private int negatedLiteralCount = 0;
+    private String stringRepresentation;
 
     public Clause(LinkedHashSet<Literal> literals) {
         if (literals == null || literals.isEmpty()) throw new IllegalArgumentException("null param");
         literals.remove(null);
         if (literals.size() == 0) throw new IllegalArgumentException("null literal passed");
-        setLiteralCounts(literals);
         this.literals = literals;
     }
 
@@ -31,19 +35,16 @@ public final class Clause implements Sentence {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         if (literalSet.size() == 0) throw new IllegalArgumentException("null literals passed");
-        setLiteralCounts(literalSet);
         this.literals = literalSet;
     }
 
     public Clause(String expression) throws ParseException {
         Clause clause = Sentences.parseClauseExpression(expression);
         this.literals = clause.getLiterals();
-        this.negatedLiteralCount = clause.getNegatedLiteralCount();
-        this.nonNegatedLiteralCount = clause.getNonNegatedLiteralCount();
     }
 
     public int size() {
-        return nonNegatedLiteralCount + negatedLiteralCount;
+        return literals.size();
     }
 
     public List<Literal> getLiteralList() {
@@ -51,31 +52,33 @@ public final class Clause implements Sentence {
     }
 
     @Override
-    public CNFSentence convertToCNF() throws TautologyException {
-        Clause clause = Sentences.optimizeClause(this);
-        return new CNFSentence(clause);
+    protected CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
+        return new CNFSentence(Sentences.optimizeClause(this));
     }
 
     @Override
-    public boolean isClause() {
-        return true;
+    public SentenceType type() {
+        return SentenceType.CLAUSE;
     }
 
     @Override
     public String toString() {
-        StringBuilder str = new StringBuilder();
-        literals.forEach(l -> str.append(l.toString())
-                .append(" ")
-                .append(Connective.OR)
-                .append(" "));
-        return str.replace(str.length() - 3, str.length(), "").toString();
+        if (stringRepresentation == null) {
+            StringBuilder str = new StringBuilder();
+            literals.forEach(l -> str.append(l.toString())
+                    .append(" ")
+                    .append(Connective.OR)
+                    .append(" "));
+            stringRepresentation = str.replace(str.length() - 3, str.length(), "").toString();
+        }
+
+        return stringRepresentation;
     }
 
     @Override
     public boolean equals(Object other) {
         if (other == this) return true;
         if (!(other instanceof Clause that)) return false;
-
         return this.literals.equals(that.getLiterals());
     }
 
@@ -84,22 +87,7 @@ public final class Clause implements Sentence {
         return literals.hashCode();
     }
 
-    private void setLiteralCounts(Set<Literal> literals) {
-        for (Literal literal : literals) {
-            if (literal.isNegated()) negatedLiteralCount++;
-            else nonNegatedLiteralCount++;
-        }
-    }
-
     public LinkedHashSet<Literal> getLiterals() {
         return new LinkedHashSet<>(literals);
-    }
-
-    public int getNonNegatedLiteralCount() {
-        return nonNegatedLiteralCount;
-    }
-
-    public int getNegatedLiteralCount() {
-        return negatedLiteralCount;
     }
 }
