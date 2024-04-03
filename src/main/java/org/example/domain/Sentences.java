@@ -97,7 +97,7 @@ public class Sentences {
         if (ccnf == null) throw new IllegalArgumentException("null param");
         if (!ccnf.isCanonical()) throw new IllegalArgumentException("not canonical cnf");
 
-        Set<Sentence> set = new HashSet<>();
+        Set<CNFSentence> set = new HashSet<>();
         set.add(ccnf);
         return Sentences.optimizeCNF(new CNFSentence(new LinkedHashSet<>(new Resolution(set, false).resolveAndGet())));
     }

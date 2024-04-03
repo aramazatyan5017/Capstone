@@ -40,21 +40,45 @@ public final class CNFSentence extends AbstractSentence {
     }
 
     //-- returns true if and only if really canonical (will mostly be used for minimal CNFs)
-    // TODO: 4/3/2024 hotfix changes, check later
-    public boolean isCanonical() {
-        if (satisfiabilityType() != SatisfiabilityType.CONTINGENCY) return false;
+//    public boolean isCanonical() {
+//        if (satisfiabilityType() != SatisfiabilityType.CONTINGENCY) return false;
+//
+//        if (size() == 1) return satisfiabilityType() != SatisfiabilityType.TAUTOLOGY;
+//        LinkedHashSet<String> clauseLiteralNames = null;
+//        for (Clause clause : clauses) {
+//            if (satisfiabilityType() != SatisfiabilityType.CONTINGENCY) return false;
+//
+//            if (clauseLiteralNames == null) {
+//                clauseLiteralNames = clause.getLiterals().stream()
+//                        .map(Literal::getName)
+//                        .collect(Collectors.toCollection(LinkedHashSet::new));
+//                continue;
+//            }
+//
+//            LinkedHashSet<Literal> currentLiterals = clause.getLiterals();
+//            if (currentLiterals.size() != clauseLiteralNames.size()) return false;
+//            for (Literal literal : currentLiterals) {
+//                if (!clauseLiteralNames.contains(literal.getName())) return false;
+//            }
+//        }
+//        return true;
+//    }
 
-        if (size() == 1) return satisfiabilityType() != SatisfiabilityType.TAUTOLOGY;
-        LinkedHashSet<String> clauseLiteralNames = null;
+    public boolean isCanonical() {
+        Set<String> clauseLiteralNames = null;
         for (Clause clause : clauses) {
-            if (satisfiabilityType() != SatisfiabilityType.CONTINGENCY) return false;
+            if (clause.getLiterals().contains(Literal.TRUE) || clause.getLiterals().contains(Literal.FALSE)) return false;
 
             if (clauseLiteralNames == null) {
                 clauseLiteralNames = clause.getLiterals().stream()
                         .map(Literal::getName)
                         .collect(Collectors.toCollection(LinkedHashSet::new));
+
+                if (clauseLiteralNames.size() != clause.size()) return false;
                 continue;
             }
+
+            if (clauseLiteralNames.size() != clause.size()) return false;
 
             LinkedHashSet<Literal> currentLiterals = clause.getLiterals();
             if (currentLiterals.size() != clauseLiteralNames.size()) return false;
@@ -76,7 +100,10 @@ public final class CNFSentence extends AbstractSentence {
 
     @Override
     protected CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
-        return Sentences.optimizeCNF(this);
+//        return Sentences.optimizeCNF(this);
+        CNFSentence possCNF = Sentences.optimizeCNF(this);
+        if (possCNF.size() == 1) return possCNF;
+        return possCNF.isCanonical() ? Sentences.optimizeCanonicalCNF(possCNF) : possCNF;
     }
 
     @Override
@@ -111,5 +138,9 @@ public final class CNFSentence extends AbstractSentence {
 
     public int size() {
         return clauses.size();
+    }
+
+    public static void main(String[] args) throws Exception {
+        System.out.println(new CNFSentence("(A | B | C) & (!A | B | !C)").convertToMinimalCNF());
     }
 }

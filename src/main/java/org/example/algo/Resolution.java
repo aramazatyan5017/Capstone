@@ -1,9 +1,8 @@
 package org.example.algo;
 
-import org.example.domain.SatisfiabilityType;
+import org.example.domain.Sentences;
 import org.example.domain.sentence.CNFSentence;
 import org.example.domain.sentence.Clause;
-import org.example.domain.sentence.Sentence;
 import org.example.exception.ContradictionException;
 import org.example.exception.NothingToInferException;
 import org.example.exception.TautologyException;
@@ -19,7 +18,7 @@ public class Resolution {
 
     private final Set<Clause> knowledgeBase;
 
-    public Resolution(Set<Sentence> knowledgeBase, boolean shouldIgnoreContradictions)
+    public Resolution(Set<CNFSentence> knowledgeBase, boolean shouldIgnoreContradictions)
             throws TautologyException, ContradictionException {
         if (knowledgeBase == null || knowledgeBase.isEmpty()) throw new IllegalArgumentException("null param");
         knowledgeBase.remove(null);
@@ -28,17 +27,24 @@ public class Resolution {
         this.knowledgeBase = getKBClauses(knowledgeBase, shouldIgnoreContradictions);
     }
 
-    private Set<Clause> getKBClauses(Set<Sentence> knowledgeBase, boolean shouldIgnoreContradictions)
+    private Set<Clause> getKBClauses(Set<CNFSentence> knowledgeBase, boolean shouldIgnoreContradictions)
             throws TautologyException, ContradictionException {
         Set<CNFSentence> preprocessedKnowledgeBase = new HashSet<>();
 
-        for (Iterator<Sentence> iterator = knowledgeBase.iterator(); iterator.hasNext(); iterator.remove()) {
-            Sentence sentence = iterator.next();
-            if (sentence.satisfiabilityType() == SatisfiabilityType.CONTRADICTION) {
+        for (Iterator<CNFSentence> iterator = knowledgeBase.iterator(); iterator.hasNext(); iterator.remove()) {
+            CNFSentence cnfSentence = iterator.next();
+
+            try {
+                preprocessedKnowledgeBase.add(Sentences.optimizeCNF(cnfSentence));
+            } catch (ContradictionException e) {
                 if (!shouldIgnoreContradictions) throw new ContradictionException();
-            } else if (sentence.satisfiabilityType() == SatisfiabilityType.CONTINGENCY) {
-                preprocessedKnowledgeBase.add(sentence.minimalCNF());
-            }
+            } catch (TautologyException ignored) {}
+
+//            if (cnfSentence.satisfiabilityType() == SatisfiabilityType.CONTRADICTION) {
+//                if (!shouldIgnoreContradictions) throw new ContradictionException();
+//            } else if (cnfSentence.satisfiabilityType() == SatisfiabilityType.CONTINGENCY) {
+//                preprocessedKnowledgeBase.add(cnfSentence.minimalCNF());
+//            }
         }
 
         if (preprocessedKnowledgeBase.isEmpty()) throw new TautologyException();
@@ -46,7 +52,7 @@ public class Resolution {
         LinkedHashSet<Clause> combinedClauses = new LinkedHashSet<>();
         preprocessedKnowledgeBase.forEach(s -> combinedClauses.addAll(s.getClauses()));
 
-        return new CNFSentence(combinedClauses).minimalCNF().getClauses();
+        return Sentences.optimizeCNF(new CNFSentence(combinedClauses)).getClauses();
     }
 
     public Set<Clause> resolveAndGet() {
@@ -74,7 +80,7 @@ public class Resolution {
 
     public static void main(String[] args) throws Exception {
         CNFSentence cnf = new CNFSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E)"));
-        Set<Sentence> kb = new HashSet<>();
+        Set<CNFSentence> kb = new HashSet<>();
         kb.add(cnf);
         new Resolution(kb, true).resolveAndGet().forEach(System.out::println);
 

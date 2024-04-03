@@ -17,9 +17,16 @@ class AndEliminationInferenceRuleTest {
     @Test
     void inferTest() {
         try {
+            Set<Sentence> set = new HashSet<>();
+            set.add(new Literal("A"));
+            set.add(new Literal("B"));
+            set.add(new Literal("C"));
+            assertEquals(set, infer(new GenericComplexSentence("A & B & C")));
+
+
             assertThrows(IllegalArgumentException.class, () -> infer(null));
 
-            Set<Sentence> set = new HashSet<>();
+            set = new HashSet<>();
             set.add(new Literal("A"));
             assertEquals(set, infer(new Literal("A")));
 
@@ -48,12 +55,6 @@ class AndEliminationInferenceRuleTest {
             set.add(new Literal("!A"));
             set.add(new Clause("B | C"));
             assertEquals(set, infer(new CNFSentence("(A | B | C) & (B | C) & !A")));
-
-            set = new HashSet<>();
-            set.add(new Literal("A"));
-            set.add(new Literal("B"));
-            set.add(new Literal("C"));
-            assertEquals(set, infer(new GenericComplexSentence("A & B & C")));
 
             set = new HashSet<>();
             set.add(new GenericComplexSentence("(A | B => C)"));
