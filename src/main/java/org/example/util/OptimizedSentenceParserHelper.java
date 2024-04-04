@@ -696,4 +696,379 @@ public class OptimizedSentenceParserHelper {
         return new GenericComplexSentence(left, right, Connective.AND, true);
     }
     //-- NegatedAND end
+
+    //-- IMPLICATION start
+    public static Sentence literalImplicationLiteral(Sentence left, Sentence right) {
+        Literal literalLeft = (Literal) left;
+        Literal literalRight = (Literal) right;
+
+        if (literalLeft == Literal.FALSE) return Literal.TRUE;
+        if (literalLeft == Literal.TRUE && literalRight == Literal.FALSE) return Literal.FALSE;
+        if (literalLeft.equals(literalRight)) return Literal.TRUE;
+        if (literalLeft.equalsIgnoreNegation(literalRight)) return literalRight;
+        if (literalLeft == Literal.TRUE) return literalRight;
+        if (literalRight == Literal.FALSE) return new Literal(literalLeft.getName(), !literalLeft.isNegated());
+        if (literalRight == Literal.TRUE) return Literal.TRUE;
+
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION);
+    }
+
+    public static Sentence literalImplicationClause(Sentence left, Sentence right) throws ParseException {
+        if (right.type() == LITERAL) {
+            Literal literal = (Literal) right;
+            if (literal == Literal.TRUE) return Literal.TRUE;
+            if (literal == Literal.FALSE) return new GenericComplexSentence(SentenceUtils.NOT +
+                    SentenceUtils.OPENING_PARENTHESES + left + SentenceUtils.CLOSING_PARENTHESES);
+
+        } else {
+            Literal literal = (Literal) left;
+            if (literal == Literal.TRUE) return right;
+            if (literal == Literal.FALSE) return Literal.TRUE;
+            if (((Clause) right).getLiterals().contains(literal)) return Literal.TRUE;
+            if (((Clause) right).getLiterals().contains(new Literal(literal.getName(), !literal.isNegated()))) return right;
+        }
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION);
+    }
+
+    public static Sentence literalImplicationCNF(Sentence left, Sentence right) throws ParseException {
+        if (right.type() == LITERAL) {
+            Literal literal = (Literal) right;
+            if (literal == Literal.TRUE) return Literal.TRUE;
+            if (literal == Literal.FALSE) return new GenericComplexSentence(SentenceUtils.NOT +
+                    SentenceUtils.OPENING_PARENTHESES + left + SentenceUtils.CLOSING_PARENTHESES);
+
+        } else {
+            Literal literal = (Literal) left;
+            if (literal == Literal.TRUE) return right;
+            if (literal == Literal.FALSE) return Literal.TRUE;
+            if (((CNFSentence) right).getClauses().stream()
+                    .allMatch(c -> c.getLiterals().contains(literal))) return Literal.TRUE;
+        }
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION);
+    }
+
+    public static Sentence literalImplicationGeneric(Sentence left, Sentence right) throws ParseException {
+        if (right.type() == LITERAL) {
+            Literal literal = (Literal) right;
+            if (literal == Literal.TRUE) return Literal.TRUE;
+            if (literal == Literal.FALSE) return new GenericComplexSentence(SentenceUtils.NOT +
+                    SentenceUtils.OPENING_PARENTHESES + left + SentenceUtils.CLOSING_PARENTHESES);
+        } else {
+            Literal literal = (Literal) left;
+            if (literal == Literal.TRUE) return right;
+            if (literal == Literal.FALSE) return Literal.TRUE;
+        }
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION);
+    }
+
+    public static Sentence clauseImplicationClause(Sentence left, Sentence right) {
+        if (left.equals(right)) return Literal.TRUE;
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION);
+    }
+
+    public static Sentence clauseImplicationCNF(Sentence left, Sentence right) {
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION);
+    }
+
+    public static Sentence clauseImplicationGeneric(Sentence left, Sentence right) {
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION);
+    }
+
+    public static Sentence cnfImplicationCNF(Sentence left, Sentence right) {
+        if (left.equals(right)) return Literal.TRUE;
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION);
+    }
+
+    public static Sentence cnfImplicationGeneric(Sentence left, Sentence right) {
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION);
+    }
+
+    public static Sentence genericImplicationGeneric(Sentence left, Sentence right) {
+        if (left.equals(right)) return Literal.TRUE;
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION);
+    }
+    //-- IMPLICATION end
+
+    //-- NegatedIMPLICATION start
+    public static Sentence literalNegatedImplicationLiteral(Sentence left, Sentence right) {
+        Literal literalLeft = (Literal) left;
+        Literal literalRight = (Literal) right;
+
+        if (literalLeft == Literal.FALSE) return Literal.FALSE;
+        if (literalLeft == Literal.TRUE && literalRight == Literal.FALSE) return Literal.TRUE;
+        if (literalLeft.equals(literalRight)) return Literal.FALSE;
+        if (literalLeft.equalsIgnoreNegation(literalRight)) return new Literal(literalRight.getName(), !literalRight.isNegated());
+        if (literalLeft == Literal.TRUE) return new Literal(literalRight.getName(), !literalRight.isNegated());
+        if (literalRight == Literal.FALSE) return literalLeft;
+        if (literalRight == Literal.TRUE) return Literal.FALSE;
+
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION, true);
+    }
+
+    public static Sentence literalNegatedImplicationClause(Sentence left, Sentence right) throws ParseException {
+        if (right.type() == LITERAL) {
+            Literal literal = (Literal) right;
+            if (literal == Literal.TRUE) return Literal.FALSE;
+            if (literal == Literal.FALSE) return left;
+        } else {
+            Literal literal = (Literal) left;
+            if (literal == Literal.TRUE) return new GenericComplexSentence(SentenceUtils.NOT +
+                    SentenceUtils.OPENING_PARENTHESES + right + SentenceUtils.CLOSING_PARENTHESES);
+            if (literal == Literal.FALSE) return Literal.FALSE;
+            if (((Clause) right).getLiterals().contains(literal)) return Literal.FALSE;
+            if (((Clause) right).getLiterals().contains(new Literal(literal.getName(), !literal.isNegated()))) {
+                return new GenericComplexSentence(SentenceUtils.NOT +
+                        SentenceUtils.OPENING_PARENTHESES + right + SentenceUtils.CLOSING_PARENTHESES);
+            }
+        }
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION, true);
+    }
+
+    public static Sentence literalNegatedImplicationCNF(Sentence left, Sentence right) throws ParseException {
+        if (right.type() == LITERAL) {
+            Literal literal = (Literal) right;
+            if (literal == Literal.TRUE) return Literal.FALSE;
+            if (literal == Literal.FALSE) return left;
+        } else {
+            Literal literal = (Literal) left;
+            if (literal == Literal.TRUE) return new GenericComplexSentence(SentenceUtils.NOT +
+                    SentenceUtils.OPENING_PARENTHESES + right + SentenceUtils.CLOSING_PARENTHESES);
+            if (literal == Literal.FALSE) return Literal.FALSE;
+            if (((CNFSentence) right).getClauses().stream()
+                    .allMatch(c -> c.getLiterals().contains(literal))) return Literal.FALSE;
+        }
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION, true);
+    }
+
+    public static Sentence literalNegatedImplicationGeneric(Sentence left, Sentence right) throws ParseException {
+        if (right.type() == LITERAL) {
+            Literal literal = (Literal) right;
+            if (literal == Literal.TRUE) return Literal.FALSE;
+            if (literal == Literal.FALSE) return left;
+        } else {
+            Literal literal = (Literal) left;
+            if (literal == Literal.TRUE) return new GenericComplexSentence(SentenceUtils.NOT +
+                    SentenceUtils.OPENING_PARENTHESES + right + SentenceUtils.CLOSING_PARENTHESES);
+            if (literal == Literal.FALSE) return Literal.FALSE;
+        }
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION, true);
+    }
+
+    public static Sentence clauseNegatedImplicationClause(Sentence left, Sentence right) throws ParseException {
+        if (left.equals(right)) return Literal.FALSE;
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION, true);
+    }
+
+    public static Sentence clauseNegatedImplicationCNF(Sentence left, Sentence right) {
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION, true);
+    }
+
+    public static Sentence clauseNegatedImplicationGeneric(Sentence left, Sentence right) {
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION, true);
+    }
+
+    public static Sentence cnfNegatedImplicationCNF(Sentence left, Sentence right) throws ParseException {
+        if (left.equals(right)) return Literal.FALSE;
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION, true);
+    }
+
+    public static Sentence cnfNegatedImplicationGeneric(Sentence left, Sentence right) {
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION, true);
+    }
+
+    public static Sentence genericNegatedImplicationGeneric(Sentence left, Sentence right) {
+        if (left.equals(right)) return Literal.FALSE;
+        return new GenericComplexSentence(left, right, Connective.IMPLICATION, true);
+    }
+    //-- NegatedIMPLICATION end
+
+    //-- BICONDITIONAL start
+    public static Sentence literalBiconditionalLiteral(Sentence left, Sentence right) {
+        Literal leftLiteral = (Literal) left;
+        Literal rightLiteral = (Literal) right;
+
+        if (leftLiteral.equals(rightLiteral)) return Literal.TRUE;
+        if (leftLiteral.equalsIgnoreNegation(rightLiteral)) return Literal.FALSE;
+        if (leftLiteral == Literal.TRUE && rightLiteral == Literal.FALSE) return Literal.FALSE;
+        if (leftLiteral == Literal.FALSE && rightLiteral == Literal.TRUE) return Literal.FALSE;
+        if (leftLiteral == Literal.TRUE) return rightLiteral;
+        if (leftLiteral == Literal.FALSE) return new Literal(rightLiteral.getName(), !rightLiteral.isNegated());
+        if (rightLiteral == Literal.TRUE) return leftLiteral;
+        if (rightLiteral == Literal.FALSE) return new Literal(leftLiteral.getName(), !leftLiteral.isNegated());
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL);
+    }
+
+    public static Sentence literalBiconditionalClause(Sentence left, Sentence right) throws ParseException {
+        Literal literal = (Literal) (left.type() == LITERAL ? left : right);
+        Clause clause = (Clause) (left.type() == CLAUSE ? left : right);
+
+        if (literal == Literal.TRUE) return clause;
+        if (literal == Literal.FALSE) return new GenericComplexSentence(SentenceUtils.NOT +
+                SentenceUtils.OPENING_PARENTHESES + clause + SentenceUtils.CLOSING_PARENTHESES);
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL);
+    }
+
+    public static Sentence literalBiconditionalCNF(Sentence left, Sentence right) throws ParseException {
+        Literal literal = (Literal) (left.type() == LITERAL ? left : right);
+        CNFSentence cnf = (CNFSentence) (left.type() == CNF ? left : right);
+
+        if (literal == Literal.TRUE) return cnf;
+        if (literal == Literal.FALSE) return new GenericComplexSentence(SentenceUtils.NOT +
+                SentenceUtils.OPENING_PARENTHESES + cnf + SentenceUtils.CLOSING_PARENTHESES);
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL);
+    }
+
+    public static Sentence literalBiconditionalGeneric(Sentence left, Sentence right) throws ParseException {
+        Literal literal = (Literal) (left.type() == LITERAL ? left : right);
+        GenericComplexSentence generic = (GenericComplexSentence) (left.type() == GENERIC_COMPLEX ? left : right);
+
+        if (literal == Literal.TRUE) return generic;
+        if (literal == Literal.FALSE) return new GenericComplexSentence(SentenceUtils.NOT +
+                SentenceUtils.OPENING_PARENTHESES + generic + SentenceUtils.CLOSING_PARENTHESES);
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL);
+    }
+
+    public static Sentence clauseBiconditionalClause(Sentence left, Sentence right) throws ParseException {
+        Clause clause1 = (Clause) left;
+        Clause clause2 = (Clause) right;
+
+        if (clause1.equals(clause2)) return Literal.TRUE;
+        if (Sentence.isEquivalent(clause1, new GenericComplexSentence(SentenceUtils.NOT +
+                SentenceUtils.OPENING_PARENTHESES + clause2 + SentenceUtils.CLOSING_PARENTHESES))) return Literal.FALSE;
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL);
+    }
+
+    public static Sentence clauseBiconditionalCNF(Sentence left, Sentence right) {
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL);
+    }
+
+    public static Sentence clauseBiconditionalGeneric(Sentence left, Sentence right) {
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL);
+    }
+
+    public static Sentence cnfBiconditionalCNF(Sentence left, Sentence right) throws ParseException {
+        CNFSentence cnf1 = (CNFSentence) left;
+        CNFSentence cnf2 = (CNFSentence) right;
+
+        if (cnf1.equals(cnf2)) return Literal.TRUE;
+        if (Sentence.isEquivalent(cnf1, new GenericComplexSentence(SentenceUtils.NOT +
+                SentenceUtils.OPENING_PARENTHESES + cnf2 + SentenceUtils.CLOSING_PARENTHESES))) return Literal.FALSE;
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL);
+    }
+
+    public static Sentence cnfBiconditionalGeneric(Sentence left, Sentence right) {
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL);
+    }
+
+    public static Sentence genericBiconditionalGeneric(Sentence left, Sentence right) throws ParseException {
+        GenericComplexSentence generic1 = (GenericComplexSentence) left;
+        GenericComplexSentence generic2 = (GenericComplexSentence) right;
+
+        if (generic1.equals(generic2)) return Literal.TRUE;
+        if (generic1.equals(new GenericComplexSentence(SentenceUtils.NOT + generic2.toString()))) return Literal.FALSE;
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL);
+    }
+    //-- BICONDITIONAL end
+
+    //-- NegatedBICONDITIONAL start
+    public static Sentence literalNegatedBiconditionalLiteral(Sentence left, Sentence right) {
+        Literal leftLiteral = (Literal) left;
+        Literal rightLiteral = (Literal) right;
+
+        if (leftLiteral.equals(rightLiteral)) return Literal.FALSE;
+        if (leftLiteral.equalsIgnoreNegation(rightLiteral)) return Literal.TRUE;
+        if (leftLiteral == Literal.TRUE && rightLiteral == Literal.FALSE) return Literal.TRUE;
+        if (leftLiteral == Literal.FALSE && rightLiteral == Literal.TRUE) return Literal.TRUE;
+        if (leftLiteral == Literal.TRUE) return new Literal(rightLiteral.getName(), !rightLiteral.isNegated());
+        if (leftLiteral == Literal.FALSE) return rightLiteral;
+        if (rightLiteral == Literal.TRUE) return new Literal(leftLiteral.getName(), !leftLiteral.isNegated());
+        if (rightLiteral == Literal.FALSE) return leftLiteral;
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL, true);
+    }
+
+    public static Sentence literalNegatedBiconditionalClause(Sentence left, Sentence right) throws ParseException {
+        Literal literal = (Literal) (left.type() == LITERAL ? left : right);
+        Clause clause = (Clause) (left.type() == CLAUSE ? left : right);
+
+        if (literal == Literal.FALSE) return clause;
+        if (literal == Literal.TRUE) return new GenericComplexSentence(SentenceUtils.NOT +
+                SentenceUtils.OPENING_PARENTHESES + clause + SentenceUtils.CLOSING_PARENTHESES);
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL, true);
+    }
+
+    public static Sentence literalNegatedBiconditionalCNF(Sentence left, Sentence right) throws ParseException {
+        Literal literal = (Literal) (left.type() == LITERAL ? left : right);
+        CNFSentence cnf = (CNFSentence) (left.type() == CNF ? left : right);
+
+        if (literal == Literal.FALSE) return cnf;
+        if (literal == Literal.TRUE) return new GenericComplexSentence(SentenceUtils.NOT +
+                SentenceUtils.OPENING_PARENTHESES + cnf + SentenceUtils.CLOSING_PARENTHESES);
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL, true);
+    }
+
+    public static Sentence literalNegatedBiconditionalGeneric(Sentence left, Sentence right) throws ParseException {
+        Literal literal = (Literal) (left.type() == LITERAL ? left : right);
+        GenericComplexSentence generic = (GenericComplexSentence) (left.type() == GENERIC_COMPLEX ? left : right);
+
+        if (literal == Literal.FALSE) return generic;
+        if (literal == Literal.TRUE) return new GenericComplexSentence(SentenceUtils.NOT +
+                SentenceUtils.OPENING_PARENTHESES + generic + SentenceUtils.CLOSING_PARENTHESES);
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL, true);
+    }
+
+    public static Sentence clauseNegatedBiconditionalClause(Sentence left, Sentence right) throws ParseException {
+        Clause clause1 = (Clause) left;
+        Clause clause2 = (Clause) right;
+
+        if (clause1.equals(clause2)) return Literal.FALSE;
+        if (Sentence.isEquivalent(clause1, new GenericComplexSentence(SentenceUtils.NOT +
+                SentenceUtils.OPENING_PARENTHESES + clause2 + SentenceUtils.CLOSING_PARENTHESES))) return Literal.TRUE;
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL, true);
+    }
+
+    public static Sentence clauseNegatedBiconditionalCNF(Sentence left, Sentence right) {
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL, true);
+    }
+
+    public static Sentence clauseNegatedBiconditionalGeneric(Sentence left, Sentence right) {
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL, true);
+    }
+
+    public static Sentence cnfNegatedBiconditionalCNF(Sentence left, Sentence right) throws ParseException {
+        CNFSentence cnf1 = (CNFSentence) left;
+        CNFSentence cnf2 = (CNFSentence) right;
+
+        if (cnf1.equals(cnf2)) return Literal.FALSE;
+        if (Sentence.isEquivalent(cnf1, new GenericComplexSentence(SentenceUtils.NOT +
+                SentenceUtils.OPENING_PARENTHESES + cnf2 + SentenceUtils.CLOSING_PARENTHESES))) return Literal.TRUE;
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL, true);
+    }
+
+    public static Sentence cnfNegatedBiconditionalGeneric(Sentence left, Sentence right) {
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL, true);
+    }
+
+    public static Sentence genericNegatedBiconditionalGeneric(Sentence left, Sentence right) throws ParseException {
+        GenericComplexSentence generic1 = (GenericComplexSentence) left;
+        GenericComplexSentence generic2 = (GenericComplexSentence) right;
+
+        if (generic1.equals(generic2)) return Literal.FALSE;
+        if (generic1.equals(new GenericComplexSentence(SentenceUtils.NOT + generic2.toString()))) return Literal.TRUE;
+
+        return new GenericComplexSentence(left, right, Connective.BICONDITIONAL, true);
+    }
+    //-- NegatedBICONDITIONAL end
 }

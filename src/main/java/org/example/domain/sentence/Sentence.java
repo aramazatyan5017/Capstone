@@ -141,9 +141,53 @@ public sealed interface Sentence permits AbstractSentence {
                     if (thisAndThat(left, right, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.genericAndGeneric(left, right);
                 }
             } case IMPLICATION -> {
-                return new GenericComplexSentence(left, right, genericSentence.getConnective(), genericSentence.isNegated());
+                if (genericSentence.isNegated()) {
+                    if (thisAndThat(left, right, LITERAL)) return OptimizedSentenceParserHelper.literalNegatedImplicationLiteral(left, right);
+                    if (thisOrThat(left, right, LITERAL, CLAUSE)) return OptimizedSentenceParserHelper.literalNegatedImplicationClause(left, right);
+                    if (thisOrThat(left, right, LITERAL, CNF)) return OptimizedSentenceParserHelper.literalNegatedImplicationCNF(left, right);
+                    if (thisOrThat(left, right, LITERAL, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.literalNegatedImplicationGeneric(left, right);
+                    if (thisAndThat(left, right, CLAUSE)) return OptimizedSentenceParserHelper.clauseNegatedImplicationClause(left, right);
+                    if (thisOrThat(left, right, CLAUSE, CNF)) return OptimizedSentenceParserHelper.clauseNegatedImplicationCNF(left, right);
+                    if (thisOrThat(left, right, CLAUSE, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.clauseNegatedImplicationGeneric(left, right);
+                    if (thisAndThat(left, right, CNF)) return OptimizedSentenceParserHelper.cnfNegatedImplicationCNF(left, right);
+                    if (thisOrThat(left, right, CNF, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.cnfNegatedImplicationGeneric(left, right);
+                    if (thisAndThat(left, right, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.genericNegatedImplicationGeneric(left, right);
+                } else {
+                    if (thisAndThat(left, right, LITERAL)) return OptimizedSentenceParserHelper.literalImplicationLiteral(left, right);
+                    if (thisOrThat(left, right, LITERAL, CLAUSE)) return OptimizedSentenceParserHelper.literalImplicationClause(left, right);
+                    if (thisOrThat(left, right, LITERAL, CNF)) return OptimizedSentenceParserHelper.literalImplicationCNF(left, right);
+                    if (thisOrThat(left, right, LITERAL, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.literalImplicationGeneric(left, right);
+                    if (thisAndThat(left, right, CLAUSE)) return OptimizedSentenceParserHelper.clauseImplicationClause(left, right);
+                    if (thisOrThat(left, right, CLAUSE, CNF)) return OptimizedSentenceParserHelper.clauseImplicationCNF(left, right);
+                    if (thisOrThat(left, right, CLAUSE, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.clauseImplicationGeneric(left, right);
+                    if (thisAndThat(left, right, CNF)) return OptimizedSentenceParserHelper.cnfImplicationCNF(left, right);
+                    if (thisOrThat(left, right, CNF, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.cnfImplicationGeneric(left, right);
+                    if (thisAndThat(left, right, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.genericImplicationGeneric(left, right);
+                }
             } case BICONDITIONAL -> {
-                return new GenericComplexSentence(left, right, genericSentence.getConnective(), genericSentence.isNegated());
+                if (genericSentence.isNegated()) {
+                    if (thisAndThat(left, right, LITERAL)) return OptimizedSentenceParserHelper.literalNegatedBiconditionalLiteral(left, right);
+                    if (thisOrThat(left, right, LITERAL, CLAUSE)) return OptimizedSentenceParserHelper.literalNegatedBiconditionalClause(left, right);
+                    if (thisOrThat(left, right, LITERAL, CNF)) return OptimizedSentenceParserHelper.literalNegatedBiconditionalCNF(left, right);
+                    if (thisOrThat(left, right, LITERAL, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.literalNegatedBiconditionalGeneric(left, right);
+                    if (thisAndThat(left, right, CLAUSE)) return OptimizedSentenceParserHelper.clauseNegatedBiconditionalClause(left, right);
+                    if (thisOrThat(left, right, CLAUSE, CNF)) return OptimizedSentenceParserHelper.clauseNegatedBiconditionalCNF(left, right);
+                    if (thisOrThat(left, right, CLAUSE, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.clauseNegatedBiconditionalGeneric(left, right);
+                    if (thisAndThat(left, right, CNF)) return OptimizedSentenceParserHelper.cnfNegatedBiconditionalCNF(left, right);
+                    if (thisOrThat(left, right, CNF, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.cnfNegatedBiconditionalGeneric(left, right);
+                    if (thisAndThat(left, right, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.genericNegatedBiconditionalGeneric(left, right);
+                } else {
+                    if (thisAndThat(left, right, LITERAL)) return OptimizedSentenceParserHelper.literalBiconditionalLiteral(left, right);
+                    if (thisOrThat(left, right, LITERAL, CLAUSE)) return OptimizedSentenceParserHelper.literalBiconditionalClause(left, right);
+                    if (thisOrThat(left, right, LITERAL, CNF)) return OptimizedSentenceParserHelper.literalBiconditionalCNF(left, right);
+                    if (thisOrThat(left, right, LITERAL, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.literalBiconditionalGeneric(left, right);
+                    if (thisAndThat(left, right, CLAUSE)) return OptimizedSentenceParserHelper.clauseBiconditionalClause(left, right);
+                    if (thisOrThat(left, right, CLAUSE, CNF)) return OptimizedSentenceParserHelper.clauseBiconditionalCNF(left, right);
+                    if (thisOrThat(left, right, CLAUSE, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.clauseBiconditionalGeneric(left, right);
+                    if (thisAndThat(left, right, CNF)) return OptimizedSentenceParserHelper.cnfBiconditionalCNF(left, right);
+                    if (thisOrThat(left, right, CNF, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.cnfBiconditionalGeneric(left, right);
+                    if (thisAndThat(left, right, GENERIC_COMPLEX)) return OptimizedSentenceParserHelper.genericBiconditionalGeneric(left, right);
+                }
             }
         }
         return null;
