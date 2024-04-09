@@ -35,35 +35,11 @@ public final class CNFSentence extends AbstractSentence {
     }
 
     public CNFSentence(String expression) throws ParseException {
-        CNFSentence cnfSentence = Sentences.parseCNFExpression(expression, true);
+        CNFSentence cnfSentence = Sentences.parseCNFExpression(expression);
         this.clauses = cnfSentence.getClauses();
     }
 
     //-- returns true if and only if really canonical (will mostly be used for minimal CNFs)
-//    public boolean isCanonical() {
-//        if (satisfiabilityType() != SatisfiabilityType.CONTINGENCY) return false;
-//
-//        if (size() == 1) return satisfiabilityType() != SatisfiabilityType.TAUTOLOGY;
-//        LinkedHashSet<String> clauseLiteralNames = null;
-//        for (Clause clause : clauses) {
-//            if (satisfiabilityType() != SatisfiabilityType.CONTINGENCY) return false;
-//
-//            if (clauseLiteralNames == null) {
-//                clauseLiteralNames = clause.getLiterals().stream()
-//                        .map(Literal::getName)
-//                        .collect(Collectors.toCollection(LinkedHashSet::new));
-//                continue;
-//            }
-//
-//            LinkedHashSet<Literal> currentLiterals = clause.getLiterals();
-//            if (currentLiterals.size() != clauseLiteralNames.size()) return false;
-//            for (Literal literal : currentLiterals) {
-//                if (!clauseLiteralNames.contains(literal.getName())) return false;
-//            }
-//        }
-//        return true;
-//    }
-
     public boolean isCanonical() {
         Set<String> clauseLiteralNames = null;
         for (Clause clause : clauses) {

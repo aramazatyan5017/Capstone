@@ -21,8 +21,8 @@ public abstract class LogicalExpressionParser {
 
     protected static List<Token> getPostfixTokens(List<Token> infixTokens) throws ParseException {
         validateInfixTokenList(infixTokens);
-        var stack = new LinkedList<Token>();
-        var postfix = new LinkedList<Token>();
+        Deque<Token> stack = new ArrayDeque<>();
+        LinkedList<Token> postfix = new LinkedList<>();
         for (Token token : infixTokens) {
             switch (token.getType()) {
                 case LITERAL -> postfix.offer(token);
@@ -49,6 +49,8 @@ public abstract class LogicalExpressionParser {
             }
         }
         while (!stack.isEmpty()) postfix.offer(stack.pop());
+
+        optimizeNegationsInPostfix(postfix);
         return postfix;
     }
 
@@ -171,5 +173,19 @@ public abstract class LogicalExpressionParser {
         }
 
         if (!stack.isEmpty()) throw new ParseException("invalid parentheses, some are not closed", -1);
+    }
+
+    private static void optimizeNegationsInPostfix(List<Token> postfix) {
+        for (int i = 0; i < postfix.size();) {
+            if (postfix.get(i).getType() == NEGATION) {
+                int start = i;
+                while (i < postfix.size() && postfix.get(i).getType() == NEGATION) i++;
+                int end = i;
+                postfix.subList(start, end).clear();
+                if ((end - start) % 2 == 1) postfix.add(start, new Token(NEGATION));
+            } else {
+                i++;
+            }
+        }
     }
 }

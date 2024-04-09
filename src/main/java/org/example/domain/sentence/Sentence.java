@@ -50,7 +50,7 @@ public sealed interface Sentence permits AbstractSentence {
             sentence = Sentences.parseGenericExpression(expression);
         } else if (expression.contains(SentenceUtils.AND)) {
             try {
-                sentence = optimizeCNF(Sentences.parseCNFExpression(expression, false));
+                sentence = optimizeCNF(Sentences.parseCNFExpression(expression));
                 if (sentence.type() == CNF) {
                     CNFSentence cnf = (CNFSentence) sentence;
                     if (cnf.size() == 1) {

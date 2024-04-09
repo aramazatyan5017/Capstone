@@ -49,7 +49,8 @@ class CNFSentenceTest extends SentenceCommon {
         assertThrows(ParseException.class, () -> new CNFSentence("(a & b & c) | (d & e & f)"));
         assertThrows(ParseException.class, () -> new CNFSentence("(a | b) &&& (b | d)"));
         assertThrows(ParseException.class, () -> new CNFSentence("!(a | b) & (b | d)"));
-        assertThrows(ParseException.class, () -> new CNFSentence("(a & b & c & d)"));
+        assertThrows(ParseException.class, () -> new CNFSentence("(a | b & c | d)"));
+        assertThrows(ParseException.class, () -> new CNFSentence("!(!(!(A & B)))"));
     }
 
     @Test
@@ -90,11 +91,26 @@ class CNFSentenceTest extends SentenceCommon {
             cnfSentence = new CNFSentence("a & b & c & d");
             assertEquals(4, cnfSentence.size());
 
+            cnfSentence = new CNFSentence("(a & b & c & d)");
+            assertEquals(4, cnfSentence.size());
+
             cnfSentence = new CNFSentence("(a) & (b) & (c) & (d)");
             assertEquals(4, cnfSentence.size());
 
-            cnfSentence = new CNFSentence("a & (true) & (false) & c | d");
+            cnfSentence = new CNFSentence("a & (true) & (false) & (c | d)");
             assertEquals(4, cnfSentence.size());
+
+            cnfSentence = new CNFSentence("!!(c | !!!d) & !(!(a | b))");
+            assertEquals(2, cnfSentence.size());
+
+            cnfSentence = new CNFSentence("((!!!!(c | d) & !(!(!(e))) & !(!(!!!a | !!b))))");
+            assertEquals(3, cnfSentence.size());
+
+            cnfSentence = new CNFSentence("(!(!((A | C) & (B | E))) & D)");
+            assertEquals(3, cnfSentence.size());
+
+            cnfSentence = new CNFSentence("(!(!(A & B)) & C)");
+            assertEquals(3, cnfSentence.size());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }

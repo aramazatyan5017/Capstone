@@ -30,9 +30,8 @@ public class Sentences {
     }
 
     //-- a | b & c | d -> weak cnf expression, (a | b) & (c | d) -> strong cnf expression
-    public static CNFSentence parseCNFExpression(String expression,
-                                                 boolean isPossibleWeakCNFExpression) throws ParseException {
-        return CNFExpressionParser.parseCNFExpression(expression, isPossibleWeakCNFExpression);
+    public static CNFSentence parseCNFExpression(String expression) throws ParseException {
+        return CNFExpressionParser.parseCNFExpression(expression);
     }
 
     public static CNFSentence toCNF(Sentence sentence) throws ContradictionException, TautologyException {
