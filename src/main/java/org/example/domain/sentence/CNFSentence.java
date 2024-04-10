@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public final class CNFSentence extends AbstractSentence {
     private final LinkedHashSet<Clause> clauses;
     private String stringRepresentation;
+    private Boolean isCanonical;
 
     public CNFSentence(LinkedHashSet<Clause> clauses) {
         if (clauses == null || clauses.isEmpty()) throw new IllegalArgumentException("null param");
@@ -40,28 +41,47 @@ public final class CNFSentence extends AbstractSentence {
 
     //-- returns true if and only if really canonical (will mostly be used for minimal CNFs)
     public boolean isCanonical() {
+        if (isCanonical != null) return isCanonical;
+
         Set<String> clauseLiteralNames = null;
-        for (Clause clause : clauses) {
-            if (clause.getLiterals().contains(Literal.TRUE) || clause.getLiterals().contains(Literal.FALSE)) return false;
+        OUTER: for (Clause clause : clauses) {
+            if (clause.getLiterals().contains(Literal.TRUE) || clause.getLiterals().contains(Literal.FALSE)) {
+                isCanonical = false;
+                break;
+            }
 
             if (clauseLiteralNames == null) {
                 clauseLiteralNames = clause.getLiterals().stream()
                         .map(Literal::getName)
                         .collect(Collectors.toCollection(LinkedHashSet::new));
 
-                if (clauseLiteralNames.size() != clause.size()) return false;
+                if (clauseLiteralNames.size() != clause.size()) {
+                    isCanonical = false;
+                    break;
+                }
                 continue;
             }
 
-            if (clauseLiteralNames.size() != clause.size()) return false;
+            if (clauseLiteralNames.size() != clause.size()) {
+                isCanonical = false;
+                break;
+            }
 
             LinkedHashSet<Literal> currentLiterals = clause.getLiterals();
-            if (currentLiterals.size() != clauseLiteralNames.size()) return false;
+            if (currentLiterals.size() != clauseLiteralNames.size()) {
+                isCanonical = false;
+                break;
+            }
             for (Literal literal : currentLiterals) {
-                if (!clauseLiteralNames.contains(literal.getName())) return false;
+                if (!clauseLiteralNames.contains(literal.getName())) {
+                    isCanonical = false;
+                    break OUTER;
+                }
             }
         }
-        return true;
+
+        if (isCanonical == null) isCanonical = true;
+        return isCanonical;
     }
 
     public List<Clause> getClauseList() {
