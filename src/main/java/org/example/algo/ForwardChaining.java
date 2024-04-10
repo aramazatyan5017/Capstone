@@ -5,7 +5,7 @@ import org.example.domain.Connective;
 import org.example.domain.SatisfiabilityType;
 import org.example.domain.sentence.*;
 import org.example.domain.Premise;
-import org.example.domain.PremiseAndConclusion;
+import org.example.domain.supplementary.PremiseAndConclusion;
 import org.example.exception.TautologyException;
 import org.example.exception.ContradictionException;
 import org.example.inference_rules.AndEliminationInferenceRule;

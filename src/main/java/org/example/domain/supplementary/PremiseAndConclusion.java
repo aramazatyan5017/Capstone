@@ -1,5 +1,6 @@
-package org.example.domain;
+package org.example.domain.supplementary;
 
+import org.example.domain.Premise;
 import org.example.domain.sentence.Sentence;
 
 /**
