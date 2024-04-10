@@ -22,9 +22,7 @@ public class ResolutionInferenceRule {
         Set<Literal> set = new HashSet<>();
         LinkedHashSet<Literal> possClauseLiterals = clause1.getLiterals();
 
-        clause1.getLiterals().forEach(l -> {
-            set.add(new Literal(l.getName(), !l.isNegated()));
-        });
+        clause1.getLiterals().forEach(l -> set.add(new Literal(l.getName(), !l.isNegated())));
 
         StringBuilder complementaryLiteralName = new StringBuilder();
         for (Literal literal : clause2.getLiterals()) {
