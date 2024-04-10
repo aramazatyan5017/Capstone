@@ -2,8 +2,8 @@ package org.example.domain.supplementary;
 
 import org.example.domain.sentence.CNFSentence;
 import org.example.domain.sentence.Sentence;
-import org.example.exception.TautologyException;
 import org.example.exception.ContradictionException;
+import org.example.exception.TautologyException;
 
 /**
  * @author aram.azatyan | 3/14/2024 4:39 PM

@@ -1,13 +1,15 @@
 package org.example;
 
-import org.example.domain.sentence.CNFSentence;
-import org.example.domain.sentence.GenericComplexSentence;
-import org.example.domain.sentence.Sentence;
+import org.example.algo.Resolution;
+import org.example.domain.Sentences;
+import org.example.domain.sentence.*;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
 
 import java.text.ParseException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author aram.azatyan | 2/2/2024 11:58 AM
@@ -30,8 +32,8 @@ public class Main {
         Sentence sentence = Sentence.optimizedParse("(b) & (a & b => l) & (a & p => l) & (b & l => m) & (l & m => p) & (p => q) & (a)");
         System.out.println(sentence);
         System.out.println(Sentence.optimizedParse(String.join("", "(", sentence.toString(), ")", "=>!q")));
-//        System.out.println(Sentence.optimizedParse(SentenceUtils.convertOnlineCalculatorString("((¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E))") + "=>" +
-//                "((A | B | C) & (A | B | D | E) & (!B | !A) & (!C | !D | !A) & (!C | !E | !A))"));
+        System.out.println(Sentence.optimizedParse(SentenceUtils.convertOnlineCalculatorString("((¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E))") + "=>" +
+                "((A | B | C) & (A | B | D | E) & (!B | !A) & (!C | !D | !A) & (!C | !E | !A))"));
         System.out.println(Sentence.optimizedParse("(" + sentence.toString() + ")=>(" + sentence.minimalCNF() + ")"));
 
         String str1 = SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E)");
@@ -44,7 +46,29 @@ public class Main {
         String andur = "((!A | (!B | (!C | (!D | !E)))) & ((!A | (!B | (!C | (!D | E)))) & ((!A | (!B | (!C | (D | !E)))) & ((!A | (!B | (!C | (D | E)))) & ((!A | (!B | (C | (!D | !E)))) & ((!A | (!B | (C | (!D | E)))) & ((!A | (!B | (C | (D | !E)))) & ((!A | (!B | (C | (D | E)))) & ((!A | (B | (!C | (!D | !E)))) & ((!A | (B | (!C | (!D | E)))) & ((!A | (B | (!C | (D | !E)))) & ((A | (B | (!C | (D | E)))) & ((A | (B | (C | (!D | !E)))) & ((A | (B | (C | (!D | E)))) & ((A | (B | (C | (D | !E)))) & (A | (B | (C | (D | E)))))))))))))))))))";
         System.out.println(new CNFSentence(andur));
 
+        System.out.println(new GenericComplexSentence(str1).satisfiabilityType());
+        System.out.println(new GenericComplexSentence(str2).satisfiabilityType());
+
+        System.out.println(Sentences.optimizeCanonicalCNF(new CNFSentence(str1)));
+
+        try {
+            System.out.println(new GenericComplexSentence("(" + str1 + ")=>(" + str2 + ")").minimalCNF());
+        } catch (TautologyException e) {
+            System.out.println("TRUE");
+        } catch (ContradictionException e) {
+            System.out.println("FALSE");
+        }
+
         System.out.println(Sentence.optimizedParse("(" + str1 + ")=>(" + str2 + ")"));
+
+        Set<CNFSentence> set = new HashSet<>();
+        set.add(new GenericComplexSentence("((B & C) => (A | T | G)) & ((G | T | A) => (C & B))").minimalCNF());
+        System.out.println(set.iterator().next().size());
+        System.out.println(new Resolution(set, false).resolveAndGet().size());
+
+        System.out.println(new GenericComplexSentence(str1).minimalCNF());
+
+        System.out.println(new GenericComplexSentence(str1).equals(new GenericComplexSentence(str2)));
     }
 }
 

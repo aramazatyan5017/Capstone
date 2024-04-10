@@ -373,7 +373,7 @@ class GenericComplexSentenceTest extends SentenceCommon {
     private void tautology(String str) {
         try {
             CNFSentence cnfSentence = new GenericComplexSentence(str).minimalCNF();
-            fail("not VERUM");
+            fail("not a tautology");
         } catch (Exception e) {
             assertTrue(e instanceof TautologyException);
         }
@@ -382,7 +382,7 @@ class GenericComplexSentenceTest extends SentenceCommon {
     private void contradiction(String str) {
         try {
             CNFSentence cnfSentence = new GenericComplexSentence(str).minimalCNF();
-            fail("not FALSUM");
+            fail("not a contradiction");
         } catch (Exception e) {
             assertTrue(e instanceof ContradictionException);
         }

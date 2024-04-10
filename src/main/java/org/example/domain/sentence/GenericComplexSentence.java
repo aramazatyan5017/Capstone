@@ -113,9 +113,7 @@ public final class GenericComplexSentence extends AbstractSentence {
 
     @Override
     protected CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
-//        return Sentences.toCNF(this);
-        CNFSentence possCNF = Sentences.toCNF(this);
-        return possCNF.isCanonical() ? Sentences.optimizeCanonicalCNF(possCNF) : possCNF;
+        return Sentences.toCNF(this);
     }
 
     @Override
@@ -135,10 +133,37 @@ public final class GenericComplexSentence extends AbstractSentence {
 
         LeftAndRightCNF thisAndThatInfo = new LeftAndRightCNF(this, that);
 
-        if (!thisAndThatInfo.isLeftDetermined() && !thisAndThatInfo.isRightDetermined()) {
-            return thisAndThatInfo.getLeft().equals(thisAndThatInfo.getRight());
-        } else if (thisAndThatInfo.isLeftDetermined() && thisAndThatInfo.isRightDetermined()) {
+        if (thisAndThatInfo.isLeftDetermined() && thisAndThatInfo.isRightDetermined()) {
             return thisAndThatInfo.leftValue() == thisAndThatInfo.rightValue();
+        } else if (!thisAndThatInfo.isLeftDetermined() && !thisAndThatInfo.isRightDetermined()) {
+            if (thisAndThatInfo.getLeft().equals(thisAndThatInfo.getRight())) return true;
+
+            Sentence opt1 = thisAndThatInfo.getLeft();
+            Sentence opt2 = thisAndThatInfo.getRight();
+
+            if (thisAndThatInfo.getLeft().isCanonical()) {
+                try {
+                    opt1 = Sentences.optimizeCanonicalCNF(thisAndThatInfo.getLeft());
+                } catch (TautologyException e) {
+                    opt1 = Literal.TRUE;
+                } catch (ContradictionException e) {
+                    opt1 = Literal.FALSE;
+                }
+            }
+
+            if (thisAndThatInfo.getRight().isCanonical()) {
+                try {
+                    opt2 = Sentences.optimizeCanonicalCNF(thisAndThatInfo.getRight());
+                } catch (TautologyException e) {
+                    opt2 = Literal.TRUE;
+                } catch (ContradictionException e) {
+                    opt2 = Literal.FALSE;
+                }
+            }
+
+            if ((opt1.type() == SentenceType.LITERAL && opt2.type() == SentenceType.LITERAL)
+                    ||
+               (opt1.type() == SentenceType.CNF && opt2.type() == SentenceType.CNF)) return opt1.equals(opt2);
         }
 
         return false;

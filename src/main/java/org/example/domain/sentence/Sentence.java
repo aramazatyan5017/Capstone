@@ -34,8 +34,34 @@ public sealed interface Sentence permits AbstractSentence {
                 s2.satisfiabilityType() == SatisfiabilityType.TAUTOLOGY) return true;
         if (s1.satisfiabilityType() == SatisfiabilityType.CONTRADICTION &&
                 s2.satisfiabilityType() == SatisfiabilityType.CONTRADICTION) return true;
+
         try {
-            return s1.minimalCNF().equals(s2.minimalCNF()); // TODO: 4/3/2024 canonicaly amen meky inqy petq a handle ani
+            Sentence opt1 = s1.minimalCNF();
+            Sentence opt2 = s2.minimalCNF();
+
+            if (((CNFSentence) opt1).isCanonical()) {
+                try {
+                    opt1 = Sentences.optimizeCanonicalCNF((CNFSentence) opt1);
+                } catch (TautologyException e) {
+                    opt1 = Literal.TRUE;
+                } catch (ContradictionException e) {
+                    opt1 = Literal.FALSE;
+                }
+            }
+
+            if (((CNFSentence) opt2).isCanonical()) {
+                try {
+                    opt2 = Sentences.optimizeCanonicalCNF((CNFSentence) opt2);
+                } catch (TautologyException e) {
+                    opt2 = Literal.TRUE;
+                } catch (ContradictionException e) {
+                    opt2 = Literal.FALSE;
+                }
+            }
+
+            if ((opt1.type() == SentenceType.LITERAL && opt2.type() == SentenceType.LITERAL)
+                    ||
+                (opt1.type() == SentenceType.CNF && opt2.type() == SentenceType.CNF)) return opt1.equals(opt2);
         } catch (TautologyException | ContradictionException ignored) {}
 
         return false;
@@ -211,19 +237,5 @@ public sealed interface Sentence permits AbstractSentence {
         } catch (ContradictionException e) {
             return Literal.FALSE;
         }
-    }
-
-    static void main(String[] args) throws Exception {
-        Sentence a = Sentence.optimizedParse("((A | !A) & (B & B)) => ((A | B) & (C | D | A))");
-        System.out.println(a);
-//
-//        GenericComplexSentence gen = new GenericComplexSentence("true & false");
-//        System.out.println(gen);
-
-//        System.out.println(new GenericComplexSentence("A & B | C & (D | E | false)"));
-
-        System.out.println(new CNFSentence("a | b"));
-        System.out.println(new CNFSentence("(a | b)"));
-        System.out.println(new CNFSentence("(a | b) & (c | d)"));
     }
 }

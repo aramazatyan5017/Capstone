@@ -116,6 +116,8 @@ public enum CNFRules {
     }
 
     public static CNFSentence negateCNF(CNFSentence sentence) throws ContradictionException, TautologyException {
+        sentence = sentence.isCanonical() ? Sentences.optimizeCanonicalCNF(sentence) : Sentences.optimizeCNF(sentence);
+
         LinkedHashSet<Clause> combined = new LinkedHashSet<>();
         List<LinkedHashSet<Literal>> clauseList = new ArrayList<>();
         sentence.getClauses().forEach(c -> clauseList.add(c.getLiterals()));

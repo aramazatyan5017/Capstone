@@ -6,8 +6,10 @@ import static org.example.domain.SentenceType.*;
 
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
+import org.example.util.SentenceUtils;
 import org.junit.jupiter.api.Test;
 import static org.example.domain.sentence.Sentence.optimizedParse;
+import static org.example.domain.sentence.Sentence.isEquivalent;
 import static org.example.util.SentenceUtils.convertOnlineCalculatorString;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +23,77 @@ public class SentenceTest {
 
     @Test
     void isEquivalentTest() {
+        try {
+            Sentence s1 = new Literal("A");
+            Sentence s2 = new Literal("B");
+            assertFalse(isEquivalent(s1, s2));
 
+            s1 = new Literal("A");
+            s2 = new Literal("A");
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = new Literal("A");
+            s2 = new Literal("!(!!!A)");
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = Literal.TRUE;
+            s2 = Literal.FALSE;
+            assertFalse(isEquivalent(s1, s2));
+
+            s1 = Literal.FALSE;
+            s2 = Literal.FALSE;
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = new Clause("(a | b | c)");
+            s2 = new Clause("(c | b | e)");
+            assertFalse(isEquivalent(s1, s2));
+
+            s1 = new Clause("a | b | c");
+            s2 = new Clause("a | c | b");
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = new Clause("false | false | false");
+            s2 = Literal.FALSE;
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = new Clause("true | a | false");
+            s2 = Literal.TRUE;
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = new Clause("a | !a | b");
+            s2 = new Clause("!b | b | r");
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = new CNFSentence("(a | b) & (c | d)");
+            s2 = new CNFSentence("(c | d) & (a | b)");
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = new CNFSentence("(false) & (a | b) & (c | true)");
+            s2 = new Clause("false | false");
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = new CNFSentence("(true) & (a) & (true | false)");
+            s2 = new Literal("a");
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = new CNFSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E)"));
+            s2 = new CNFSentence("(A | B | C) & (A | B | D | E) & (!B | !A) & (!C | !D | !A) & (!C | !E | !A)");
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = new GenericComplexSentence("a => a");
+            s2 = Literal.TRUE;
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = new GenericComplexSentence("a <=> b => c");
+            s2 = new GenericComplexSentence("(a => (!b | c)) & ((b => c) => !!a)");
+            assertTrue(isEquivalent(s1, s2));
+
+            s1 = new GenericComplexSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E)"));
+            s2 = new CNFSentence("(A | B | C) & (A | B | D | E) & (!B | !A) & (!C | !D | !A) & (!C | !E | !A)");
+            assertTrue(isEquivalent(s1, s2));
+        } catch (Exception e) {
+            fail("shouldn't have thrown an exception");
+        }
     }
 
     @Test
@@ -280,8 +352,8 @@ public class SentenceTest {
 
     private void tautology(String str) {
         try {
-            CNFSentence cnfSentence = Sentence.optimizedParse(str).minimalCNF();
-            fail("not VERUM");
+            Sentence.optimizedParse(str).minimalCNF();
+            fail("not a tautology");
         } catch (Exception e) {
             assertTrue(e instanceof TautologyException);
         }
@@ -289,8 +361,8 @@ public class SentenceTest {
 
     private void contradiction(String str) {
         try {
-            CNFSentence cnfSentence = Sentence.optimizedParse(str).minimalCNF();
-            fail("not FALSUM");
+            Sentence.optimizedParse(str).minimalCNF();
+            fail("not a contradiction");
         } catch (Exception e) {
             assertTrue(e instanceof ContradictionException);
         }

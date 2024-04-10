@@ -1,6 +1,5 @@
 package org.example.domain.sentence;
 
-import org.example.domain.SatisfiabilityType;
 import org.example.domain.SentenceType;
 import org.example.domain.Sentences;
 import org.example.exception.ContradictionException;
