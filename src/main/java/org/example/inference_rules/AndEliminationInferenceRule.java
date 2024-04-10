@@ -23,9 +23,9 @@ public class AndEliminationInferenceRule {
 
         switch (sentence.type()) {
             case LITERAL -> inferred.add(sentence);
-            case CLAUSE -> inferred.add(((Clause) sentence).size() == 1 ? ((Clause) sentence).getLiteralList().get(0) : sentence);
+            case CLAUSE -> inferred.add(((Clause) sentence).size() == 1 ? ((Clause) sentence).getLiterals().iterator().next() : sentence);
             case CNF -> ((CNFSentence) sentence).getClauses().forEach(clause -> inferred
-                        .add(clause.size() == 1 ? clause.getLiteralList().get(0) : clause));
+                        .add(clause.size() == 1 ? clause.getLiterals().iterator().next() : clause));
             case GENERIC_COMPLEX -> {
                 GenericComplexSentence complex = (GenericComplexSentence) sentence;
 

@@ -106,7 +106,7 @@ public class Premise {
 
     private Sentence combineSentences(Set<Sentence> sentences) {
         return sentences.size() == 1
-                ? sentences.stream().toList().get(0)
+                ? sentences.iterator().next()
                 : new GenericComplexSentence(new LinkedHashSet<>(sentences), Connective.AND, false);
     }
 }

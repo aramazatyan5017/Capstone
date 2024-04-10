@@ -75,7 +75,7 @@ public final class GenericComplexSentence extends AbstractSentence {
     }
 
     private Sentence getComplexFromSubtree(LinkedHashSet<Sentence> leftSubTree, Connective connective) {
-        if (leftSubTree.size() == 1) return leftSubTree.stream().toList().get(0);
+        if (leftSubTree.size() == 1) return leftSubTree.iterator().next();
         LinkedHashSet<Sentence>[] sets = SentenceUtils.splitLinkedHashSetOfSentencesIntoTwo(leftSubTree);
         return connectSentences(sets[0], sets[1], connective);
     }

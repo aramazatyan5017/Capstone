@@ -106,8 +106,8 @@ public class Sentences {
                                                     Map<Clause, Set<Literal>> clauseRefinementMap)
             throws ContradictionException {
         if (compared.size() == 1 && current.size() == 1) {
-            Literal l1 = current.getLiteralList().get(0);
-            Literal l2 = compared.getLiteralList().get(0);
+            Literal l1 = current.getLiterals().iterator().next();
+            Literal l2 = compared.getLiterals().iterator().next();
             if (l1.equalsIgnoreNegation(l2)) {
                 throw new ContradictionException();
             }
@@ -120,7 +120,7 @@ public class Sentences {
     private static void potentialRefineClause(Clause larger, Clause smaller,
                                               Set<Clause> toBeRemoved, Map<Clause, Set<Literal>> clauseRefinementMap)
             throws ContradictionException {
-        Literal literal = smaller.getLiteralList().get(0);
+        Literal literal = smaller.getLiterals().iterator().next();
         if (larger.getLiterals().contains(literal)) toBeRemoved.add(larger);
         else if (larger.getLiterals().contains(new Literal(literal.getName(), !literal.isNegated()))) {
             if (clauseRefinementMap.containsKey(larger)) {
