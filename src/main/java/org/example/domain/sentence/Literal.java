@@ -93,7 +93,7 @@ public final class Literal extends AbstractSentence {
         if (name.equalsIgnoreCase("true") || name.equalsIgnoreCase("false")) throw
                 new IllegalArgumentException("only one instance of TRUE and FALSE available");
 
-        for (String symbol : SentenceUtils.CONNECTIVE_AND_NEGATION_AND_PARENTHESES_SYMBOLS) {
+        for (String symbol : SentenceUtils.CONNECTIVE_AND_NEGATION_AND_PARENTHESES_AND_COMMA_SYMBOLS) {
             if (name.contains(symbol)) throw new IllegalArgumentException("the " +
                     "name of a literal should not contain any reserved symbols");
         }

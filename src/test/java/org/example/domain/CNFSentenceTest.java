@@ -111,6 +111,9 @@ class CNFSentenceTest extends SentenceCommon {
 
             cnfSentence = new CNFSentence("(!(!(A & B)) & C)");
             assertEquals(3, cnfSentence.size());
+
+            cnfSentence = new CNFSentence("((a | b) | c) & d");
+            assertEquals(2, cnfSentence.size());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }

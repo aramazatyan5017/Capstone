@@ -6,11 +6,13 @@ import org.example.domain.sentence.*;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 import org.example.parser.CNFExpressionParser;
+import org.example.parser.FOLCNFExpressionParser;
+import org.example.parser.FOLInfixExpressionParser;
 import org.example.parser.InfixExpressionParser;
+import org.example.temp_fol.*;
 
 import java.text.ParseException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author aram.azatyan | 2/14/2024 3:42 PM
@@ -26,12 +28,31 @@ public class Sentences {
     }
 
     public static Clause parseClauseExpression(String expression) throws ParseException {
-        return CNFExpressionParser.parseClauseExpression(expression);
+        return CNFExpressionParser.parseClause(expression);
     }
 
-    //-- a | b & c | d -> weak cnf expression, (a | b) & (c | d) -> strong cnf expression
     public static CNFSentence parseCNFExpression(String expression) throws ParseException {
-        return CNFExpressionParser.parseCNFExpression(expression);
+        return CNFExpressionParser.parseCNF(expression);
+    }
+
+    public static Predicate parsePredicateExpression(String expression) throws ParseException {
+        return FOLInfixExpressionParser.parsePredicate(expression);
+    }
+
+    public static Function parseFunctionExpression(String expression) throws ParseException {
+        return FOLInfixExpressionParser.parseFunction(expression);
+    }
+
+    public static GenericComplexFOLSentence parseGenericFOLExpression(String expression) throws ParseException {
+        return FOLInfixExpressionParser.parseGeneric(expression);
+    }
+
+    public static FOLClause parseFOLClauseExpression(String expression) throws ParseException {
+        return FOLCNFExpressionParser.parseClause(expression);
+    }
+
+    public static FOLCNFSentence parseFOLCNFExpression(String expression) throws ParseException {
+        return FOLCNFExpressionParser.parseCNF(expression);
     }
 
     public static CNFSentence toCNF(Sentence sentence) throws ContradictionException, TautologyException {

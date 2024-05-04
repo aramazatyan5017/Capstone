@@ -19,12 +19,12 @@ import java.util.*;
  * @author aram.azatyan | 2/22/2024 11:45 PM
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class InfixExpressionParser extends LogicalExpressionParser {
+public class InfixExpressionParser extends PropositionalLogicExpressionParser {
 
     public static GenericComplexSentence parseGeneric(String expression) throws ParseException {
         if (Utils.isNullOrBlank(expression)) throw new ParseException("null param", -1);
 
-        Node topNode = postfixToTree(getPostfixTokens(tokenize(expression, true)));
+        Node topNode = postfixToTree(postfixTokens(infixTokens(expression)));
         if (topNode.isExternal()) throw new ParseException("unable to construct a generic sentence", -1);
 
         return (GenericComplexSentence) treeToSentence(topNode);
@@ -45,7 +45,7 @@ public class InfixExpressionParser extends LogicalExpressionParser {
     private static Node postfixToTree(List<Token> postfix) {
         Deque<Node> stack = new ArrayDeque<>();
         for (Token token : postfix) {
-            if (token.getType() == LITERAL) {
+            if (token.getType() == WORD) {
                 stack.push(new Node(new LiteralNameAndNegation(token.getValue(), false)));
             } else if (token.getType() == NEGATION) {
                 Node topNode = stack.peek();
@@ -74,12 +74,12 @@ public class InfixExpressionParser extends LogicalExpressionParser {
     private static Literal possibleLiteral(String expression) throws ParseException {
         for (String connectiveSymbol : Connective.getConnectiveSymbols()) {
             if (expression.contains(connectiveSymbol)) throw
-                    new ParseException("literal should not contain any reserved symbols", -1);
+                    new ParseException("literal should not contain any connectives", -1);
         }
-        expression = expression.replaceAll("\\s+", "");
-        List<Token> tokens = getPostfixTokens(tokenize(expression, true));
 
-        if (tokens.get(0).getType() != LITERAL) throw new ParseException("unable to construct a literal", -1);
+        List<Token> tokens = postfixTokens(infixTokens(expression));
+
+        if (tokens.get(0).getType() != WORD) throw new ParseException("unable to construct a literal", -1);
 
         if (tokens.get(0).getValue().equalsIgnoreCase("true")) {
             return (tokens.size() - 1) % 2 == 0 ? Literal.TRUE : Literal.FALSE;

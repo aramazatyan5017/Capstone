@@ -14,12 +14,10 @@ import java.awt.*;
 public class ComplexSentenceDrawer extends JFrame {
     private final GenericComplexSentence sentence;
 
-    public ComplexSentenceDrawer(Sentence sentence) {
+    public ComplexSentenceDrawer(GenericComplexSentence sentence) {
         if (sentence == null) throw new IllegalArgumentException("null param");
-        if (sentence.type() != SentenceType.GENERIC_COMPLEX) throw
-                new IllegalArgumentException("not a complex sentence");
 
-        this.sentence = (GenericComplexSentence) sentence;
+        this.sentence = sentence;
         setTitle("Binary Tree Drawer");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -66,15 +64,6 @@ public class ComplexSentenceDrawer extends JFrame {
         int textWidth = fm.stringWidth(value);
         int textHeight = fm.getHeight();
         g.drawString(value, x - textWidth / 2, y + textHeight / 4);
-
-
-//        if (node.isExternal()) {
-//            ;
-//        } else {
-//            var connAndNeg = (ConnectiveAndNegation) node.getValue();
-//            g.drawString((connAndNeg.isNegated() ? "!" : "") + connAndNeg.getConnective().toString(),
-//                    x - textWidth / 2, y + textHeight / 4);
-//        }
     }
 
     private String getValueAndChangeColor(Sentence sentence, Graphics g) {

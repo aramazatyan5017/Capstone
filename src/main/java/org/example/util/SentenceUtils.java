@@ -1,8 +1,10 @@
 package org.example.util;
 
+import org.example.domain.FOLSentenceType;
 import org.example.domain.sentence.*;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
+import org.example.temp_fol.FOLSentence;
 
 import java.util.*;
 
@@ -18,18 +20,20 @@ public class SentenceUtils {
 
     public static char OPENING_PARENTHESES = '(';
     public static char CLOSING_PARENTHESES = ')';
+    public static char COMMA = ',';
 
-    public static final Set<String> CONNECTIVE_AND_NEGATION_AND_PARENTHESES_SYMBOLS;
+    public static final Set<String> CONNECTIVE_AND_NEGATION_AND_PARENTHESES_AND_COMMA_SYMBOLS;
 
     static {
-        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_SYMBOLS = new HashSet<>();
-        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_SYMBOLS.add(NOT);
-        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_SYMBOLS.add(AND);
-        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_SYMBOLS.add(OR);
-        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_SYMBOLS.add(IMPLICATION);
-        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_SYMBOLS.add(BICONDITIONAL);
-        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_SYMBOLS.add(String.valueOf(OPENING_PARENTHESES));
-        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_SYMBOLS.add(String.valueOf(CLOSING_PARENTHESES));
+        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_AND_COMMA_SYMBOLS = new HashSet<>();
+        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_AND_COMMA_SYMBOLS.add(NOT);
+        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_AND_COMMA_SYMBOLS.add(AND);
+        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_AND_COMMA_SYMBOLS.add(OR);
+        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_AND_COMMA_SYMBOLS.add(IMPLICATION);
+        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_AND_COMMA_SYMBOLS.add(BICONDITIONAL);
+        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_AND_COMMA_SYMBOLS.add(String.valueOf(OPENING_PARENTHESES));
+        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_AND_COMMA_SYMBOLS.add(String.valueOf(CLOSING_PARENTHESES));
+        CONNECTIVE_AND_NEGATION_AND_PARENTHESES_AND_COMMA_SYMBOLS.add(String.valueOf(COMMA));
     }
 
     public static String convertOnlineCalculatorString(String str) {
@@ -63,18 +67,25 @@ public class SentenceUtils {
         return arr;
     }
 
-    public static Set<Sentence> normalizeANDConnectedSentences(Set<Sentence> sentences) throws TautologyException, ContradictionException {
-        if (sentences == null || sentences.isEmpty()) throw new IllegalArgumentException("null param");
+    @SuppressWarnings("unchecked")
+    public static LinkedHashSet<FOLSentence>[] splitLinkedHashSetOfFOLSentencesIntoTwo(LinkedHashSet<FOLSentence> set) {
+        if (set == null || set.size() < 2) throw new IllegalArgumentException("null param");
 
-        Set<Sentence> normalizedSet = new HashSet<>();
+        LinkedHashSet<FOLSentence>[] arr = (LinkedHashSet<FOLSentence>[]) new LinkedHashSet[2];
+        LinkedHashSet<FOLSentence> s1 = new LinkedHashSet<>();
+        LinkedHashSet<FOLSentence> s2 = new LinkedHashSet<>();
 
-        for (Sentence sentence : sentences) {
-            try {
-                sentence.minimalCNF();
-            } catch (TautologyException ignored) {}
+        int halfSize = set.size() / 2;
+
+        int count = 0;
+        for (Iterator<FOLSentence> iterator = set.iterator(); iterator.hasNext(); count++) {
+            if (count < halfSize) s1.add(iterator.next());
+            else s2.add(iterator.next());
         }
 
-        return null;
+        arr[0] = s1;
+        arr[1] = s2;
+        return arr;
     }
 }
 

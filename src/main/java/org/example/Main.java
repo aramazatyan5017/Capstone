@@ -2,7 +2,9 @@ package org.example;
 
 import org.example.algo.Resolution;
 import org.example.domain.Sentences;
-import org.example.domain.sentence.*;
+import org.example.domain.sentence.CNFSentence;
+import org.example.domain.sentence.GenericComplexSentence;
+import org.example.domain.sentence.Sentence;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;

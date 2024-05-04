@@ -93,6 +93,10 @@ public final class CNFSentence extends AbstractSentence {
         return SentenceType.CNF;
     }
 
+    public int size() {
+        return clauses.size();
+    }
+
     @Override
     protected CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
 //        return Sentences.optimizeCNF(this);
@@ -129,13 +133,5 @@ public final class CNFSentence extends AbstractSentence {
 
     public LinkedHashSet<Clause> getClauses() {
         return new LinkedHashSet<>(clauses);
-    }
-
-    public int size() {
-        return clauses.size();
-    }
-
-    public static void main(String[] args) throws Exception {
-        System.out.println(new CNFSentence("(A | B | C) & (!A | B | !C)").convertToMinimalCNF());
     }
 }

@@ -96,6 +96,12 @@ class ClauseTest extends SentenceCommon {
 
             clause = new Clause("(!(!(A | B)) | C)");
             assertEquals(3, clause.size());
+
+            clause = new Clause("(a | b) | c");
+            assertEquals(3, clause.size());
+
+            clause = new Clause("!!(!!!!(a | !!b) | !c)");
+            assertEquals(3, clause.size());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }
