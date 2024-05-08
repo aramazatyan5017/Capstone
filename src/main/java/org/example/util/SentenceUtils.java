@@ -1,10 +1,7 @@
 package org.example.util;
 
-import org.example.domain.FOLSentenceType;
-import org.example.domain.sentence.*;
-import org.example.exception.ContradictionException;
-import org.example.exception.TautologyException;
-import org.example.temp_fol.FOLSentence;
+import org.example.domain.sentence.fol.FOLSentence;
+import org.example.domain.sentence.propositional.PropositionalSentence;
 
 import java.util.*;
 
@@ -47,17 +44,17 @@ public class SentenceUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static LinkedHashSet<Sentence>[] splitLinkedHashSetOfSentencesIntoTwo(LinkedHashSet<Sentence> set) {
+    public static LinkedHashSet<PropositionalSentence>[] splitLinkedHashSetOfPropositionalSentencesIntoTwo(LinkedHashSet<PropositionalSentence> set) {
         if (set == null || set.size() < 2) throw new IllegalArgumentException("null param");
 
-        LinkedHashSet<Sentence>[] arr = (LinkedHashSet<Sentence>[]) new LinkedHashSet[2];
-        LinkedHashSet<Sentence> s1 = new LinkedHashSet<>();
-        LinkedHashSet<Sentence> s2 = new LinkedHashSet<>();
+        LinkedHashSet<PropositionalSentence>[] arr = (LinkedHashSet<PropositionalSentence>[]) new LinkedHashSet[2];
+        LinkedHashSet<PropositionalSentence> s1 = new LinkedHashSet<>();
+        LinkedHashSet<PropositionalSentence> s2 = new LinkedHashSet<>();
 
         int halfSize = set.size() / 2;
 
         int count = 0;
-        for (Iterator<Sentence> iterator = set.iterator(); iterator.hasNext(); count++) {
+        for (Iterator<PropositionalSentence> iterator = set.iterator(); iterator.hasNext(); count++) {
             if (count < halfSize) s1.add(iterator.next());
             else s2.add(iterator.next());
         }

@@ -1,8 +1,8 @@
 package org.example.parser;
 
-import org.example.domain.sentence.CNFSentence;
-import org.example.domain.sentence.Clause;
-import org.example.domain.sentence.Literal;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.domain.sentence.propositional.PropositionalClause;
+import org.example.domain.sentence.propositional.Literal;
 import org.example.parser.supplementary.Token;
 import org.example.parser.supplementary.TokenType;
 import org.example.util.SentenceUtils;
@@ -16,14 +16,14 @@ import java.util.*;
  */
 public class CNFExpressionParser extends PropositionalLogicExpressionParser {
 
-    public static Clause parseClause(String expression) throws ParseException {
+    public static PropositionalClause parseClause(String expression) throws ParseException {
         if (Utils.isNullOrBlank(expression)) throw new ParseException("null param", -1);
         if (expression.contains(SentenceUtils.IMPLICATION) || expression.contains(SentenceUtils.BICONDITIONAL) ||
             expression.contains(SentenceUtils.AND)) throw new ParseException("not a cnf sentence", -1);
         return getClauseFromPostfix(postfixTokens(infixTokens(expression)));
     }
 
-    public static CNFSentence parseCNF(String expression) throws ParseException {
+    public static PropositionalCNFSentence parseCNF(String expression) throws ParseException {
         if (Utils.isNullOrBlank(expression)) throw new ParseException("null param", -1);
         if (expression.contains(SentenceUtils.IMPLICATION) || expression.contains(SentenceUtils.BICONDITIONAL)) throw
                 new ParseException("not a cnf sentence", -1);
@@ -31,14 +31,14 @@ public class CNFExpressionParser extends PropositionalLogicExpressionParser {
         return getCNFFromPostfix(postfixTokens(infixTokens(expression)));
     }
 
-    private static CNFSentence getCNFFromPostfix(List<Token> postfix) throws ParseException {
+    private static PropositionalCNFSentence getCNFFromPostfix(List<Token> postfix) throws ParseException {
         ParseException invalidCNF = new ParseException("invalid cnf", -1);
 
         Token andToken = new Token(TokenType.CONNECTIVE, SentenceUtils.AND);
         Token orToken = new Token(TokenType.CONNECTIVE, SentenceUtils.OR);
 
         if (!postfix.contains(andToken)) {
-            return new CNFSentence(getClauseFromPostfix(postfix));
+            return new PropositionalCNFSentence(getClauseFromPostfix(postfix));
         }
 
         for (int i = 1; i < postfix.size(); i++) {
@@ -51,7 +51,7 @@ public class CNFExpressionParser extends PropositionalLogicExpressionParser {
         }
 
         Deque<Object> stack = new LinkedList<>();
-        CNFSentence possCNF;
+        PropositionalCNFSentence possCNF;
 
         try {
             for (int i = 0; i < postfix.size(); i++) {
@@ -77,70 +77,70 @@ public class CNFExpressionParser extends PropositionalLogicExpressionParser {
                             Object obj1 = stack.pop();
                             Object obj2 = stack.pop();
 
-                            if ((!(obj1 instanceof Literal) && !(obj1 instanceof Clause))
+                            if ((!(obj1 instanceof Literal) && !(obj1 instanceof PropositionalClause))
                                     ||
-                                    (!(obj2 instanceof Literal) && !(obj2 instanceof Clause))) {
+                                    (!(obj2 instanceof Literal) && !(obj2 instanceof PropositionalClause))) {
                                 throw invalidCNF;
                             }
 
                             if (obj1 instanceof Literal l1 && obj2 instanceof Literal l2) {
-                                Clause clause = new Clause(l2, l1);
+                                PropositionalClause clause = new PropositionalClause(l2, l1);
                                 stack.push(clause.size() > 1 ? clause : clause.getLiterals().iterator().next());
                             } else if (obj1 instanceof Literal l1) {
-                                LinkedHashSet<Literal> literals = ((Clause) obj2).getLiterals();
+                                LinkedHashSet<Literal> literals = ((PropositionalClause) obj2).getLiterals();
                                 literals.add(l1);
-                                stack.push(literals.size() > 1 ? new Clause(literals) : literals.iterator().next());
+                                stack.push(literals.size() > 1 ? new PropositionalClause(literals) : literals.iterator().next());
                             } else if (obj2 instanceof Literal l2) {
-                                LinkedHashSet<Literal> literals = ((Clause) obj1).getLiterals();
+                                LinkedHashSet<Literal> literals = ((PropositionalClause) obj1).getLiterals();
                                 LinkedHashSet<Literal> newLiterals = new LinkedHashSet<>();
                                 newLiterals.add(l2);
                                 newLiterals.addAll(literals);
-                                stack.push(newLiterals.size() > 1 ? new Clause(newLiterals) : newLiterals.iterator().next());
+                                stack.push(newLiterals.size() > 1 ? new PropositionalClause(newLiterals) : newLiterals.iterator().next());
                             } else {
-                                LinkedHashSet<Literal> literals1 = ((Clause) obj1).getLiterals();
-                                LinkedHashSet<Literal> literals2 = ((Clause) obj2).getLiterals();
+                                LinkedHashSet<Literal> literals1 = ((PropositionalClause) obj1).getLiterals();
+                                LinkedHashSet<Literal> literals2 = ((PropositionalClause) obj2).getLiterals();
                                 literals2.addAll(literals1);
-                                stack.push(literals2.size() > 1 ? new Clause(literals2) : literals2.iterator().next());
+                                stack.push(literals2.size() > 1 ? new PropositionalClause(literals2) : literals2.iterator().next());
                             }
                         } else {
                             if (stack.size() < 2) throw invalidCNF;
                             Object obj1 = stack.pop();
                             Object obj2 = stack.pop();
 
-                            if (obj1 instanceof Literal l1) obj1 = new Clause(l1);
-                            if (obj2 instanceof Literal l2) obj2 = new Clause(l2);
+                            if (obj1 instanceof Literal l1) obj1 = new PropositionalClause(l1);
+                            if (obj2 instanceof Literal l2) obj2 = new PropositionalClause(l2);
 
-                            if ((!(obj1 instanceof Clause) && !(obj1 instanceof CNFSentence))
+                            if ((!(obj1 instanceof PropositionalClause) && !(obj1 instanceof PropositionalCNFSentence))
                                     ||
-                                (!(obj2 instanceof Clause) && !(obj2 instanceof CNFSentence))) {
+                                (!(obj2 instanceof PropositionalClause) && !(obj2 instanceof PropositionalCNFSentence))) {
                                 throw invalidCNF;
                             }
 
-                            if (obj1 instanceof Clause c1 && obj2 instanceof Clause c2) {
-                                CNFSentence cnf = new CNFSentence(c2, c1);
+                            if (obj1 instanceof PropositionalClause c1 && obj2 instanceof PropositionalClause c2) {
+                                PropositionalCNFSentence cnf = new PropositionalCNFSentence(c2, c1);
                                 stack.push(cnf.size() > 1 ? cnf : cnf.getClauses().iterator().next());
-                            } else if (obj1 instanceof Clause c1) {
-                                LinkedHashSet<Clause> clauses = ((CNFSentence) obj2).getClauses();
+                            } else if (obj1 instanceof PropositionalClause c1) {
+                                LinkedHashSet<PropositionalClause> clauses = ((PropositionalCNFSentence) obj2).getClauses();
                                 clauses.add(c1);
-                                stack.push(clauses.size() > 1 ? new CNFSentence(clauses) : clauses.iterator().next());
-                            } else if (obj2 instanceof Clause c2) {
-                                LinkedHashSet<Clause> clauses = ((CNFSentence) obj1).getClauses();
-                                LinkedHashSet<Clause> newClauses = new LinkedHashSet<>();
+                                stack.push(clauses.size() > 1 ? new PropositionalCNFSentence(clauses) : clauses.iterator().next());
+                            } else if (obj2 instanceof PropositionalClause c2) {
+                                LinkedHashSet<PropositionalClause> clauses = ((PropositionalCNFSentence) obj1).getClauses();
+                                LinkedHashSet<PropositionalClause> newClauses = new LinkedHashSet<>();
                                 newClauses.add(c2);
                                 newClauses.addAll(clauses);
-                                stack.push(newClauses.size() > 1 ? new CNFSentence(newClauses) : newClauses.iterator().next());
+                                stack.push(newClauses.size() > 1 ? new PropositionalCNFSentence(newClauses) : newClauses.iterator().next());
                             } else {
-                                LinkedHashSet<Clause> clauses1 = ((CNFSentence) obj1).getClauses();
-                                LinkedHashSet<Clause> clauses2 = ((CNFSentence) obj2).getClauses();
+                                LinkedHashSet<PropositionalClause> clauses1 = ((PropositionalCNFSentence) obj1).getClauses();
+                                LinkedHashSet<PropositionalClause> clauses2 = ((PropositionalCNFSentence) obj2).getClauses();
                                 clauses2.addAll(clauses1);
-                                stack.push(clauses2.size() > 1 ? new CNFSentence(clauses2) : clauses2.iterator().next());
+                                stack.push(clauses2.size() > 1 ? new PropositionalCNFSentence(clauses2) : clauses2.iterator().next());
                             }
                         }
                     }
                 }
             }
 
-            if (stack.size() != 1 || !(stack.pop() instanceof CNFSentence cnf)) throw invalidCNF;
+            if (stack.size() != 1 || !(stack.pop() instanceof PropositionalCNFSentence cnf)) throw invalidCNF;
             possCNF = cnf;
         } catch (Exception e) {
             throw invalidCNF;
@@ -149,7 +149,7 @@ public class CNFExpressionParser extends PropositionalLogicExpressionParser {
         return possCNF;
     }
 
-    private static Clause getClauseFromPostfix(List<Token> postfix) throws ParseException {
+    private static PropositionalClause getClauseFromPostfix(List<Token> postfix) throws ParseException {
         validateClausePostfixTokens(postfix);
 
         LinkedHashSet<Literal> literals = new LinkedHashSet<>();
@@ -180,7 +180,7 @@ public class CNFExpressionParser extends PropositionalLogicExpressionParser {
 
         if (literalName != null) literals.add(getLiteral(literalName, negated));
 
-        return new Clause(literals);
+        return new PropositionalClause(literals);
     }
 
     private static void validateClausePostfixTokens(List<Token> postfix) throws ParseException {

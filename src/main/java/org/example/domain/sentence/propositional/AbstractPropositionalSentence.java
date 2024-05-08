@@ -1,4 +1,4 @@
-package org.example.domain.sentence;
+package org.example.domain.sentence.propositional;
 
 import org.example.domain.SatisfiabilityType;
 import org.example.exception.ContradictionException;
@@ -8,16 +8,16 @@ import org.example.truth_table.TruthTable;
 /**
  * @author aram.azatyan | 4/1/2024 2:11 PM
  */
-public sealed abstract class AbstractSentence implements Sentence
-                                              permits Literal, Clause, CNFSentence, GenericComplexSentence {
+public sealed abstract class AbstractPropositionalSentence implements PropositionalSentence
+                                              permits Literal, PropositionalClause, PropositionalCNFSentence, GenericComplexPropositionalSentence {
     private SatisfiabilityType satisfiabilityType;
-    private CNFSentence minimalCNF;
+    private PropositionalCNFSentence minimalCNF;
     private TruthTable truthTable;
 
-    protected abstract CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException;
+    protected abstract PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException;
 
     @Override
-    public CNFSentence minimalCNF() throws ContradictionException, TautologyException {
+    public PropositionalCNFSentence minimalCNF() throws ContradictionException, TautologyException {
         if (satisfiabilityType == null) {
             try {
                 minimalCNF = convertToMinimalCNF();

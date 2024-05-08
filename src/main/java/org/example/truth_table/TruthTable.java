@@ -2,7 +2,7 @@ package org.example.truth_table;
 
 import org.example.domain.Connective;
 import org.example.domain.SatisfiabilityType;
-import org.example.domain.sentence.*;
+import org.example.domain.sentence.propositional.*;
 import org.example.domain.supplementary.TruthTableRow;
 import org.example.exception.TautologyException;
 import org.example.exception.ContradictionException;
@@ -14,7 +14,7 @@ import java.util.*;
  * @author aram.azatyan | 3/12/2024 7:42 PM
  */
 public class TruthTable implements Iterable<TruthTableRow> {
-    private final Sentence sentence;
+    private final PropositionalSentence sentence;
     private final LinkedHashSet<String> literals;
     private final LinkedHashMap<boolean[], Boolean> table;
 
@@ -38,7 +38,7 @@ public class TruthTable implements Iterable<TruthTableRow> {
         }
     }
 
-    public TruthTable(Sentence sentence) throws ContradictionException, TautologyException {
+    public TruthTable(PropositionalSentence sentence) throws ContradictionException, TautologyException {
         if (sentence == null) throw new IllegalArgumentException("null param");
         if (sentence.satisfiabilityType() == SatisfiabilityType.TAUTOLOGY) throw new TautologyException();
         if (sentence.satisfiabilityType() == SatisfiabilityType.CONTRADICTION) throw new ContradictionException();
@@ -49,9 +49,9 @@ public class TruthTable implements Iterable<TruthTableRow> {
 
         switch (sentence.type()) {
             case LITERAL -> constructLiteralTable((Literal) sentence);
-            case CLAUSE -> constructClauseTable((Clause) sentence);
-            case CNF -> constructCNFTable((CNFSentence) sentence);
-            case GENERIC_COMPLEX -> constructGenericComplexTable((GenericComplexSentence) sentence);
+            case CLAUSE -> constructClauseTable((PropositionalClause) sentence);
+            case CNF -> constructCNFTable((PropositionalCNFSentence) sentence);
+            case GENERIC_COMPLEX -> constructGenericComplexTable((GenericComplexPropositionalSentence) sentence);
         }
     }
 
@@ -61,7 +61,7 @@ public class TruthTable implements Iterable<TruthTableRow> {
         table.put(new boolean[] {false}, evaluateLiteral(false, literal));
     }
 
-    private void constructClauseTable(Clause clause) {
+    private void constructClauseTable(PropositionalClause clause) {
         clause.getLiterals().stream()
                             .map(Literal::getName)
                             .sorted(Comparator.naturalOrder())
@@ -73,7 +73,7 @@ public class TruthTable implements Iterable<TruthTableRow> {
         }
     }
 
-    private void constructCNFTable(CNFSentence cnfSentence) {
+    private void constructCNFTable(PropositionalCNFSentence cnfSentence) {
         cnfSentence.getClauses().stream()
                         .flatMap(clause -> clause.getLiterals().stream().map(Literal::getName))
                         .sorted(Comparator.naturalOrder())
@@ -85,7 +85,7 @@ public class TruthTable implements Iterable<TruthTableRow> {
         }
     }
 
-    private void constructGenericComplexTable(GenericComplexSentence sentence) {
+    private void constructGenericComplexTable(GenericComplexPropositionalSentence sentence) {
         sentence.getLiterals().stream()
                 .map(Literal::getName)
                 .sorted(Comparator.naturalOrder())
@@ -119,8 +119,8 @@ public class TruthTable implements Iterable<TruthTableRow> {
         }
     }
 
-    public CNFSentence getCanonicalCNF() {
-        LinkedHashSet<Clause> clauses = new LinkedHashSet<>();
+    public PropositionalCNFSentence getCanonicalCNF() {
+        LinkedHashSet<PropositionalClause> clauses = new LinkedHashSet<>();
         Map<String, Literal[]> literalObjectPreservationMap = new HashMap<>();
         for (String litStr : literals) {
             Literal[] literalArr = new Literal[2];
@@ -138,10 +138,10 @@ public class TruthTable implements Iterable<TruthTableRow> {
                     for (String literal : literals) {
                         literalSet.add(literalObjectPreservationMap.get(literal)[literalValues[i++] ? 1 : 0]);
                     }
-                    clauses.add(new Clause(literalSet));
+                    clauses.add(new PropositionalClause(literalSet));
                 });
 
-        return new CNFSentence(clauses);
+        return new PropositionalCNFSentence(clauses);
     }
 
     private void printDash(List<Integer> lengths, int sentenceLength) {
@@ -160,20 +160,20 @@ public class TruthTable implements Iterable<TruthTableRow> {
     }
 
     // TODO: 3/15/2024 kareli a hetagayaum cnf ov sarqel
-    private boolean evaluateSentence(Map<String, Boolean> literalValueMap, Sentence sentence) {
+    private boolean evaluateSentence(Map<String, Boolean> literalValueMap, PropositionalSentence sentence) {
         switch (sentence.type()) {
             case LITERAL -> {
                 Literal literal = (Literal) sentence;
                 return evaluateLiteral(literalValueMap.get(literal.getName()), literal);
             }
             case CLAUSE -> {
-                return evaluateClause(literalValueMap, (Clause) sentence);
+                return evaluateClause(literalValueMap, (PropositionalClause) sentence);
             }
             case CNF -> {
-                return evaluateCNF(literalValueMap, (CNFSentence) sentence);
+                return evaluateCNF(literalValueMap, (PropositionalCNFSentence) sentence);
             }
             case GENERIC_COMPLEX -> {
-                GenericComplexSentence complex = (GenericComplexSentence) sentence;
+                GenericComplexPropositionalSentence complex = (GenericComplexPropositionalSentence) sentence;
                 Boolean result = null;
                 boolean left = evaluateSentence(literalValueMap, complex.getLeftSentence());
                 if (complex.getConnective() == Connective.AND && !left) result = false;
@@ -195,15 +195,15 @@ public class TruthTable implements Iterable<TruthTableRow> {
         return value != literal.isNegated();
     }
 
-    private boolean evaluateClause(Map<String, Boolean> literalValueMap, Clause clause) {
+    private boolean evaluateClause(Map<String, Boolean> literalValueMap, PropositionalClause clause) {
         for (Literal literal : clause.getLiterals()) {
             if (literal.isNegated() != literalValueMap.get(literal.getName())) return true;
         }
         return false;
     }
 
-    private boolean evaluateCNF(Map<String, Boolean> literalValueMap, CNFSentence cnfSentence) {
-        OVER_CLAUSES: for (Clause clause : cnfSentence.getClauses()) {
+    private boolean evaluateCNF(Map<String, Boolean> literalValueMap, PropositionalCNFSentence cnfSentence) {
+        OVER_CLAUSES: for (PropositionalClause clause : cnfSentence.getClauses()) {
             OVER_LITERALS: for (Literal literal : clause.getLiterals()) {
                 if (literal.isNegated() != literalValueMap.get(literal.getName())) continue OVER_CLAUSES;
             }
@@ -217,7 +217,7 @@ public class TruthTable implements Iterable<TruthTableRow> {
         return new TruthTableIterator();
     }
 
-    public Sentence getSentence() {
+    public PropositionalSentence getSentence() {
         return sentence;
     }
 

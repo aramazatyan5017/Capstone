@@ -1,4 +1,4 @@
-package org.example.temp_fol;
+package org.example.domain.sentence.fol;
 
 import org.example.domain.Connective;
 import org.example.domain.FOLSentenceType;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * @author aram.azatyan | 4/17/2024 8:30 PM
  */
-public class FOLClause implements FOLSentence {
+public final class FOLClause implements FOLSentence {
     private final LinkedHashSet<Predicate> predicates;
     private String stringRepresentation;
 

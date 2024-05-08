@@ -1,4 +1,4 @@
-package org.example.temp_fol;
+package org.example.domain.sentence.fol.term;
 
 import org.example.util.SentenceUtils;
 import org.example.util.Utils;

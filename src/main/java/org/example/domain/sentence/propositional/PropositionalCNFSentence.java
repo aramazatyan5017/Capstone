@@ -1,6 +1,6 @@
-package org.example.domain.sentence;
+package org.example.domain.sentence.propositional;
 
-import org.example.domain.SentenceType;
+import org.example.domain.PropositionalSentenceType;
 import org.example.domain.Sentences;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
@@ -13,29 +13,29 @@ import java.util.stream.Collectors;
 /**
  * @author aram.azatyan | 2/28/2024 5:20 PM
  */
-public final class CNFSentence extends AbstractSentence {
-    private final LinkedHashSet<Clause> clauses;
+public final class PropositionalCNFSentence extends AbstractPropositionalSentence {
+    private final LinkedHashSet<PropositionalClause> clauses;
     private String stringRepresentation;
     private Boolean isCanonical;
 
-    public CNFSentence(LinkedHashSet<Clause> clauses) {
+    public PropositionalCNFSentence(LinkedHashSet<PropositionalClause> clauses) {
         if (clauses == null || clauses.isEmpty()) throw new IllegalArgumentException("null param");
         clauses.remove(null);
         if (clauses.size() == 0) throw new IllegalArgumentException("null clause passed");
         this.clauses = clauses;
     }
 
-    public CNFSentence(Clause... clauses) {
+    public PropositionalCNFSentence(PropositionalClause... clauses) {
         if (clauses == null || clauses.length == 0) throw new IllegalArgumentException("null param");
-        LinkedHashSet<Clause> clauseSet = Arrays.stream(clauses)
+        LinkedHashSet<PropositionalClause> clauseSet = Arrays.stream(clauses)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         if (clauseSet.size() == 0) throw new IllegalArgumentException("null clauses passed");
         this.clauses = clauseSet;
     }
 
-    public CNFSentence(String expression) throws ParseException {
-        CNFSentence cnfSentence = Sentences.parseCNFExpression(expression);
+    public PropositionalCNFSentence(String expression) throws ParseException {
+        PropositionalCNFSentence cnfSentence = Sentences.parseCNFExpression(expression);
         this.clauses = cnfSentence.getClauses();
     }
 
@@ -44,7 +44,7 @@ public final class CNFSentence extends AbstractSentence {
         if (isCanonical != null) return isCanonical;
 
         Set<String> clauseLiteralNames = null;
-        OUTER: for (Clause clause : clauses) {
+        OUTER: for (PropositionalClause clause : clauses) {
             if (clause.getLiterals().contains(Literal.TRUE) || clause.getLiterals().contains(Literal.FALSE)) {
                 isCanonical = false;
                 break;
@@ -84,13 +84,13 @@ public final class CNFSentence extends AbstractSentence {
         return isCanonical;
     }
 
-    public List<Clause> getClauseList() {
+    public List<PropositionalClause> getClauseList() {
         return getClauses().stream().toList();
     }
 
     @Override
-    public SentenceType type() {
-        return SentenceType.CNF;
+    public PropositionalSentenceType type() {
+        return PropositionalSentenceType.CNF;
     }
 
     public int size() {
@@ -98,9 +98,9 @@ public final class CNFSentence extends AbstractSentence {
     }
 
     @Override
-    protected CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
+    protected PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
 //        return Sentences.optimizeCNF(this);
-        CNFSentence possCNF = Sentences.optimizeCNF(this);
+        PropositionalCNFSentence possCNF = Sentences.optimizeCNF(this);
         if (possCNF.size() == 1) return possCNF;
         return possCNF.isCanonical() ? Sentences.optimizeCanonicalCNF(possCNF) : possCNF;
     }
@@ -122,7 +122,7 @@ public final class CNFSentence extends AbstractSentence {
     @Override
     public boolean equals(Object other) {
         if (other == this) return true;
-        if (!(other instanceof CNFSentence that)) return false;
+        if (!(other instanceof PropositionalCNFSentence that)) return false;
         return clauses.equals(that.getClauses());
     }
 
@@ -131,7 +131,7 @@ public final class CNFSentence extends AbstractSentence {
         return clauses.hashCode();
     }
 
-    public LinkedHashSet<Clause> getClauses() {
+    public LinkedHashSet<PropositionalClause> getClauses() {
         return new LinkedHashSet<>(clauses);
     }
 }

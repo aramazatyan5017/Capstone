@@ -2,6 +2,7 @@ package org.example.truth_table;
 
 import org.example.domain.Connective;
 import org.example.domain.sentence.*;
+import org.example.domain.sentence.propositional.*;
 import org.example.domain.supplementary.TruthTableRow;
 import org.example.exception.TautologyException;
 import org.example.exception.ContradictionException;
@@ -18,21 +19,21 @@ class TruthTableTest {
     @Test
     void createTruthTableAbnormal() {
         assertThrows(IllegalArgumentException.class, () -> new TruthTable(null));
-        assertThrows(ContradictionException.class, () -> new TruthTable(new GenericComplexSentence("!a & !b & !c & (a | b | c)")));
-        assertThrows(ContradictionException.class, () -> new TruthTable(new CNFSentence("!a & !b & !c & (a | b | c)")));
-        assertThrows(ContradictionException.class, () -> new TruthTable(new GenericComplexSentence("a & !a")));
-        assertThrows(TautologyException.class, () -> new TruthTable(new GenericComplexSentence("(a | !a | b) & (c | d | !c)")));
-        assertThrows(TautologyException.class, () -> new TruthTable(new CNFSentence("(a | !a | b) & (c | d | !c)")));
-        assertThrows(TautologyException.class, () -> new TruthTable(new Clause("(a | !a | b)")));
+        assertThrows(ContradictionException.class, () -> new TruthTable(new GenericComplexPropositionalSentence("!a & !b & !c & (a | b | c)")));
+        assertThrows(ContradictionException.class, () -> new TruthTable(new PropositionalCNFSentence("!a & !b & !c & (a | b | c)")));
+        assertThrows(ContradictionException.class, () -> new TruthTable(new GenericComplexPropositionalSentence("a & !a")));
+        assertThrows(TautologyException.class, () -> new TruthTable(new GenericComplexPropositionalSentence("(a | !a | b) & (c | d | !c)")));
+        assertThrows(TautologyException.class, () -> new TruthTable(new PropositionalCNFSentence("(a | !a | b) & (c | d | !c)")));
+        assertThrows(TautologyException.class, () -> new TruthTable(new PropositionalClause("(a | !a | b)")));
     }
 
     @Test
     void createTruthTableNormal() {
         try {
             TruthTable table = new TruthTable(new Literal("A", true));
-            table = new TruthTable(new Clause("a | b | !c"));
-            table = new TruthTable(new CNFSentence("(a | b) & (c | d)"));
-            table = new TruthTable(new GenericComplexSentence("a => b & c <=> d"));
+            table = new TruthTable(new PropositionalClause("a | b | !c"));
+            table = new TruthTable(new PropositionalCNFSentence("(a | b) & (c | d)"));
+            table = new TruthTable(new GenericComplexPropositionalSentence("a => b & c <=> d"));
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }
@@ -54,7 +55,7 @@ class TruthTableTest {
     @Test
     void clauseTableIteratorTest() {
         try {
-            TruthTable table = new TruthTable(new Clause("a | c | b"));
+            TruthTable table = new TruthTable(new PropositionalClause("a | c | b"));
             assertTrue(compareMyTruthTableWithTheirs(table, """
                     1 1 1  │  1
                       1 1 0  │  1
@@ -66,7 +67,7 @@ class TruthTableTest {
                       0 0 0  │  0   
                     """));
 
-            table = new TruthTable(new Clause("(a | b | !d | e | !c)"));
+            table = new TruthTable(new PropositionalClause("(a | b | !d | e | !c)"));
             assertTrue(compareMyTruthTableWithTheirs(table, """
                     1 1 1 1 1  │  1
                       1 1 1 1 0  │  1
@@ -109,7 +110,7 @@ class TruthTableTest {
     @Test
     void cnfTableIteratorTest() {
         try {
-            TruthTable table = new TruthTable(new CNFSentence("a | b | c"));
+            TruthTable table = new TruthTable(new PropositionalCNFSentence("a | b | c"));
             assertTrue(compareMyTruthTableWithTheirs(table, """
                     1 1 1  │  1
                       1 1 0  │  1
@@ -121,7 +122,7 @@ class TruthTableTest {
                       0 0 0  │  0
                     """));
 
-            table = new TruthTable(new CNFSentence("(b | !c | e) & d & (a | d)"));
+            table = new TruthTable(new PropositionalCNFSentence("(b | !c | e) & d & (a | d)"));
             assertTrue(compareMyTruthTableWithTheirs(table, """
                      1 1 1 1 1  │  1
                       1 1 1 1 0  │  1
@@ -157,7 +158,7 @@ class TruthTableTest {
                       0 0 0 0 0  │  0
                     """));
 
-            table = new TruthTable(new CNFSentence("(b | c) & (b | c | e | a | d)"));
+            table = new TruthTable(new PropositionalCNFSentence("(b | c) & (b | c | e | a | d)"));
             assertTrue(compareMyTruthTableWithTheirs(table, """
                     1 1 1 1 1  │  1
                       1 1 1 1 0  │  1
@@ -200,7 +201,7 @@ class TruthTableTest {
     @Test
     void genericTableIteratorTest() {
         try {
-            TruthTable table = new TruthTable(new GenericComplexSentence("!A => b <=> C | D & A & E => G | P"));
+            TruthTable table = new TruthTable(new GenericComplexPropositionalSentence("!A => b <=> C | D & A & E => G | P"));
             assertTrue(compareMyTruthTableWithTheirs(table, """
                      1 1 1 1 1 1 1  │  1
                       1 1 1 1 1 1 0  │  1
@@ -332,7 +333,7 @@ class TruthTableTest {
                       0 0 0 0 0 0 0  │  0
                     """));
 
-            table = new TruthTable(new GenericComplexSentence("(b | !c | e) & d & (a | d)"));
+            table = new TruthTable(new GenericComplexPropositionalSentence("(b | !c | e) & d & (a | d)"));
             assertTrue(compareMyTruthTableWithTheirs(table, """
                     1 1 1 1 1  │  1
                       1 1 1 1 0  │  1
@@ -368,7 +369,7 @@ class TruthTableTest {
                       0 0 0 0 0  │  0
                     """));
 
-            table = new TruthTable(new GenericComplexSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ " +
+            table = new TruthTable(new GenericComplexPropositionalSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ " +
                     "(¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ " +
                     "(¬A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ B ∨ C ∨ D ∨ E) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ " +
                     "(A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ " +
@@ -408,8 +409,8 @@ class TruthTableTest {
                       0 0 0 0 0  │  0
                     """));
 
-            GenericComplexSentence sentence = new GenericComplexSentence(new GenericComplexSentence("(A <=> B | C & (D | E))"),
-                    new CNFSentence("(A | !B) & (Q | G | H) & (E)"), Connective.BICONDITIONAL, true);
+            GenericComplexPropositionalSentence sentence = new GenericComplexPropositionalSentence(new GenericComplexPropositionalSentence("(A <=> B | C & (D | E))"),
+                    new PropositionalCNFSentence("(A | !B) & (Q | G | H) & (E)"), Connective.BICONDITIONAL, true);
             TruthTable genericSentenceTable = new TruthTable(sentence);
             assertTrue(compareMyTruthTableWithTheirs(genericSentenceTable, """
                      1 1 1 1 1 1 1 1  │  0
@@ -671,7 +672,7 @@ class TruthTableTest {
                     """));
 
             TruthTable genericEquivalentCCNFTable =
-                    new TruthTable(new GenericComplexSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ ( A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q)")));
+                    new TruthTable(new GenericComplexPropositionalSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ ( A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q)")));
             assertTrue(compareMyTruthTableWithTheirs(genericEquivalentCCNFTable, """
                     1 1 1 1 1 1 1 1  │  0
                       1 1 1 1 1 1 1 0  │  0
@@ -1190,7 +1191,7 @@ class TruthTableTest {
                       0 0 0 0 0 0 0 0  │  1
                     """));
 
-            TruthTable cnfTable = new TruthTable(new GenericComplexSentence("!((!A | B | C) & (!A | B | D | E) & (!B | A) & (!C | !D | A) & (!C | !E | A))"));
+            TruthTable cnfTable = new TruthTable(new GenericComplexPropositionalSentence("!((!A | B | C) & (!A | B | D | E) & (!B | A) & (!C | !D | A) & (!C | !E | A))"));
             String equivalentCCNFTable = """
                     1 1 1 1 1  │  0
                       1 1 1 1 0  │  0
@@ -1234,16 +1235,16 @@ class TruthTableTest {
     @Test
     void getCanonicalCNFTest() {
         try {
-            Sentence s = new GenericComplexSentence("(A) => (B | C & (D | E))");
+            PropositionalSentence s = new GenericComplexPropositionalSentence("(A) => (B | C & (D | E))");
             assertTrue(compareMyCCNFWithTheirs(s, "(¬A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ B ∨ C ∨ D ∨ E)"));
 
             s = new Literal("A", true);
             assertTrue(compareMyCCNFWithTheirs(s, "¬A"));
 
-            s = new GenericComplexSentence("(A | B | !C | D)");
+            s = new GenericComplexPropositionalSentence("(A | B | !C | D)");
             assertTrue(compareMyCCNFWithTheirs(s, "A ∨ B ∨ ¬C ∨ D"));
 
-            s = new GenericComplexSentence("(A | B) & (C | !D | E | !A) & (G | !H | !Q)");
+            s = new GenericComplexPropositionalSentence("(A | B) & (C | !D | E | !A) & (G | !H | !Q)");
             assertTrue(compareMyCCNFWithTheirs(s, "(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (¬A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ ¬B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E ∨ G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ ¬G ∨ H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ ¬H ∨ Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ H ∨ ¬Q) ∧ (A ∨ B ∨ C ∨ D ∨ E ∨ G ∨ H ∨ Q)"));
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -1260,9 +1261,9 @@ class TruthTableTest {
         return true;
     }
 
-    private boolean compareMyCCNFWithTheirs(Sentence mySentence, String theirCCNFString) throws Exception {
+    private boolean compareMyCCNFWithTheirs(PropositionalSentence mySentence, String theirCCNFString) throws Exception {
         return new TruthTable(mySentence).getCanonicalCNF()
-                .equals(new CNFSentence(SentenceUtils.convertOnlineCalculatorString(theirCCNFString)));
+                .equals(new PropositionalCNFSentence(SentenceUtils.convertOnlineCalculatorString(theirCCNFString)));
     }
 
     private String getStringFromTruthTableRow(TruthTableRow row) {

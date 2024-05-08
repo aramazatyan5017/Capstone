@@ -1,14 +1,11 @@
-package org.example.temp_fol;
+package org.example.domain.sentence.fol.term;
 
 import org.example.domain.Sentences;
 import org.example.util.SentenceUtils;
 import org.example.util.Utils;
 
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -16,15 +13,15 @@ import java.util.stream.Collectors;
  */
 public final class Function implements Term {
     private final String name;
-    private final LinkedHashSet<Term> terms;
+    private final List<Term> terms;
 
     private String stringRepresentation;
 
-    public Function(String name, LinkedHashSet<Term> terms) {
+    public Function(String name, List<Term> terms) {
         if (Utils.isNullOrBlank(name)) throw new IllegalArgumentException("null param");
         if (terms == null || terms.isEmpty()) throw new IllegalArgumentException("null param");
-        terms.remove(null);
-        if (terms.size() == 0) throw new IllegalArgumentException("null clause passed");
+        terms.removeIf(Objects::isNull);
+        if (terms.size() == 0) throw new IllegalArgumentException("null clause(s) passed");
 
         this.name = name;
         this.terms = terms;
@@ -33,13 +30,13 @@ public final class Function implements Term {
     public Function(String name, Term... terms) {
         if (Utils.isNullOrBlank(name)) throw new IllegalArgumentException("null param");
         if (terms == null || terms.length == 0) throw new IllegalArgumentException("null param");
-        LinkedHashSet<Term> termSet = Arrays.stream(terms)
+        List<Term> tempList = Arrays.stream(terms)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        if (termSet.isEmpty()) throw new IllegalArgumentException("null clauses passed");
+                .toList();
+        if (tempList.isEmpty()) throw new IllegalArgumentException("null clause(s) passed");
 
         this.name = name;
-        this.terms = termSet;
+        this.terms = tempList;
     }
 
     public Function(String expression) throws ParseException {
@@ -86,15 +83,11 @@ public final class Function implements Term {
         return Objects.hash(name, terms);
     }
 
-    public List<Term> getTermList() {
-        return terms.stream().toList();
-    }
-
     public String getName() {
         return name;
     }
 
-    public LinkedHashSet<Term> getTerms() {
-        return new LinkedHashSet<>(terms);
+    public List<Term> getTerms() {
+        return new ArrayList<>(terms);
     }
 }

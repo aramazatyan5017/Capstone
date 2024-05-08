@@ -1,20 +1,19 @@
 package org.example.domain;
 
-import org.example.domain.sentence.*;
-
-import static org.example.domain.SentenceType.*;
-
+import org.example.domain.sentence.Sentence;
+import org.example.domain.sentence.propositional.*;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
 import org.junit.jupiter.api.Test;
-import static org.example.domain.sentence.Sentence.optimizedParse;
-import static org.example.domain.sentence.Sentence.isEquivalent;
-import static org.example.util.SentenceUtils.convertOnlineCalculatorString;
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.text.ParseException;
 import java.util.LinkedHashSet;
+
+import static org.example.domain.PropositionalSentenceType.*;
+import static org.example.domain.sentence.propositional.PropositionalSentence.isEquivalent;
+import static org.example.domain.sentence.propositional.PropositionalSentence.optimizedParse;
+import static org.example.util.SentenceUtils.convertOnlineCalculatorString;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author aram.azatyan | 3/29/2024 4:31 PM
@@ -24,8 +23,8 @@ public class SentenceTest {
     @Test
     void isEquivalentTest() {
         try {
-            Sentence s1 = new Literal("A");
-            Sentence s2 = new Literal("B");
+            PropositionalSentence s1 = new Literal("A");
+            PropositionalSentence s2 = new Literal("B");
             assertFalse(isEquivalent(s1, s2));
 
             s1 = new Literal("A");
@@ -44,52 +43,52 @@ public class SentenceTest {
             s2 = Literal.FALSE;
             assertTrue(isEquivalent(s1, s2));
 
-            s1 = new Clause("(a | b | c)");
-            s2 = new Clause("(c | b | e)");
+            s1 = new PropositionalClause("(a | b | c)");
+            s2 = new PropositionalClause("(c | b | e)");
             assertFalse(isEquivalent(s1, s2));
 
-            s1 = new Clause("a | b | c");
-            s2 = new Clause("a | c | b");
+            s1 = new PropositionalClause("a | b | c");
+            s2 = new PropositionalClause("a | c | b");
             assertTrue(isEquivalent(s1, s2));
 
-            s1 = new Clause("false | false | false");
+            s1 = new PropositionalClause("false | false | false");
             s2 = Literal.FALSE;
             assertTrue(isEquivalent(s1, s2));
 
-            s1 = new Clause("true | a | false");
+            s1 = new PropositionalClause("true | a | false");
             s2 = Literal.TRUE;
             assertTrue(isEquivalent(s1, s2));
 
-            s1 = new Clause("a | !a | b");
-            s2 = new Clause("!b | b | r");
+            s1 = new PropositionalClause("a | !a | b");
+            s2 = new PropositionalClause("!b | b | r");
             assertTrue(isEquivalent(s1, s2));
 
-            s1 = new CNFSentence("(a | b) & (c | d)");
-            s2 = new CNFSentence("(c | d) & (a | b)");
+            s1 = new PropositionalCNFSentence("(a | b) & (c | d)");
+            s2 = new PropositionalCNFSentence("(c | d) & (a | b)");
             assertTrue(isEquivalent(s1, s2));
 
-            s1 = new CNFSentence("(false) & (a | b) & (c | true)");
-            s2 = new Clause("false | false");
+            s1 = new PropositionalCNFSentence("(false) & (a | b) & (c | true)");
+            s2 = new PropositionalClause("false | false");
             assertTrue(isEquivalent(s1, s2));
 
-            s1 = new CNFSentence("(true) & (a) & (true | false)");
+            s1 = new PropositionalCNFSentence("(true) & (a) & (true | false)");
             s2 = new Literal("a");
             assertTrue(isEquivalent(s1, s2));
 
-            s1 = new CNFSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E)"));
-            s2 = new CNFSentence("(A | B | C) & (A | B | D | E) & (!B | !A) & (!C | !D | !A) & (!C | !E | !A)");
+            s1 = new PropositionalCNFSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E)"));
+            s2 = new PropositionalCNFSentence("(A | B | C) & (A | B | D | E) & (!B | !A) & (!C | !D | !A) & (!C | !E | !A)");
             assertTrue(isEquivalent(s1, s2));
 
-            s1 = new GenericComplexSentence("a => a");
+            s1 = new GenericComplexPropositionalSentence("a => a");
             s2 = Literal.TRUE;
             assertTrue(isEquivalent(s1, s2));
 
-            s1 = new GenericComplexSentence("a <=> b => c");
-            s2 = new GenericComplexSentence("(a => (!b | c)) & ((b => c) => !!a)");
+            s1 = new GenericComplexPropositionalSentence("a <=> b => c");
+            s2 = new GenericComplexPropositionalSentence("(a => (!b | c)) & ((b => c) => !!a)");
             assertTrue(isEquivalent(s1, s2));
 
-            s1 = new GenericComplexSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E)"));
-            s2 = new CNFSentence("(A | B | C) & (A | B | D | E) & (!B | !A) & (!C | !D | !A) & (!C | !E | !A)");
+            s1 = new GenericComplexPropositionalSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E)"));
+            s2 = new PropositionalCNFSentence("(A | B | C) & (A | B | D | E) & (!B | !A) & (!C | !D | !A) & (!C | !E | !A)");
             assertTrue(isEquivalent(s1, s2));
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -118,7 +117,7 @@ public class SentenceTest {
     @Test
     void parseTest() {
         try {
-            Sentence sentence = optimizedParse("A");
+            PropositionalSentence sentence = optimizedParse("A");
             assertEquals(LITERAL, sentence.type());
             assertEquals(new Literal("A"), sentence);
 
@@ -132,27 +131,27 @@ public class SentenceTest {
 
             sentence = optimizedParse("(a | b)");
             assertEquals(CLAUSE, sentence.type());
-            assertEquals(new Clause("(a | b)"), sentence);
+            assertEquals(new PropositionalClause("(a | b)"), sentence);
 
             sentence = optimizedParse("a | b");
             assertEquals(CLAUSE, sentence.type());
-            assertEquals(new Clause("a | b"), sentence);
+            assertEquals(new PropositionalClause("a | b"), sentence);
 
             sentence = optimizedParse("(!(!(!a)) | !!!b | g)");
             assertEquals(CLAUSE, sentence.type());
-            assertEquals(new Clause("(!(!(!a)) | !!!b | g)"), sentence);
+            assertEquals(new PropositionalClause("(!(!(!a)) | !!!b | g)"), sentence);
 
             sentence = optimizedParse("!(!(!a)) | !!!b | g");
             assertEquals(CLAUSE, sentence.type());
-            assertEquals(new Clause("!(!(!a)) | !!!b | g"), sentence);
+            assertEquals(new PropositionalClause("!(!(!a)) | !!!b | g"), sentence);
 
             sentence = optimizedParse("a | b | c");
             assertEquals(CLAUSE, sentence.type());
-            assertEquals(new Clause("a | b | c"), sentence);
+            assertEquals(new PropositionalClause("a | b | c"), sentence);
 
             sentence = optimizedParse("A | B | C | A");
             assertEquals(CLAUSE, sentence.type());
-            assertEquals(new Clause("A | B | C | A"), sentence);
+            assertEquals(new PropositionalClause("A | B | C | A"), sentence);
 
             sentence = optimizedParse("a | !a | b");
             assertEquals(LITERAL, sentence.type());
@@ -160,27 +159,27 @@ public class SentenceTest {
 
             sentence = optimizedParse("(a | b) & (c | d)");
             assertEquals(CNF, sentence.type());
-            assertEquals(new CNFSentence("(a | b) & (c | d)"), sentence);
+            assertEquals(new PropositionalCNFSentence("(a | b) & (c | d)"), sentence);
 
             sentence = optimizedParse("a & b & c & d");
             assertEquals(CNF, sentence.type());
-            assertEquals(new CNFSentence("a & b & c & d"), sentence);
+            assertEquals(new PropositionalCNFSentence("a & b & c & d"), sentence);
 
             sentence = optimizedParse("(a) & (b) & (c) & (d)");
             assertEquals(CNF, sentence.type());
-            assertEquals(new CNFSentence("(a) & (b) & (c) & (d)"), sentence);
+            assertEquals(new PropositionalCNFSentence("(a) & (b) & (c) & (d)"), sentence);
 
             sentence = optimizedParse("(a | b | c) & (D | !e | f)");
             assertEquals(CNF, sentence.type());
-            assertEquals(new CNFSentence("(a | b | c) & (D | !e | f)"), sentence);
+            assertEquals(new PropositionalCNFSentence("(a | b | c) & (D | !e | f)"), sentence);
 
             sentence = optimizedParse("(a | B | c) & (g | !D | c) & (a | B | c)");
             assertEquals(CNF, sentence.type());
-            assertEquals(new CNFSentence("(a | B | c) & (g | !D | c) & (a | B | c)"), sentence);
+            assertEquals(new PropositionalCNFSentence("(a | B | c) & (g | !D | c) & (a | B | c)"), sentence);
 
             sentence = optimizedParse("(a | b) & (b | c | a)");
             assertEquals(CLAUSE, sentence.type());
-            assertEquals(new Clause("a | b"), sentence);
+            assertEquals(new PropositionalClause("a | b"), sentence);
 
             sentence = optimizedParse("(a | !a | b) & (!c | e | f | c)");
             assertEquals(LITERAL, sentence.type());
@@ -200,41 +199,41 @@ public class SentenceTest {
 
             sentence = optimizedParse("(a | b | c) & (d | e) & (f) & f");
             assertEquals(CNF, sentence.type());
-            assertEquals(new CNFSentence("(a | b | c) & (d | e) & (f)"), sentence);
+            assertEquals(new PropositionalCNFSentence("(a | b | c) & (d | e) & (f)"), sentence);
 
             sentence = optimizedParse("(a | b) & (!a | c | d) & (b)");
             assertEquals(CNF, sentence.type());
-            assertEquals(new CNFSentence("(!a | c | d) & (b)"), sentence);
+            assertEquals(new PropositionalCNFSentence("(!a | c | d) & (b)"), sentence);
 
             sentence = optimizedParse("(a | b | c) & (!a | b | !c) & (a | !b | !c)");
             assertEquals(CNF, sentence.type());
-            assertEquals(new CNFSentence("(a | b | c) & (!a | b | !c) & (a | !b | !c)"), sentence);
+            assertEquals(new PropositionalCNFSentence("(a | b | c) & (!a | b | !c) & (a | !b | !c)"), sentence);
 
             sentence = optimizedParse("(a | b | c | d) & (!a | b | !c) & (a | !b | !c)");
             assertEquals(CNF, sentence.type());
-            assertEquals(new CNFSentence("(a | b | c | d) & (!a | b | !c) & (a | !b | !c)"), sentence);
+            assertEquals(new PropositionalCNFSentence("(a | b | c | d) & (!a | b | !c) & (a | !b | !c)"), sentence);
 
             sentence = optimizedParse("(a | b | c) & (!a | b | !c) & (a | !b)");
             assertEquals(CNF, sentence.type());
-            assertEquals(new CNFSentence("(a | b | c) & (!a | b | !c) & (a | !b)"), sentence);
+            assertEquals(new PropositionalCNFSentence("(a | b | c) & (!a | b | !c) & (a | !b)"), sentence);
 
             sentence = optimizedParse("(a | b | c) => (e | f | g)");
             assertEquals(GENERIC_COMPLEX, sentence.type());
-            assertSame(Connective.IMPLICATION, ((GenericComplexSentence) sentence).getConnective());
-            assertEquals(CLAUSE, ((GenericComplexSentence) sentence).getLeftSentence().type());
-            assertEquals(CLAUSE, ((GenericComplexSentence) sentence).getRightSentence().type());
+            assertSame(Connective.IMPLICATION, ((GenericComplexPropositionalSentence) sentence).getConnective());
+            assertEquals(CLAUSE, ((GenericComplexPropositionalSentence) sentence).getLeftSentence().type());
+            assertEquals(CLAUSE, ((GenericComplexPropositionalSentence) sentence).getRightSentence().type());
 
             sentence = optimizedParse("((a) & (a | b | c)) => ((e | f | g) & (h <=> u))");
             assertEquals(GENERIC_COMPLEX, sentence.type());
-            assertEquals(LITERAL, ((GenericComplexSentence) sentence).getLeftSentence().type());
-            assertEquals(GENERIC_COMPLEX, ((GenericComplexSentence) sentence).getRightSentence().type());
-            assertSame(Connective.IMPLICATION, ((GenericComplexSentence) sentence).getConnective());
-            assertEquals(CLAUSE, ((GenericComplexSentence) ((GenericComplexSentence) sentence).getRightSentence()).getLeftSentence().type());
-            assertEquals(GENERIC_COMPLEX, ((GenericComplexSentence) ((GenericComplexSentence) sentence).getRightSentence()).getRightSentence().type());
-            assertSame(Connective.AND, ((GenericComplexSentence) ((GenericComplexSentence) sentence).getRightSentence()).getConnective());
-            assertEquals(LITERAL, ((GenericComplexSentence) ((GenericComplexSentence) ((GenericComplexSentence) sentence).getRightSentence()).getRightSentence()).getLeftSentence().type());
-            assertEquals(LITERAL, ((GenericComplexSentence) ((GenericComplexSentence) ((GenericComplexSentence) sentence).getRightSentence()).getRightSentence()).getRightSentence().type());
-            assertSame(Connective.BICONDITIONAL, ((GenericComplexSentence) ((GenericComplexSentence) ((GenericComplexSentence) sentence).getRightSentence()).getRightSentence()).getConnective());
+            assertEquals(LITERAL, ((GenericComplexPropositionalSentence) sentence).getLeftSentence().type());
+            assertEquals(GENERIC_COMPLEX, ((GenericComplexPropositionalSentence) sentence).getRightSentence().type());
+            assertSame(Connective.IMPLICATION, ((GenericComplexPropositionalSentence) sentence).getConnective());
+            assertEquals(CLAUSE, ((GenericComplexPropositionalSentence) ((GenericComplexPropositionalSentence) sentence).getRightSentence()).getLeftSentence().type());
+            assertEquals(GENERIC_COMPLEX, ((GenericComplexPropositionalSentence) ((GenericComplexPropositionalSentence) sentence).getRightSentence()).getRightSentence().type());
+            assertSame(Connective.AND, ((GenericComplexPropositionalSentence) ((GenericComplexPropositionalSentence) sentence).getRightSentence()).getConnective());
+            assertEquals(LITERAL, ((GenericComplexPropositionalSentence) ((GenericComplexPropositionalSentence) ((GenericComplexPropositionalSentence) sentence).getRightSentence()).getRightSentence()).getLeftSentence().type());
+            assertEquals(LITERAL, ((GenericComplexPropositionalSentence) ((GenericComplexPropositionalSentence) ((GenericComplexPropositionalSentence) sentence).getRightSentence()).getRightSentence()).getRightSentence().type());
+            assertSame(Connective.BICONDITIONAL, ((GenericComplexPropositionalSentence) ((GenericComplexPropositionalSentence) ((GenericComplexPropositionalSentence) sentence).getRightSentence()).getRightSentence()).getConnective());
 
             sentence = optimizedParse("(A) & !(B | C) & D");
             assertEquals(GENERIC_COMPLEX, sentence.type());
@@ -340,10 +339,10 @@ public class SentenceTest {
 
     private void compareMyGenericWithTheirs(String strMy, String strOther) {
         try {
-            CNFSentence myCNF = Sentence.optimizedParse(strMy).minimalCNF();
-            LinkedHashSet<Clause> myClauses = myCNF.getClauses();
-            CNFSentence theirCNF = new CNFSentence(convertOnlineCalculatorString(strOther)).minimalCNF();
-            LinkedHashSet<Clause> theirClauses = theirCNF.getClauses();
+            PropositionalCNFSentence myCNF = PropositionalSentence.optimizedParse(strMy).minimalCNF();
+            LinkedHashSet<PropositionalClause> myClauses = myCNF.getClauses();
+            PropositionalCNFSentence theirCNF = new PropositionalCNFSentence(convertOnlineCalculatorString(strOther)).minimalCNF();
+            LinkedHashSet<PropositionalClause> theirClauses = theirCNF.getClauses();
             assertEquals(myClauses, theirClauses);
         } catch (Exception ex) {
             fail("shouldn't have thrown an exception");
@@ -352,7 +351,7 @@ public class SentenceTest {
 
     private void tautology(String str) {
         try {
-            Sentence.optimizedParse(str).minimalCNF();
+            PropositionalSentence.optimizedParse(str).minimalCNF();
             fail("not a tautology");
         } catch (Exception e) {
             assertTrue(e instanceof TautologyException);
@@ -361,7 +360,7 @@ public class SentenceTest {
 
     private void contradiction(String str) {
         try {
-            Sentence.optimizedParse(str).minimalCNF();
+            PropositionalSentence.optimizedParse(str).minimalCNF();
             fail("not a contradiction");
         } catch (Exception e) {
             assertTrue(e instanceof ContradictionException);

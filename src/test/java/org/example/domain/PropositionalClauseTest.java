@@ -1,9 +1,9 @@
 package org.example.domain;
 
 import org.example.SentenceCommon;
-import org.example.domain.sentence.CNFSentence;
-import org.example.domain.sentence.Clause;
-import org.example.domain.sentence.Literal;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.domain.sentence.propositional.PropositionalClause;
+import org.example.domain.sentence.propositional.Literal;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 import org.junit.jupiter.api.Test;
@@ -18,36 +18,36 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author aram.azatyan | 3/15/2024 9:09 PM
  */
-class ClauseTest extends SentenceCommon {
+class PropositionalClauseTest extends SentenceCommon {
 
     @Test
     public void createAbnormal() {
-        assertThrows(IllegalArgumentException.class, () -> new Clause(new LinkedHashSet<>()));
+        assertThrows(IllegalArgumentException.class, () -> new PropositionalClause(new LinkedHashSet<>()));
 
         LinkedHashSet<Literal> nullSet = new LinkedHashSet<>();
-        assertThrows(IllegalArgumentException.class, () -> new Clause(nullSet));
+        assertThrows(IllegalArgumentException.class, () -> new PropositionalClause(nullSet));
 
         LinkedHashSet<Literal> set = new LinkedHashSet<>();
         set.add(null);
         set.add(null);
         set.add(null);
-        assertThrows(IllegalArgumentException.class, () -> new Clause(set));
+        assertThrows(IllegalArgumentException.class, () -> new PropositionalClause(set));
 
         Literal[] literals = null;
-        assertThrows(IllegalArgumentException.class, () -> new Clause(literals));
+        assertThrows(IllegalArgumentException.class, () -> new PropositionalClause(literals));
 
-        assertThrows(IllegalArgumentException.class, () -> new Clause(null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> new PropositionalClause(null, null, null));
 
         String str = null;
-        assertThrows(ParseException.class, () -> new Clause(str));
+        assertThrows(ParseException.class, () -> new PropositionalClause(str));
 
-        assertThrows(ParseException.class, () -> new Clause("   "));
+        assertThrows(ParseException.class, () -> new PropositionalClause("   "));
 
-        assertThrows(ParseException.class, () -> new Clause("a & b"));
-        assertThrows(ParseException.class, () -> new Clause("(a &)"));
-        assertThrows(ParseException.class, () -> new Clause("a => b & c"));
-        assertThrows(ParseException.class, () -> new Clause("b <=> c <=> !d | f"));
-        assertThrows(ParseException.class, () -> new Clause("!(a | B)"));
+        assertThrows(ParseException.class, () -> new PropositionalClause("a & b"));
+        assertThrows(ParseException.class, () -> new PropositionalClause("(a &)"));
+        assertThrows(ParseException.class, () -> new PropositionalClause("a => b & c"));
+        assertThrows(ParseException.class, () -> new PropositionalClause("b <=> c <=> !d | f"));
+        assertThrows(ParseException.class, () -> new PropositionalClause("!(a | B)"));
     }
 
     @Test
@@ -56,7 +56,7 @@ class ClauseTest extends SentenceCommon {
             LinkedHashSet<Literal> set = new LinkedHashSet<>();
             set.add(new Literal("A"));
             set.add(new Literal("B"));
-            Clause clause = new Clause(set);
+            PropositionalClause clause = new PropositionalClause(set);
             assertEquals(2, clause.size());
 
             set = new LinkedHashSet<>();
@@ -64,43 +64,43 @@ class ClauseTest extends SentenceCommon {
             set.add(null);
             set.add(new Literal("B"));
             set.add(null);
-            clause = new Clause(set);
+            clause = new PropositionalClause(set);
             assertEquals(2, clause.size());
 
-            clause = new Clause(new Literal("A"), null, new Literal("B"));
+            clause = new PropositionalClause(new Literal("A"), null, new Literal("B"));
             assertEquals(2, clause.size());
 
-            clause = new Clause("a");
+            clause = new PropositionalClause("a");
             assertEquals(1, clause.size());
 
-            clause = new Clause("(a)");
+            clause = new PropositionalClause("(a)");
             assertEquals(1, clause.size());
 
-            clause = new Clause("(a | b)");
+            clause = new PropositionalClause("(a | b)");
             assertEquals(2, clause.size());
 
-            clause = new Clause("a | b");
+            clause = new PropositionalClause("a | b");
             assertEquals(2, clause.size());
 
-            clause = new Clause("(!(!(!a)) | !!!b | g)");
+            clause = new PropositionalClause("(!(!(!a)) | !!!b | g)");
             assertEquals(3, clause.size());
 
-            clause = new Clause("!(!(!a)) | !!!b | g");
+            clause = new PropositionalClause("!(!(!a)) | !!!b | g");
             assertEquals(3, clause.size());
 
-            clause = new Clause("true | A | !B");
+            clause = new PropositionalClause("true | A | !B");
             assertEquals(3, clause.size());
 
-            clause = new Clause("true | false | !!false");
+            clause = new PropositionalClause("true | false | !!false");
             assertEquals(2, clause.size());
 
-            clause = new Clause("(!(!(A | B)) | C)");
+            clause = new PropositionalClause("(!(!(A | B)) | C)");
             assertEquals(3, clause.size());
 
-            clause = new Clause("(a | b) | c");
+            clause = new PropositionalClause("(a | b) | c");
             assertEquals(3, clause.size());
 
-            clause = new Clause("!!(!!!!(a | !!b) | !c)");
+            clause = new PropositionalClause("!!(!!!!(a | !!b) | !c)");
             assertEquals(3, clause.size());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -110,7 +110,7 @@ class ClauseTest extends SentenceCommon {
     @Test
     public void literalListTest() {
         try {
-            Clause clause = new Clause("a | b | c");
+            PropositionalClause clause = new PropositionalClause("a | b | c");
             List<Literal> literalList = new ArrayList<>();
             literalList.add(new Literal("a"));
             literalList.add(new Literal("b"));
@@ -124,8 +124,8 @@ class ClauseTest extends SentenceCommon {
     @Test
     public void sentenceTypeTest() {
         try {
-            Clause clause = new Clause("A | B | C");
-            assertSame(clause.type(), SentenceType.CLAUSE);
+            PropositionalClause clause = new PropositionalClause("A | B | C");
+            assertSame(clause.type(), PropositionalSentenceType.CLAUSE);
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }
@@ -134,28 +134,28 @@ class ClauseTest extends SentenceCommon {
     @Test
     public void minimalCNFTest() {
         try {
-            Clause clause = new Clause("a | B | c");
-            CNFSentence cnfSentence = clause.minimalCNF();
+            PropositionalClause clause = new PropositionalClause("a | B | c");
+            PropositionalCNFSentence cnfSentence = clause.minimalCNF();
             assertEquals(1, cnfSentence.size());
 
-            LinkedHashSet<Clause> clauseSet = new LinkedHashSet<>();
-            clauseSet.add(new Clause("a | B | c"));
+            LinkedHashSet<PropositionalClause> clauseSet = new LinkedHashSet<>();
+            clauseSet.add(new PropositionalClause("a | B | c"));
             assertEquals(clauseSet, cnfSentence.getClauses());
 
-            clause = new Clause("false | !true | A | B");
+            clause = new PropositionalClause("false | !true | A | B");
             cnfSentence = clause.minimalCNF();
             assertEquals(1, cnfSentence.size());
 
             clauseSet = new LinkedHashSet<>();
-            clauseSet.add(new Clause("A | B"));
+            clauseSet.add(new PropositionalClause("A | B"));
             assertEquals(clauseSet, cnfSentence.getClauses());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }
 
         try {
-            Clause clause = new Clause("a | !a | b");
-            CNFSentence cnfSentence = clause.minimalCNF();
+            PropositionalClause clause = new PropositionalClause("a | !a | b");
+            PropositionalCNFSentence cnfSentence = clause.minimalCNF();
         } catch (Exception e) {
             if (!(e instanceof TautologyException)) {
                 fail("should have thrown a TautologyException");
@@ -163,8 +163,8 @@ class ClauseTest extends SentenceCommon {
         }
 
         try {
-            Clause clause = new Clause("true | false | A");
-            CNFSentence cnfSentence = clause.minimalCNF();
+            PropositionalClause clause = new PropositionalClause("true | false | A");
+            PropositionalCNFSentence cnfSentence = clause.minimalCNF();
         } catch (Exception e) {
             if (!(e instanceof TautologyException)) {
                 fail("should have thrown a TautologyException");
@@ -172,8 +172,8 @@ class ClauseTest extends SentenceCommon {
         }
 
         try {
-            Clause clause = new Clause("false | !true | !!(!true)");
-            CNFSentence cnfSentence = clause.minimalCNF();
+            PropositionalClause clause = new PropositionalClause("false | !true | !!(!true)");
+            PropositionalCNFSentence cnfSentence = clause.minimalCNF();
         } catch (Exception e) {
             if (!(e instanceof ContradictionException)) {
                 fail("should have thrown a ContradictionException");
@@ -181,7 +181,7 @@ class ClauseTest extends SentenceCommon {
         }
 
         try {
-            new Clause("truE").minimalCNF();
+            new PropositionalClause("truE").minimalCNF();
         } catch (Exception e) {
             if (!(e instanceof TautologyException)) {
                 fail("should have thrown a TautologyException");
@@ -189,7 +189,7 @@ class ClauseTest extends SentenceCommon {
         }
 
         try {
-            new Clause("FalSe").minimalCNF();
+            new PropositionalClause("FalSe").minimalCNF();
         } catch (Exception e) {
             if (!(e instanceof ContradictionException)) {
                 fail("should have thrown a TautologyException");
@@ -200,16 +200,16 @@ class ClauseTest extends SentenceCommon {
     @Test
     public void satisfiabilityTypeTest() {
         try {
-            Clause clause = new Clause("A | !A | B");
+            PropositionalClause clause = new PropositionalClause("A | !A | B");
             assertSame(clause.satisfiabilityType(), SatisfiabilityType.TAUTOLOGY);
 
-            clause = new Clause("A | B | C");
+            clause = new PropositionalClause("A | B | C");
             assertSame(clause.satisfiabilityType(), SatisfiabilityType.CONTINGENCY);
 
-            clause = new Clause("true | false | A");
+            clause = new PropositionalClause("true | false | A");
             assertSame(clause.satisfiabilityType(), SatisfiabilityType.TAUTOLOGY);
 
-            clause = new Clause("false | !true");
+            clause = new PropositionalClause("false | !true");
             assertSame(clause.satisfiabilityType(), SatisfiabilityType.CONTRADICTION);
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -219,16 +219,16 @@ class ClauseTest extends SentenceCommon {
     @Test
     public void truthTableTest() {
         try {
-            Clause clause = new Clause("A | !A | B");
+            PropositionalClause clause = new PropositionalClause("A | !A | B");
             assertThrows(TautologyException.class, clause::truthTable);
 
-            clause = new Clause("A | B | C");
+            clause = new PropositionalClause("A | B | C");
             assertNotNull(clause.truthTable());
 
-            clause = new Clause("true | false | A");
+            clause = new PropositionalClause("true | false | A");
             assertThrows(TautologyException.class, clause::truthTable);
 
-            clause = new Clause("false | !true");
+            clause = new PropositionalClause("false | !true");
             assertThrows(ContradictionException.class, clause::truthTable);
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -238,19 +238,19 @@ class ClauseTest extends SentenceCommon {
     @Test
     public void toStringTest() {
         try {
-            Clause clause = new Clause("a");
+            PropositionalClause clause = new PropositionalClause("a");
             assertEquals("a", clause.toString());
 
-            clause = new Clause("a | b | c");
+            clause = new PropositionalClause("a | b | c");
             assertEquals("a | b | c", clause.toString());
 
-            clause = new Clause(new Literal("a"), new Literal("b", true));
+            clause = new PropositionalClause(new Literal("a"), new Literal("b", true));
             assertEquals("a | !b", clause.toString());
 
-            clause = new Clause("trUE | fAlse | A");
+            clause = new PropositionalClause("trUE | fAlse | A");
             assertEquals("TRUE | FALSE | A", clause.toString());
 
-            clause = new Clause("faLSe | !!!true");
+            clause = new PropositionalClause("faLSe | !!!true");
             assertEquals("FALSE", clause.toString());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -260,16 +260,16 @@ class ClauseTest extends SentenceCommon {
     @Test
     public void equalsTest() {
         try {
-            Clause clause1 = new Clause("a | b");
-            Clause clause2 = new Clause("b | a");
+            PropositionalClause clause1 = new PropositionalClause("a | b");
+            PropositionalClause clause2 = new PropositionalClause("b | a");
             assertEquals(clause1, clause2);
 
-            clause1 = new Clause("a | b | c");
-            clause2 = new Clause("a | b | d");
+            clause1 = new PropositionalClause("a | b | c");
+            clause2 = new PropositionalClause("a | b | d");
             assertNotEquals(clause1, clause2);
 
-            clause1 = new Clause("a | b | trUe");
-            clause2 = new Clause("TRue | b | a");
+            clause1 = new PropositionalClause("a | b | trUe");
+            clause2 = new PropositionalClause("TRue | b | a");
             assertEquals(clause1, clause2);
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -279,12 +279,12 @@ class ClauseTest extends SentenceCommon {
     @Test
     public void hashCodeTest() {
         try {
-            Clause clause1 = new Clause("a | b");
-            Clause clause2 = new Clause("b | a");
+            PropositionalClause clause1 = new PropositionalClause("a | b");
+            PropositionalClause clause2 = new PropositionalClause("b | a");
             assertEquals(clause1.hashCode(), clause2.hashCode());
 
-            clause1 = new Clause("a | b | trUe");
-            clause2 = new Clause("TRue | b | a");
+            clause1 = new PropositionalClause("a | b | trUe");
+            clause2 = new PropositionalClause("TRue | b | a");
             assertEquals(clause1.hashCode(), clause2.hashCode());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");

@@ -1,11 +1,15 @@
 package org.example.parser;
 
 import org.example.domain.Connective;
+import org.example.domain.sentence.fol.*;
+import org.example.domain.sentence.fol.term.Constant;
+import org.example.domain.sentence.fol.term.Function;
+import org.example.domain.sentence.fol.term.Term;
+import org.example.domain.sentence.fol.term.Variable;
 import org.example.domain.supplementary.ConnectiveAndNegation;
 import org.example.domain.supplementary.Node;
 import org.example.domain.supplementary.PostfixAndFuncArgCountMap;
 import org.example.parser.supplementary.Token;
-import org.example.temp_fol.*;
 import org.example.util.Utils;
 
 import java.text.ParseException;
@@ -79,7 +83,7 @@ public class FOLInfixExpressionParser extends FOLLogicExpressionParser {
                             : new Variable(token.getValue())));
                 }
                 case FUNCTION, PREDICATE -> {
-                    LinkedHashSet<Term> terms = new LinkedHashSet<>();
+                    List<Term> terms = new ArrayList<>();
 
                     int argCount = argCountMap.get(token.getValue());
 
@@ -88,10 +92,7 @@ public class FOLInfixExpressionParser extends FOLLogicExpressionParser {
                         --argCount;
                     }
 
-                    List<Term> termList = new ArrayList<>(terms);
-                    Collections.reverse(termList);
-                    terms = new LinkedHashSet<>(termList);
-
+                    Collections.reverse(terms);
                     boolean negated = i + 1 < postfix.size() && postfix.get(i + 1).getType() == NEGATION;
 
                     stack.push(new Node(token.getType() == FUNCTION

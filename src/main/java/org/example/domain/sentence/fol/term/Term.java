@@ -1,4 +1,4 @@
-package org.example.temp_fol;
+package org.example.domain.sentence.fol.term;
 
 /**
  * @author aram.azatyan | 4/15/2024 10:57 AM

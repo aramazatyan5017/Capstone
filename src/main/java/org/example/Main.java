@@ -1,10 +1,10 @@
 package org.example;
 
-import org.example.algo.Resolution;
+import org.example.algo.PropositionalResolution;
 import org.example.domain.Sentences;
-import org.example.domain.sentence.CNFSentence;
-import org.example.domain.sentence.GenericComplexSentence;
-import org.example.domain.sentence.Sentence;
+import org.example.domain.sentence.propositional.GenericComplexPropositionalSentence;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.domain.sentence.propositional.PropositionalSentence;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
@@ -18,59 +18,59 @@ import java.util.Set;
  */
 public class Main {
     public static void main(String[] args) throws ParseException, TautologyException, ContradictionException {
-        Sentence s1 = new GenericComplexSentence("!(a => ((b <=> c) | (e & d & !f)))");
-        Sentence s2 = new GenericComplexSentence("!(!a | (((b => c) & (c => b)) | (!(!e | !d | f))))");
+        PropositionalSentence s1 = new GenericComplexPropositionalSentence("!(a => ((b <=> c) | (e & d & !f)))");
+        PropositionalSentence s2 = new GenericComplexPropositionalSentence("!(!a | (((b => c) & (c => b)) | (!(!e | !d | f))))");
         System.out.println(s1.minimalCNF().equals(s2.minimalCNF()));
 
-        GenericComplexSentence generic = new GenericComplexSentence("!true => !(!!false)");
+        GenericComplexPropositionalSentence generic = new GenericComplexPropositionalSentence("!true => !(!!false)");
         System.out.println(generic);
 
-        System.out.println(Sentence.optimizedParse("(!(a => ((b <=> c) & (e & f & !f)))) | (!(!a | (((b => c) & (c => b)) | (!(!e | !d | f)))))"));
-        System.out.println(Sentence.optimizedParse("(!(!a => ((b <=> c) & (e & f & !f))))"));
-        System.out.println(Sentence.optimizedParse("(a => ((a | b) & (a | c) & (a | d)))"));
-        System.out.println(Sentence.optimizedParse("c => ((a | b) & (a | b | c))"));
-        System.out.println(Sentence.optimizedParse("((b) & (a & b => l) & (a & p => l) & (b & l => m) & (l & m => p)" +
+        System.out.println(PropositionalSentence.optimizedParse("(!(a => ((b <=> c) & (e & f & !f)))) | (!(!a | (((b => c) & (c => b)) | (!(!e | !d | f)))))"));
+        System.out.println(PropositionalSentence.optimizedParse("(!(!a => ((b <=> c) & (e & f & !f))))"));
+        System.out.println(PropositionalSentence.optimizedParse("(a => ((a | b) & (a | c) & (a | d)))"));
+        System.out.println(PropositionalSentence.optimizedParse("c => ((a | b) & (a | b | c))"));
+        System.out.println(PropositionalSentence.optimizedParse("((b) & (a & b => l) & (a & p => l) & (b & l => m) & (l & m => p)" +
                 " & (p => q) & (a)) => q"));
-        Sentence sentence = Sentence.optimizedParse("(b) & (a & b => l) & (a & p => l) & (b & l => m) & (l & m => p) & (p => q) & (a)");
+        PropositionalSentence sentence = PropositionalSentence.optimizedParse("(b) & (a & b => l) & (a & p => l) & (b & l => m) & (l & m => p) & (p => q) & (a)");
         System.out.println(sentence);
-        System.out.println(Sentence.optimizedParse(String.join("", "(", sentence.toString(), ")", "=>!q")));
-        System.out.println(Sentence.optimizedParse(SentenceUtils.convertOnlineCalculatorString("((¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E))") + "=>" +
+        System.out.println(PropositionalSentence.optimizedParse(String.join("", "(", sentence.toString(), ")", "=>!q")));
+        System.out.println(PropositionalSentence.optimizedParse(SentenceUtils.convertOnlineCalculatorString("((¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E))") + "=>" +
                 "((A | B | C) & (A | B | D | E) & (!B | !A) & (!C | !D | !A) & (!C | !E | !A))"));
-        System.out.println(Sentence.optimizedParse("(" + sentence.toString() + ")=>(" + sentence.minimalCNF() + ")"));
+        System.out.println(PropositionalSentence.optimizedParse("(" + sentence.toString() + ")=>(" + sentence.minimalCNF() + ")"));
 
         String str1 = SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E)");
         String str2 = "(A | B | C) & (A | B | D | E) & (!B | !A) & (!C | !D | !A) & (!C | !E | !A)";
-        System.out.println(Sentence.optimizedParse(str1));
-        System.out.println(Sentence.optimizedParse(str2));
+        System.out.println(PropositionalSentence.optimizedParse(str1));
+        System.out.println(PropositionalSentence.optimizedParse(str2));
 
-        System.out.println(Sentence.isEquivalent(new CNFSentence(str1), new CNFSentence(str2)));
+        System.out.println(PropositionalSentence.isEquivalent(new PropositionalCNFSentence(str1), new PropositionalCNFSentence(str2)));
 
         String andur = "((!A | (!B | (!C | (!D | !E)))) & ((!A | (!B | (!C | (!D | E)))) & ((!A | (!B | (!C | (D | !E)))) & ((!A | (!B | (!C | (D | E)))) & ((!A | (!B | (C | (!D | !E)))) & ((!A | (!B | (C | (!D | E)))) & ((!A | (!B | (C | (D | !E)))) & ((!A | (!B | (C | (D | E)))) & ((!A | (B | (!C | (!D | !E)))) & ((!A | (B | (!C | (!D | E)))) & ((!A | (B | (!C | (D | !E)))) & ((A | (B | (!C | (D | E)))) & ((A | (B | (C | (!D | !E)))) & ((A | (B | (C | (!D | E)))) & ((A | (B | (C | (D | !E)))) & (A | (B | (C | (D | E)))))))))))))))))))";
-        System.out.println(new CNFSentence(andur));
+        System.out.println(new PropositionalCNFSentence(andur));
 
-        System.out.println(new GenericComplexSentence(str1).satisfiabilityType());
-        System.out.println(new GenericComplexSentence(str2).satisfiabilityType());
+        System.out.println(new GenericComplexPropositionalSentence(str1).satisfiabilityType());
+        System.out.println(new GenericComplexPropositionalSentence(str2).satisfiabilityType());
 
-        System.out.println(Sentences.optimizeCanonicalCNF(new CNFSentence(str1)));
+        System.out.println(Sentences.optimizeCanonicalCNF(new PropositionalCNFSentence(str1)));
 
         try {
-            System.out.println(new GenericComplexSentence("(" + str1 + ")=>(" + str2 + ")").minimalCNF());
+            System.out.println(new GenericComplexPropositionalSentence("(" + str1 + ")=>(" + str2 + ")").minimalCNF());
         } catch (TautologyException e) {
             System.out.println("TRUE");
         } catch (ContradictionException e) {
             System.out.println("FALSE");
         }
 
-        System.out.println(Sentence.optimizedParse("(" + str1 + ")=>(" + str2 + ")"));
+        System.out.println(PropositionalSentence.optimizedParse("(" + str1 + ")=>(" + str2 + ")"));
 
-        Set<CNFSentence> set = new HashSet<>();
-        set.add(new GenericComplexSentence("((B & C) => (A | T | G)) & ((G | T | A) => (C & B))").minimalCNF());
+        Set<PropositionalCNFSentence> set = new HashSet<>();
+        set.add(new GenericComplexPropositionalSentence("((B & C) => (A | T | G)) & ((G | T | A) => (C & B))").minimalCNF());
         System.out.println(set.iterator().next().size());
-        System.out.println(new Resolution(set, false).resolveAndGet().size());
+        System.out.println(new PropositionalResolution(set, false).resolveAndGet().size());
 
-        System.out.println(new GenericComplexSentence(str1).minimalCNF());
+        System.out.println(new GenericComplexPropositionalSentence(str1).minimalCNF());
 
-        System.out.println(new GenericComplexSentence(str1).equals(new GenericComplexSentence(str2)));
+        System.out.println(new GenericComplexPropositionalSentence(str1).equals(new GenericComplexPropositionalSentence(str2)));
     }
 }
 

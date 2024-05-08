@@ -1,7 +1,7 @@
-package org.example.domain.sentence;
+package org.example.domain.sentence.propositional;
 
 import org.example.domain.Connective;
-import org.example.domain.SentenceType;
+import org.example.domain.PropositionalSentenceType;
 import org.example.domain.Sentences;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
@@ -18,18 +18,18 @@ import java.util.stream.Collectors;
  */
 
 //--  a disjunction of literals
-public final class Clause extends AbstractSentence {
+public final class PropositionalClause extends AbstractPropositionalSentence {
     private final LinkedHashSet<Literal> literals;
     private String stringRepresentation;
 
-    public Clause(LinkedHashSet<Literal> literals) {
+    public PropositionalClause(LinkedHashSet<Literal> literals) {
         if (literals == null || literals.isEmpty()) throw new IllegalArgumentException("null param");
         literals.remove(null);
         if (literals.size() == 0) throw new IllegalArgumentException("null literal passed");
         this.literals = literals;
     }
 
-    public Clause(Literal... literals) {
+    public PropositionalClause(Literal... literals) {
         if (literals == null || literals.length == 0) throw new IllegalArgumentException("null param");
         LinkedHashSet<Literal> literalSet = Arrays.stream(literals)
                 .filter(Objects::nonNull)
@@ -38,8 +38,8 @@ public final class Clause extends AbstractSentence {
         this.literals = literalSet;
     }
 
-    public Clause(String expression) throws ParseException {
-        Clause clause = Sentences.parseClauseExpression(expression);
+    public PropositionalClause(String expression) throws ParseException {
+        PropositionalClause clause = Sentences.parseClauseExpression(expression);
         this.literals = clause.getLiterals();
     }
 
@@ -52,13 +52,13 @@ public final class Clause extends AbstractSentence {
     }
 
     @Override
-    protected CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
-        return new CNFSentence(Sentences.optimizeClause(this));
+    protected PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
+        return new PropositionalCNFSentence(Sentences.optimizeClause(this));
     }
 
     @Override
-    public SentenceType type() {
-        return SentenceType.CLAUSE;
+    public PropositionalSentenceType type() {
+        return PropositionalSentenceType.CLAUSE;
     }
 
     @Override
@@ -78,7 +78,7 @@ public final class Clause extends AbstractSentence {
     @Override
     public boolean equals(Object other) {
         if (other == this) return true;
-        if (!(other instanceof Clause that)) return false;
+        if (!(other instanceof PropositionalClause that)) return false;
         return this.literals.equals(that.getLiterals());
     }
 

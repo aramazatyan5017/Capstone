@@ -1,19 +1,22 @@
 package org.example.parser;
 
-import org.example.domain.*;
-import org.example.domain.sentence.GenericComplexSentence;
-import org.example.domain.sentence.Literal;
-import org.example.domain.sentence.Sentence;
+import org.example.domain.Connective;
+import org.example.domain.sentence.propositional.GenericComplexPropositionalSentence;
+import org.example.domain.sentence.propositional.Literal;
+import org.example.domain.sentence.propositional.PropositionalSentence;
 import org.example.domain.supplementary.ConnectiveAndNegation;
 import org.example.domain.supplementary.LiteralNameAndNegation;
 import org.example.domain.supplementary.Node;
 import org.example.parser.supplementary.Token;
 import org.example.util.Utils;
 
-import static org.example.parser.supplementary.TokenType.*;
-
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.List;
+
+import static org.example.parser.supplementary.TokenType.NEGATION;
+import static org.example.parser.supplementary.TokenType.WORD;
 
 /**
  * @author aram.azatyan | 2/22/2024 11:45 PM
@@ -21,13 +24,13 @@ import java.util.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class InfixExpressionParser extends PropositionalLogicExpressionParser {
 
-    public static GenericComplexSentence parseGeneric(String expression) throws ParseException {
+    public static GenericComplexPropositionalSentence parseGeneric(String expression) throws ParseException {
         if (Utils.isNullOrBlank(expression)) throw new ParseException("null param", -1);
 
         Node topNode = postfixToTree(postfixTokens(infixTokens(expression)));
         if (topNode.isExternal()) throw new ParseException("unable to construct a generic sentence", -1);
 
-        return (GenericComplexSentence) treeToSentence(topNode);
+        return (GenericComplexPropositionalSentence) treeToSentence(topNode);
     }
 
     public static Literal parseLiteral(String expression) throws ParseException {
@@ -35,10 +38,10 @@ public class InfixExpressionParser extends PropositionalLogicExpressionParser {
         return possibleLiteral(expression);
     }
 
-    private static Sentence treeToSentence(Node root) {
+    private static PropositionalSentence treeToSentence(Node root) {
         if (root.isExternal()) return getLiteral((LiteralNameAndNegation) root.getValue());
         var connectiveAndNegation = (ConnectiveAndNegation) root.getValue();
-        return new GenericComplexSentence(treeToSentence(root.getLeft()), treeToSentence(root.getRight()),
+        return new GenericComplexPropositionalSentence(treeToSentence(root.getLeft()), treeToSentence(root.getRight()),
                 connectiveAndNegation.getConnective(), connectiveAndNegation.isNegated());
     }
 

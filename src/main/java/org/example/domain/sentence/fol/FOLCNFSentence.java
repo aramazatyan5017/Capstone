@@ -1,13 +1,7 @@
-package org.example.temp_fol;
+package org.example.domain.sentence.fol;
 
 import org.example.domain.FOLSentenceType;
-import org.example.domain.SentenceType;
 import org.example.domain.Sentences;
-import org.example.domain.sentence.CNFSentence;
-import org.example.domain.sentence.Clause;
-import org.example.domain.sentence.Literal;
-import org.example.exception.ContradictionException;
-import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
 
 import java.text.ParseException;
@@ -17,7 +11,7 @@ import java.util.stream.Collectors;
 /**
  * @author aram.azatyan | 4/17/2024 8:39 PM
  */
-public class FOLCNFSentence implements FOLSentence {
+public final class FOLCNFSentence implements FOLSentence {
     private final LinkedHashSet<FOLClause> clauses;
     private String stringRepresentation;
     private Boolean isCanonical;

@@ -1,6 +1,6 @@
-package org.example.domain.sentence;
+package org.example.domain.sentence.propositional;
 
-import org.example.domain.SentenceType;
+import org.example.domain.PropositionalSentenceType;
 import org.example.domain.Sentences;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * @author aram.azatyan | 2/21/2024 11:50 AM
  */
-public final class Literal extends AbstractSentence {
+public final class Literal extends AbstractPropositionalSentence {
     private final String name;
     private final boolean negated;
 
@@ -55,15 +55,15 @@ public final class Literal extends AbstractSentence {
     }
 
     @Override
-    public SentenceType type() {
-        return SentenceType.LITERAL;
+    public PropositionalSentenceType type() {
+        return PropositionalSentenceType.LITERAL;
     }
 
     @Override
-    protected CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
+    protected PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
         if (this == Literal.TRUE) throw new TautologyException();
         if (this == Literal.FALSE) throw new ContradictionException();
-        return new CNFSentence(new Clause(this));
+        return new PropositionalCNFSentence(new PropositionalClause(this));
     }
 
     @Override

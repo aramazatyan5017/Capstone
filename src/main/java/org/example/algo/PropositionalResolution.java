@@ -1,12 +1,12 @@
 package org.example.algo;
 
 import org.example.domain.Sentences;
-import org.example.domain.sentence.CNFSentence;
-import org.example.domain.sentence.Clause;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.domain.sentence.propositional.PropositionalClause;
 import org.example.exception.ContradictionException;
 import org.example.exception.NothingToInferException;
 import org.example.exception.TautologyException;
-import org.example.inference_rules.ResolutionInferenceRule;
+import org.example.inference_rules.PropositionalResolutionInferenceRule;
 import org.example.util.SentenceUtils;
 
 import java.util.*;
@@ -14,11 +14,11 @@ import java.util.*;
 /**
  * @author aram.azatyan | 3/27/2024 2:50 PM
  */
-public class Resolution {
+public class PropositionalResolution {
 
-    private final Set<Clause> knowledgeBase;
+    private final Set<PropositionalClause> knowledgeBase;
 
-    public Resolution(Set<CNFSentence> knowledgeBase, boolean shouldIgnoreContradictions)
+    public PropositionalResolution(Set<PropositionalCNFSentence> knowledgeBase, boolean shouldIgnoreContradictions)
             throws TautologyException, ContradictionException {
         if (knowledgeBase == null || knowledgeBase.isEmpty()) throw new IllegalArgumentException("null param");
         knowledgeBase.remove(null);
@@ -27,12 +27,12 @@ public class Resolution {
         this.knowledgeBase = getKBClauses(knowledgeBase, shouldIgnoreContradictions);
     }
 
-    private Set<Clause> getKBClauses(Set<CNFSentence> knowledgeBase, boolean shouldIgnoreContradictions)
+    private Set<PropositionalClause> getKBClauses(Set<PropositionalCNFSentence> knowledgeBase, boolean shouldIgnoreContradictions)
             throws TautologyException, ContradictionException {
-        Set<CNFSentence> preprocessedKnowledgeBase = new HashSet<>();
+        Set<PropositionalCNFSentence> preprocessedKnowledgeBase = new HashSet<>();
 
-        for (Iterator<CNFSentence> iterator = knowledgeBase.iterator(); iterator.hasNext(); iterator.remove()) {
-            CNFSentence cnfSentence = iterator.next();
+        for (Iterator<PropositionalCNFSentence> iterator = knowledgeBase.iterator(); iterator.hasNext(); iterator.remove()) {
+            PropositionalCNFSentence cnfSentence = iterator.next();
 
             try {
                 preprocessedKnowledgeBase.add(Sentences.optimizeCNF(cnfSentence));
@@ -49,21 +49,21 @@ public class Resolution {
 
         if (preprocessedKnowledgeBase.isEmpty()) throw new TautologyException();
 
-        LinkedHashSet<Clause> combinedClauses = new LinkedHashSet<>();
+        LinkedHashSet<PropositionalClause> combinedClauses = new LinkedHashSet<>();
         preprocessedKnowledgeBase.forEach(s -> combinedClauses.addAll(s.getClauses()));
 
-        return Sentences.optimizeCNF(new CNFSentence(combinedClauses)).getClauses();
+        return Sentences.optimizeCNF(new PropositionalCNFSentence(combinedClauses)).getClauses();
     }
 
-    public Set<Clause> resolveAndGet() {
-        Set<Clause> resolved = new HashSet<>();
+    public Set<PropositionalClause> resolveAndGet() {
+        Set<PropositionalClause> resolved = new HashSet<>();
 
         while (true) {
-            for (Clause compared : knowledgeBase) {
-                for (Clause current : knowledgeBase) {
+            for (PropositionalClause compared : knowledgeBase) {
+                for (PropositionalClause current : knowledgeBase) {
                     if (!compared.equals(current)) {
                         try {
-                            resolved.add(ResolutionInferenceRule.resolve(compared, current));
+                            resolved.add(PropositionalResolutionInferenceRule.resolve(compared, current));
                         } catch (NothingToInferException ignored) {}
                     }
                 }
@@ -79,10 +79,10 @@ public class Resolution {
     }
 
     public static void main(String[] args) throws Exception {
-        CNFSentence cnf = new CNFSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E)"));
-        Set<CNFSentence> kb = new HashSet<>();
+        PropositionalCNFSentence cnf = new PropositionalCNFSentence(SentenceUtils.convertOnlineCalculatorString("(¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ ¬C ∨ D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ ¬D ∨ E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ ¬E) ∧ (¬A ∨ ¬B ∨ C ∨ D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ ¬E) ∧ (¬A ∨ B ∨ ¬C ∨ ¬D ∨ E) ∧ (¬A ∨ B ∨ ¬C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ ¬C ∨ D ∨ E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ ¬D ∨ E) ∧ (A ∨ B ∨ C ∨ D ∨ ¬E) ∧ (A ∨ B ∨ C ∨ D ∨ E)"));
+        Set<PropositionalCNFSentence> kb = new HashSet<>();
         kb.add(cnf);
-        new Resolution(kb, true).resolveAndGet().forEach(System.out::println);
+        new PropositionalResolution(kb, true).resolveAndGet().forEach(System.out::println);
 
         String sentence = """
                 !A | !B | D | E
@@ -135,12 +135,12 @@ public class Resolution {
                 A | B | C | D | E
                 """;
 
-        LinkedHashSet<Clause> clauses = new LinkedHashSet<>();
+        LinkedHashSet<PropositionalClause> clauses = new LinkedHashSet<>();
         List<String> list = Arrays.stream(sentence.split("\n")).map(String::trim).toList();
         for (String s : list) {
-            clauses.add(new Clause(s));
+            clauses.add(new PropositionalClause(s));
         }
 
-        System.out.println(new CNFSentence(clauses).minimalCNF());
+        System.out.println(new PropositionalCNFSentence(clauses).minimalCNF());
     }
 }

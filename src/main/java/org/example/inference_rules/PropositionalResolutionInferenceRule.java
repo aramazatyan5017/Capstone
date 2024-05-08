@@ -1,8 +1,8 @@
 package org.example.inference_rules;
 
 import org.example.domain.SatisfiabilityType;
-import org.example.domain.sentence.Clause;
-import org.example.domain.sentence.Literal;
+import org.example.domain.sentence.propositional.PropositionalClause;
+import org.example.domain.sentence.propositional.Literal;
 import org.example.exception.NothingToInferException;
 
 import java.util.HashSet;
@@ -12,9 +12,9 @@ import java.util.Set;
 /**
  * @author aram.azatyan | 3/27/2024 4:04 PM
  */
-public class ResolutionInferenceRule {
+public class PropositionalResolutionInferenceRule {
 
-    public static Clause resolve(Clause clause1, Clause clause2) throws NothingToInferException {
+    public static PropositionalClause resolve(PropositionalClause clause1, PropositionalClause clause2) throws NothingToInferException {
         if (clause1 == null || clause2 == null) throw new IllegalArgumentException("null param");
         if (clause1.satisfiabilityType() != SatisfiabilityType.CONTINGENCY ||
                 clause2.satisfiabilityType() != SatisfiabilityType.CONTINGENCY) throw new NothingToInferException();
@@ -37,10 +37,10 @@ public class ResolutionInferenceRule {
 
         if (complementaryLiteralName.isEmpty()) throw new NothingToInferException();
 
-        return new Clause(possClauseLiterals);
+        return new PropositionalClause(possClauseLiterals);
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println(resolve(new Clause("A | !B | C"), new Clause("!A | B | C")));
+        System.out.println(resolve(new PropositionalClause("A | !B | C"), new PropositionalClause("!A | B | C")));
     }
 }

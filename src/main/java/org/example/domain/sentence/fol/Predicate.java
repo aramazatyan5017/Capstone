@@ -1,30 +1,26 @@
-package org.example.temp_fol;
+package org.example.domain.sentence.fol;
 
 import org.example.domain.FOLSentenceType;
 import org.example.domain.Sentences;
-import org.example.domain.sentence.Clause;
-import org.example.domain.sentence.Literal;
+import org.example.domain.sentence.fol.term.Term;
 import org.example.util.SentenceUtils;
 import org.example.util.Utils;
 
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * @author aram.azatyan | 4/14/2024 8:42 PM
  */
-public class Predicate implements FOLSentence {
+public final class Predicate implements FOLSentence {
     private final String name;
     private final boolean negated;
-    private final LinkedHashSet<Term> terms;
+    private final List<Term> terms;
 
     private String stringRepresentation;
 
-    public Predicate(String name, boolean negated, LinkedHashSet<Term> terms) {
+    public Predicate(String name, boolean negated, List<Term> terms) {
         if (Utils.isNullOrBlank(name)) throw new IllegalArgumentException("null param");
         if (terms == null || terms.isEmpty()) throw new IllegalArgumentException("null param");
         terms.remove(null);
@@ -38,14 +34,14 @@ public class Predicate implements FOLSentence {
     public Predicate(String name, boolean negated, Term... terms) {
         if (Utils.isNullOrBlank(name)) throw new IllegalArgumentException("null param");
         if (terms == null || terms.length == 0) throw new IllegalArgumentException("null param");
-        LinkedHashSet<Term> termSet = Arrays.stream(terms)
+        List<Term> termList = Arrays.stream(terms)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        if (termSet.isEmpty()) throw new IllegalArgumentException("null clauses passed");
+                .toList();
+        if (termList.isEmpty()) throw new IllegalArgumentException("null clauses passed");
 
         this.name = name;
         this.negated = negated;
-        this.terms = termSet;
+        this.terms = termList;
     }
 
     public Predicate(String expression) throws ParseException {
@@ -98,10 +94,6 @@ public class Predicate implements FOLSentence {
         return Objects.hash(name, negated, terms);
     }
 
-    public List<Term> getTermList() {
-        return terms.stream().toList();
-    }
-
     public String getName() {
         return name;
     }
@@ -110,7 +102,7 @@ public class Predicate implements FOLSentence {
         return negated;
     }
 
-    public LinkedHashSet<Term> getTerms() {
-        return new LinkedHashSet<>(terms);
+    public List<Term> getTerms() {
+        return new ArrayList<>(terms);
     }
 }

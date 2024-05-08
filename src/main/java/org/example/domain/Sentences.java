@@ -1,15 +1,16 @@
 package org.example.domain;
 
-import org.example.algo.Resolution;
+import org.example.algo.PropositionalResolution;
 import org.example.cnf_util.CNFConverter;
-import org.example.domain.sentence.*;
+import org.example.domain.sentence.fol.*;
+import org.example.domain.sentence.fol.term.Function;
+import org.example.domain.sentence.propositional.*;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 import org.example.parser.CNFExpressionParser;
 import org.example.parser.FOLCNFExpressionParser;
 import org.example.parser.FOLInfixExpressionParser;
 import org.example.parser.InfixExpressionParser;
-import org.example.temp_fol.*;
 
 import java.text.ParseException;
 import java.util.*;
@@ -23,15 +24,15 @@ public class Sentences {
         return InfixExpressionParser.parseLiteral(expression);
     }
 
-    public static GenericComplexSentence parseGenericExpression(String expression) throws ParseException {
+    public static GenericComplexPropositionalSentence parseGenericExpression(String expression) throws ParseException {
         return InfixExpressionParser.parseGeneric(expression);
     }
 
-    public static Clause parseClauseExpression(String expression) throws ParseException {
+    public static PropositionalClause parseClauseExpression(String expression) throws ParseException {
         return CNFExpressionParser.parseClause(expression);
     }
 
-    public static CNFSentence parseCNFExpression(String expression) throws ParseException {
+    public static PropositionalCNFSentence parseCNFExpression(String expression) throws ParseException {
         return CNFExpressionParser.parseCNF(expression);
     }
 
@@ -55,25 +56,25 @@ public class Sentences {
         return FOLCNFExpressionParser.parseCNF(expression);
     }
 
-    public static CNFSentence toCNF(Sentence sentence) throws ContradictionException, TautologyException {
-        return CNFConverter.toCNF(sentence);
+    public static PropositionalCNFSentence toPropositionalCNF(PropositionalSentence sentence) throws ContradictionException, TautologyException {
+        return CNFConverter.toPropositionalCNF(sentence);
     }
 
-    public static CNFSentence optimizeCNF(CNFSentence sentence) throws ContradictionException, TautologyException {
+    public static PropositionalCNFSentence optimizeCNF(PropositionalCNFSentence sentence) throws ContradictionException, TautologyException {
         if (sentence == null) throw new IllegalArgumentException("null param");
-        LinkedHashSet<Clause> clauses = new LinkedHashSet<>();
-        for (Clause clause : sentence.getClauses()) {
+        LinkedHashSet<PropositionalClause> clauses = new LinkedHashSet<>();
+        for (PropositionalClause clause : sentence.getClauses()) {
             try {
                 clauses.add(optimizeClause(clause));
             } catch (TautologyException ignored) {}
         }
         if (clauses.isEmpty()) throw new TautologyException();
 
-        Set<Clause> toBeRemoved = new HashSet<>();
-        Map<Clause, Set<Literal>> clauseRefinementMap = new HashMap<>();
+        Set<PropositionalClause> toBeRemoved = new HashSet<>();
+        Map<PropositionalClause, Set<Literal>> clauseRefinementMap = new HashMap<>();
 
-        for (Clause compared : clauses) {
-            for (Clause current : clauses) {
+        for (PropositionalClause compared : clauses) {
+            for (PropositionalClause current : clauses) {
                 if (compared.equals(current)) continue;
                 if (compared.size() == 1 || current.size() == 1) 
                     optimizeForOneLiteralClause(compared, current, toBeRemoved, clauseRefinementMap);
@@ -92,16 +93,16 @@ public class Sentences {
 
 
         clauseRefinementMap.entrySet().removeIf(entry -> !clauses.contains(entry.getKey()));
-        if (clauseRefinementMap.isEmpty()) return new CNFSentence(clauses);
+        if (clauseRefinementMap.isEmpty()) return new PropositionalCNFSentence(clauses);
 
-        Set<Clause> toBeAdded = new HashSet<>();
-        for (Iterator<Clause> iterator = clauses.iterator(); iterator.hasNext();) {
-            Clause clause = iterator.next();
+        Set<PropositionalClause> toBeAdded = new HashSet<>();
+        for (Iterator<PropositionalClause> iterator = clauses.iterator(); iterator.hasNext();) {
+            PropositionalClause clause = iterator.next();
             if (clauseRefinementMap.containsKey(clause)) {
                 Set<Literal> toBeRemovedLiterals = clauseRefinementMap.get(clause);
                 LinkedHashSet<Literal> clauseLiterals = clause.getLiterals();
                 clauseLiterals.removeIf(toBeRemovedLiterals::contains);
-                if (!clauseLiterals.isEmpty()) toBeAdded.add(new Clause(clauseLiterals));
+                if (!clauseLiterals.isEmpty()) toBeAdded.add(new PropositionalClause(clauseLiterals));
                 iterator.remove();
             }
         }
@@ -109,22 +110,22 @@ public class Sentences {
         clauses.addAll(toBeAdded);
         if (clauses.isEmpty()) throw new ContradictionException();
 
-        return new CNFSentence(clauses);
+        return new PropositionalCNFSentence(clauses);
     }
 
     // TODO: 4/3/2024 check
-    public static CNFSentence optimizeCanonicalCNF(CNFSentence ccnf) throws TautologyException, ContradictionException {
+    public static PropositionalCNFSentence optimizeCanonicalCNF(PropositionalCNFSentence ccnf) throws TautologyException, ContradictionException {
         if (ccnf == null) throw new IllegalArgumentException("null param");
         if (!ccnf.isCanonical()) throw new IllegalArgumentException("not canonical cnf");
 
-        Set<CNFSentence> set = new HashSet<>();
+        Set<PropositionalCNFSentence> set = new HashSet<>();
         set.add(ccnf);
-        return Sentences.optimizeCNF(new CNFSentence(new LinkedHashSet<>(new Resolution(set, false).resolveAndGet())));
+        return Sentences.optimizeCNF(new PropositionalCNFSentence(new LinkedHashSet<>(new PropositionalResolution(set, false).resolveAndGet())));
     }
     
-    private static void optimizeForOneLiteralClause(Clause compared, Clause current,
-                                                    Set<Clause> toBeRemoved,
-                                                    Map<Clause, Set<Literal>> clauseRefinementMap)
+    private static void optimizeForOneLiteralClause(PropositionalClause compared, PropositionalClause current,
+                                                    Set<PropositionalClause> toBeRemoved,
+                                                    Map<PropositionalClause, Set<Literal>> clauseRefinementMap)
             throws ContradictionException {
         if (compared.size() == 1 && current.size() == 1) {
             Literal l1 = current.getLiterals().iterator().next();
@@ -138,8 +139,8 @@ public class Sentences {
             potentialRefineClause(compared, current, toBeRemoved, clauseRefinementMap);
     }
     
-    private static void potentialRefineClause(Clause larger, Clause smaller,
-                                              Set<Clause> toBeRemoved, Map<Clause, Set<Literal>> clauseRefinementMap)
+    private static void potentialRefineClause(PropositionalClause larger, PropositionalClause smaller,
+                                              Set<PropositionalClause> toBeRemoved, Map<PropositionalClause, Set<Literal>> clauseRefinementMap)
             throws ContradictionException {
         Literal literal = smaller.getLiterals().iterator().next();
         if (larger.getLiterals().contains(literal)) toBeRemoved.add(larger);
@@ -158,7 +159,7 @@ public class Sentences {
         }
     }
 
-    public static Clause optimizeClause(Clause clause) throws TautologyException, ContradictionException {
+    public static PropositionalClause optimizeClause(PropositionalClause clause) throws TautologyException, ContradictionException {
         if (clause == null) throw new IllegalArgumentException("null param");
         LinkedHashSet<Literal> literals = clause.getLiterals();
         literals.removeIf(l -> l == Literal.FALSE);
@@ -171,7 +172,7 @@ public class Sentences {
                 if (compared.equalsIgnoreNegation(current)) throw new TautologyException();
             }
         }
-        return new Clause(literals);
+        return new PropositionalClause(literals);
     }
 
 }

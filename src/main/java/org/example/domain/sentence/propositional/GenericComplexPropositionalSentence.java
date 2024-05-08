@@ -1,9 +1,9 @@
-package org.example.domain.sentence;
+package org.example.domain.sentence.propositional;
 
 import org.example.domain.Connective;
-import org.example.domain.SentenceType;
+import org.example.domain.PropositionalSentenceType;
 import org.example.domain.Sentences;
-import org.example.domain.supplementary.LeftAndRightCNF;
+import org.example.domain.supplementary.LeftAndRightPropositionalCNF;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
@@ -18,15 +18,15 @@ import static org.example.util.SentenceUtils.NOT;
 /**
  * @author aram.azatyan | 2/26/2024 11:42 AM
  */
-public final class GenericComplexSentence extends AbstractSentence {
-    private final Sentence leftSentence;
-    private final Sentence rightSentence;
+public final class GenericComplexPropositionalSentence extends AbstractPropositionalSentence {
+    private final PropositionalSentence leftSentence;
+    private final PropositionalSentence rightSentence;
     private final Connective connective;
     private final boolean negated;
     private String stringRepresentation;
 
-    public GenericComplexSentence(Sentence leftSentence, Sentence rightSentence,
-                                  Connective connective) {
+    public GenericComplexPropositionalSentence(PropositionalSentence leftSentence, PropositionalSentence rightSentence,
+                                               Connective connective) {
         validateParams(leftSentence, rightSentence, connective);
         this.leftSentence = leftSentence;
         this.rightSentence = rightSentence;
@@ -34,8 +34,8 @@ public final class GenericComplexSentence extends AbstractSentence {
         this.negated = false;
     }
 
-    public GenericComplexSentence(Sentence leftSentence, Sentence rightSentence,
-                                  Connective connective, boolean negated) {
+    public GenericComplexPropositionalSentence(PropositionalSentence leftSentence, PropositionalSentence rightSentence,
+                                               Connective connective, boolean negated) {
         validateParams(leftSentence, rightSentence, connective);
         this.leftSentence = leftSentence;
         this.rightSentence = rightSentence;
@@ -43,40 +43,40 @@ public final class GenericComplexSentence extends AbstractSentence {
         this.negated = negated;
     }
 
-    public GenericComplexSentence(String expression) throws ParseException {
-        GenericComplexSentence genericComplexSentence = Sentences.parseGenericExpression(expression);
-        this.leftSentence = genericComplexSentence.getLeftSentence();
-        this.rightSentence = genericComplexSentence.getRightSentence();
-        this.connective = genericComplexSentence.getConnective();
-        this.negated = genericComplexSentence.isNegated();
+    public GenericComplexPropositionalSentence(String expression) throws ParseException {
+        GenericComplexPropositionalSentence genericComplexPropositionalSentence = Sentences.parseGenericExpression(expression);
+        this.leftSentence = genericComplexPropositionalSentence.getLeftSentence();
+        this.rightSentence = genericComplexPropositionalSentence.getRightSentence();
+        this.connective = genericComplexPropositionalSentence.getConnective();
+        this.negated = genericComplexPropositionalSentence.isNegated();
     }
 
-    public GenericComplexSentence(LinkedHashSet<Sentence> sentences, Connective connective, boolean negated) {
+    public GenericComplexPropositionalSentence(LinkedHashSet<PropositionalSentence> sentences, Connective connective, boolean negated) {
         if (sentences == null || sentences.isEmpty() || connective == null) throw
                 new IllegalArgumentException("null param");
         sentences.remove(null);
         if (sentences.size() < 2) throw new IllegalArgumentException("unable to construct a generic complex sentence");
         if (connective == Connective.IMPLICATION) throw new IllegalArgumentException("implication is not associative");
 
-        LinkedHashSet<Sentence>[] arr = SentenceUtils.splitLinkedHashSetOfSentencesIntoTwo(sentences);
+        LinkedHashSet<PropositionalSentence>[] arr = SentenceUtils.splitLinkedHashSetOfPropositionalSentencesIntoTwo(sentences);
 
-        GenericComplexSentence sentence = connectSentences(arr[0], arr[1], connective);
+        GenericComplexPropositionalSentence sentence = connectSentences(arr[0], arr[1], connective);
         this.leftSentence = sentence.getLeftSentence();
         this.rightSentence = sentence.getRightSentence();
         this.connective = connective;
         this.negated = negated;
     }
 
-    private GenericComplexSentence connectSentences(LinkedHashSet<Sentence> leftSubTree,
-                                                    LinkedHashSet<Sentence> rightSubTree, Connective connective) {
-        Sentence left = getComplexFromSubtree(leftSubTree, connective);
-        Sentence right = getComplexFromSubtree(rightSubTree, connective);
-        return new GenericComplexSentence(left, right, connective);
+    private GenericComplexPropositionalSentence connectSentences(LinkedHashSet<PropositionalSentence> leftSubTree,
+                                                                 LinkedHashSet<PropositionalSentence> rightSubTree, Connective connective) {
+        PropositionalSentence left = getComplexFromSubtree(leftSubTree, connective);
+        PropositionalSentence right = getComplexFromSubtree(rightSubTree, connective);
+        return new GenericComplexPropositionalSentence(left, right, connective);
     }
 
-    private Sentence getComplexFromSubtree(LinkedHashSet<Sentence> leftSubTree, Connective connective) {
+    private PropositionalSentence getComplexFromSubtree(LinkedHashSet<PropositionalSentence> leftSubTree, Connective connective) {
         if (leftSubTree.size() == 1) return leftSubTree.iterator().next();
-        LinkedHashSet<Sentence>[] sets = SentenceUtils.splitLinkedHashSetOfSentencesIntoTwo(leftSubTree);
+        LinkedHashSet<PropositionalSentence>[] sets = SentenceUtils.splitLinkedHashSetOfPropositionalSentencesIntoTwo(leftSubTree);
         return connectSentences(sets[0], sets[1], connective);
     }
 
@@ -86,34 +86,34 @@ public final class GenericComplexSentence extends AbstractSentence {
         return literals;
     }
 
-    private void findLiterals(Sentence root, Set<Literal> literalSet) {
+    private void findLiterals(PropositionalSentence root, Set<Literal> literalSet) {
         switch (root.type()) {
             case LITERAL -> {
                 literalSet.add((Literal) root);
             }
             case CLAUSE -> {
-                literalSet.addAll(((Clause) root).getLiterals());
+                literalSet.addAll(((PropositionalClause) root).getLiterals());
             }
             case CNF -> {
-                for (Clause clause : ((CNFSentence) root).getClauses()) {
+                for (PropositionalClause clause : ((PropositionalCNFSentence) root).getClauses()) {
                     literalSet.addAll(clause.getLiterals());
                 }
             }
             case GENERIC_COMPLEX -> {
-                findLiterals(((GenericComplexSentence) root).leftSentence, literalSet);
-                findLiterals(((GenericComplexSentence) root).rightSentence, literalSet);
+                findLiterals(((GenericComplexPropositionalSentence) root).leftSentence, literalSet);
+                findLiterals(((GenericComplexPropositionalSentence) root).rightSentence, literalSet);
             }
         }
     }
 
     @Override
-    public SentenceType type() {
-        return SentenceType.GENERIC_COMPLEX;
+    public PropositionalSentenceType type() {
+        return PropositionalSentenceType.GENERIC_COMPLEX;
     }
 
     @Override
-    protected CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
-        return Sentences.toCNF(this);
+    protected PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
+        return Sentences.toPropositionalCNF(this);
     }
 
     @Override
@@ -129,17 +129,17 @@ public final class GenericComplexSentence extends AbstractSentence {
     @Override
     public boolean equals(Object other) {
         if (other == this) return true;
-        if (!(other instanceof GenericComplexSentence that)) return false;
+        if (!(other instanceof GenericComplexPropositionalSentence that)) return false;
 
-        LeftAndRightCNF thisAndThatInfo = new LeftAndRightCNF(this, that);
+        LeftAndRightPropositionalCNF thisAndThatInfo = new LeftAndRightPropositionalCNF(this, that);
 
         if (thisAndThatInfo.isLeftDetermined() && thisAndThatInfo.isRightDetermined()) {
             return thisAndThatInfo.leftValue() == thisAndThatInfo.rightValue();
         } else if (!thisAndThatInfo.isLeftDetermined() && !thisAndThatInfo.isRightDetermined()) {
             if (thisAndThatInfo.getLeft().equals(thisAndThatInfo.getRight())) return true;
 
-            Sentence opt1 = thisAndThatInfo.getLeft();
-            Sentence opt2 = thisAndThatInfo.getRight();
+            PropositionalSentence opt1 = thisAndThatInfo.getLeft();
+            PropositionalSentence opt2 = thisAndThatInfo.getRight();
 
             if (thisAndThatInfo.getLeft().isCanonical()) {
                 try {
@@ -161,9 +161,9 @@ public final class GenericComplexSentence extends AbstractSentence {
                 }
             }
 
-            if ((opt1.type() == SentenceType.LITERAL && opt2.type() == SentenceType.LITERAL)
+            if ((opt1.type() == PropositionalSentenceType.LITERAL && opt2.type() == PropositionalSentenceType.LITERAL)
                     ||
-               (opt1.type() == SentenceType.CNF && opt2.type() == SentenceType.CNF)) return opt1.equals(opt2);
+               (opt1.type() == PropositionalSentenceType.CNF && opt2.type() == PropositionalSentenceType.CNF)) return opt1.equals(opt2);
         }
 
         return false;
@@ -172,7 +172,7 @@ public final class GenericComplexSentence extends AbstractSentence {
     @Override
     public int hashCode() {
         try {
-            CNFSentence cnfSentence = minimalCNF();
+            PropositionalCNFSentence cnfSentence = minimalCNF();
             return cnfSentence.hashCode();
         } catch (TautologyException e) {
             return Objects.hash(true);
@@ -183,17 +183,17 @@ public final class GenericComplexSentence extends AbstractSentence {
 
     private String constructToString(boolean isFirstLevel) {
         String core = String.join(" ",
-                leftSentence.type() != SentenceType.GENERIC_COMPLEX
-                        ? (leftSentence.type() == SentenceType.CLAUSE || leftSentence.type() == SentenceType.CNF
+                leftSentence.type() != PropositionalSentenceType.GENERIC_COMPLEX
+                        ? (leftSentence.type() == PropositionalSentenceType.CLAUSE || leftSentence.type() == PropositionalSentenceType.CNF
                             ? addParentheses(leftSentence.toString(), false)
                             : leftSentence.toString())
-                        : ((GenericComplexSentence) leftSentence).constructToString(false),
+                        : ((GenericComplexPropositionalSentence) leftSentence).constructToString(false),
                 connective.toString(),
-                rightSentence.type() != SentenceType.GENERIC_COMPLEX
-                        ? (rightSentence.type() == SentenceType.CLAUSE || rightSentence.type() == SentenceType.CNF
+                rightSentence.type() != PropositionalSentenceType.GENERIC_COMPLEX
+                        ? (rightSentence.type() == PropositionalSentenceType.CLAUSE || rightSentence.type() == PropositionalSentenceType.CNF
                             ? addParentheses(rightSentence.toString(), false)
                             : rightSentence.toString())
-                        : ((GenericComplexSentence) rightSentence).constructToString(false));
+                        : ((GenericComplexPropositionalSentence) rightSentence).constructToString(false));
 
         if (isFirstLevel && !isNegated()) return core;
         return addParentheses(core, negated);
@@ -203,17 +203,17 @@ public final class GenericComplexSentence extends AbstractSentence {
         return (negated ? NOT : "") + "(" + complexString + ")";
     }
 
-    private void validateParams(Sentence leftSentence, Sentence rightSentence,
+    private void validateParams(PropositionalSentence leftSentence, PropositionalSentence rightSentence,
                                 Connective connective) {
         if (leftSentence == null || rightSentence == null || connective == null) throw
                 new IllegalArgumentException("null param");
     }
 
-    public Sentence getLeftSentence() {
+    public PropositionalSentence getLeftSentence() {
         return leftSentence;
     }
 
-    public Sentence getRightSentence() {
+    public PropositionalSentence getRightSentence() {
         return rightSentence;
     }
 

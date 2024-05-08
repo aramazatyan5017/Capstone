@@ -1,9 +1,9 @@
 package org.example;
 
-import org.example.domain.sentence.Literal;
-import org.example.domain.sentence.GenericComplexSentence;
-import org.example.domain.sentence.Sentence;
-import org.example.domain.SentenceType;
+import org.example.domain.sentence.propositional.Literal;
+import org.example.domain.sentence.propositional.GenericComplexPropositionalSentence;
+import org.example.domain.PropositionalSentenceType;
+import org.example.domain.sentence.propositional.PropositionalSentence;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,10 +11,10 @@ import java.awt.*;
 /**
  * @author aram.azatyan | 2/26/2024 11:15 AM
  */
-public class ComplexSentenceDrawer extends JFrame {
-    private final GenericComplexSentence sentence;
+public class PropositionalComplexSentenceDrawer extends JFrame {
+    private final GenericComplexPropositionalSentence sentence;
 
-    public ComplexSentenceDrawer(GenericComplexSentence sentence) {
+    public PropositionalComplexSentenceDrawer(GenericComplexPropositionalSentence sentence) {
         if (sentence == null) throw new IllegalArgumentException("null param");
 
         this.sentence = sentence;
@@ -30,25 +30,25 @@ public class ComplexSentenceDrawer extends JFrame {
         drawNode(g, sentence, getWidth() / 2, 50, getWidth() / 4);
     }
 
-    private void drawNode(Graphics g, Sentence sentence, int x, int y, int xOffset) {
+    private void drawNode(Graphics g, PropositionalSentence sentence, int x, int y, int xOffset) {
         int verticalGap = 80;
 
-        if (sentence.type() == SentenceType.GENERIC_COMPLEX) {
-            GenericComplexSentence genericComplexSentence = (GenericComplexSentence) sentence;
-            if (genericComplexSentence.getLeftSentence() != null) {
+        if (sentence.type() == PropositionalSentenceType.GENERIC_COMPLEX) {
+            GenericComplexPropositionalSentence genericComplexPropositionalSentence = (GenericComplexPropositionalSentence) sentence;
+            if (genericComplexPropositionalSentence.getLeftSentence() != null) {
                 int newX = x - xOffset;
                 int newY = y + verticalGap;
                 g.setColor(Color.BLACK);
                 g.drawLine(x, y, newX, newY);
-                drawNode(g, genericComplexSentence.getLeftSentence(), newX, newY, xOffset / 2);
+                drawNode(g, genericComplexPropositionalSentence.getLeftSentence(), newX, newY, xOffset / 2);
             }
 
-            if (sentence.type() == SentenceType.GENERIC_COMPLEX && genericComplexSentence.getRightSentence() != null) {
+            if (sentence.type() == PropositionalSentenceType.GENERIC_COMPLEX && genericComplexPropositionalSentence.getRightSentence() != null) {
                 int newX = x + xOffset;
                 int newY = y + verticalGap;
                 g.setColor(Color.BLACK);
                 g.drawLine(x, y, newX, newY);
-                drawNode(g, genericComplexSentence.getRightSentence(), newX, newY, xOffset / 2);
+                drawNode(g, genericComplexPropositionalSentence.getRightSentence(), newX, newY, xOffset / 2);
             }
         }
 
@@ -66,13 +66,13 @@ public class ComplexSentenceDrawer extends JFrame {
         g.drawString(value, x - textWidth / 2, y + textHeight / 4);
     }
 
-    private String getValueAndChangeColor(Sentence sentence, Graphics g) {
-        if (sentence.type() == SentenceType.LITERAL) {
+    private String getValueAndChangeColor(PropositionalSentence sentence, Graphics g) {
+        if (sentence.type() == PropositionalSentenceType.LITERAL) {
             Literal literal = (Literal) sentence;
             g.setColor(literal.isNegated() ? new Color(255, 153, 153) : Color.GREEN);
             return (literal).getName();
         } else {
-            GenericComplexSentence complex = (GenericComplexSentence) sentence;
+            GenericComplexPropositionalSentence complex = (GenericComplexPropositionalSentence) sentence;
             g.setColor(complex.isNegated() ? new Color(255, 153, 153) : Color.GREEN);
             return complex.getConnective().toString();
         }

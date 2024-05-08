@@ -2,6 +2,7 @@ package org.example.domain;
 
 import org.example.SentenceCommon;
 import org.example.domain.sentence.*;
+import org.example.domain.sentence.propositional.*;
 import org.example.exception.TautologyException;
 import org.example.exception.ContradictionException;
 import org.junit.jupiter.api.Test;
@@ -15,28 +16,28 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author aram.azatyan | 3/18/2024 3:14 PM
  */
-class GenericComplexSentenceTest extends SentenceCommon {
+class GenericComplexPropositionalSentenceTest extends SentenceCommon {
 
     @Test
     public void createAbnormal() {
-        assertThrows(IllegalArgumentException.class, () -> new GenericComplexSentence(null, null, null));
-        assertThrows(IllegalArgumentException.class, () -> new GenericComplexSentence(new Literal("A"), new Literal("B"), null, false));
-        assertThrows(IllegalArgumentException.class, () -> new GenericComplexSentence(new Literal("A"), null, Connective.OR, false));
-        assertThrows(IllegalArgumentException.class, () -> new GenericComplexSentence(null, new Literal("A"), Connective.BICONDITIONAL, true));
+        assertThrows(IllegalArgumentException.class, () -> new GenericComplexPropositionalSentence(null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> new GenericComplexPropositionalSentence(new Literal("A"), new Literal("B"), null, false));
+        assertThrows(IllegalArgumentException.class, () -> new GenericComplexPropositionalSentence(new Literal("A"), null, Connective.OR, false));
+        assertThrows(IllegalArgumentException.class, () -> new GenericComplexPropositionalSentence(null, new Literal("A"), Connective.BICONDITIONAL, true));
 
-        assertThrows(ParseException.class, () -> new GenericComplexSentence(null));
-        assertThrows(ParseException.class, () -> new GenericComplexSentence("  "));
-        assertThrows(ParseException.class, () -> new GenericComplexSentence("A"));
-        assertThrows(ParseException.class, () -> new GenericComplexSentence("!A"));
-        assertThrows(ParseException.class, () -> new GenericComplexSentence("!(!(!A))"));
-        assertThrows(ParseException.class, () -> new GenericComplexSentence("!(!(!A!))"));
-        assertThrows(ParseException.class, () -> new GenericComplexSentence("A!B"));
-        assertThrows(ParseException.class, () -> new GenericComplexSentence("A B"));
-        assertThrows(ParseException.class, () -> new GenericComplexSentence("(A & B)("));
-        assertThrows(ParseException.class, () -> new GenericComplexSentence("(A & B)("));
-        assertThrows(ParseException.class, () -> new GenericComplexSentence("A! & =C> | D"));
+        assertThrows(ParseException.class, () -> new GenericComplexPropositionalSentence(null));
+        assertThrows(ParseException.class, () -> new GenericComplexPropositionalSentence("  "));
+        assertThrows(ParseException.class, () -> new GenericComplexPropositionalSentence("A"));
+        assertThrows(ParseException.class, () -> new GenericComplexPropositionalSentence("!A"));
+        assertThrows(ParseException.class, () -> new GenericComplexPropositionalSentence("!(!(!A))"));
+        assertThrows(ParseException.class, () -> new GenericComplexPropositionalSentence("!(!(!A!))"));
+        assertThrows(ParseException.class, () -> new GenericComplexPropositionalSentence("A!B"));
+        assertThrows(ParseException.class, () -> new GenericComplexPropositionalSentence("A B"));
+        assertThrows(ParseException.class, () -> new GenericComplexPropositionalSentence("(A & B)("));
+        assertThrows(ParseException.class, () -> new GenericComplexPropositionalSentence("(A & B)("));
+        assertThrows(ParseException.class, () -> new GenericComplexPropositionalSentence("A! & =C> | D"));
 
-        LinkedHashSet<Sentence> sentences = new LinkedHashSet<>();
+        LinkedHashSet<PropositionalSentence> sentences = new LinkedHashSet<>();
 
         try {
             sentences.add(new Literal("a"));
@@ -46,27 +47,27 @@ class GenericComplexSentenceTest extends SentenceCommon {
             fail("shouldn't have thrown an exception");
         }
 
-        assertThrows(IllegalArgumentException.class, () -> new GenericComplexSentence(sentences, Connective.IMPLICATION, false));
+        assertThrows(IllegalArgumentException.class, () -> new GenericComplexPropositionalSentence(sentences, Connective.IMPLICATION, false));
     }
 
     @Test
     public void createNormal() {
         try {
-            GenericComplexSentence sentence = new GenericComplexSentence("A & B");
-            sentence = new GenericComplexSentence("A & B | C");
-            sentence = new GenericComplexSentence("A & (B | C)");
-            sentence = new GenericComplexSentence("A & !(B | C)");
-            sentence = new GenericComplexSentence("A & (B | C) <=> (C | R | T)");
-            sentence = new GenericComplexSentence("!A <=> !B <=> C");
+            GenericComplexPropositionalSentence sentence = new GenericComplexPropositionalSentence("A & B");
+            sentence = new GenericComplexPropositionalSentence("A & B | C");
+            sentence = new GenericComplexPropositionalSentence("A & (B | C)");
+            sentence = new GenericComplexPropositionalSentence("A & !(B | C)");
+            sentence = new GenericComplexPropositionalSentence("A & (B | C) <=> (C | R | T)");
+            sentence = new GenericComplexPropositionalSentence("!A <=> !B <=> C");
 
-            LinkedHashSet<Sentence> sentences = new LinkedHashSet<>();
+            LinkedHashSet<PropositionalSentence> sentences = new LinkedHashSet<>();
             sentences.add(new Literal("a"));
             sentences.add(new Literal("b"));
             sentences.add(new Literal("c"));
             sentences.add(new Literal("d"));
-            sentence = new GenericComplexSentence(sentences, Connective.OR, false);
+            sentence = new GenericComplexPropositionalSentence(sentences, Connective.OR, false);
 
-            sentence = new GenericComplexSentence("true & true");
+            sentence = new GenericComplexPropositionalSentence("true & true");
             assertEquals(Literal.TRUE, sentence.getLeftSentence());
             assertEquals(Literal.TRUE, sentence.getRightSentence());
         } catch (Exception e) {
@@ -77,7 +78,7 @@ class GenericComplexSentenceTest extends SentenceCommon {
     @Test
     public void getLiterals() {
         try {
-            GenericComplexSentence sentence = new GenericComplexSentence("A => (B | !C) & !(D <=> (E | F))");
+            GenericComplexPropositionalSentence sentence = new GenericComplexPropositionalSentence("A => (B | !C) & !(D <=> (E | F))");
             LinkedHashSet<Literal> literals = new LinkedHashSet<>();
             literals.add(new Literal("A"));
             literals.add(new Literal("B"));
@@ -87,8 +88,8 @@ class GenericComplexSentenceTest extends SentenceCommon {
             literals.add(new Literal("F"));
             assertEquals(literals, sentence.getLiterals());
 
-            sentence = new GenericComplexSentence(new CNFSentence("(A | B | C) & (D | E | F)"),
-                    new Clause("(!A | G | F)"), Connective.OR, true);
+            sentence = new GenericComplexPropositionalSentence(new PropositionalCNFSentence("(A | B | C) & (D | E | F)"),
+                    new PropositionalClause("(!A | G | F)"), Connective.OR, true);
             literals = new LinkedHashSet<>();
             literals.add(new Literal("A"));
             literals.add(new Literal("B"));
@@ -107,8 +108,8 @@ class GenericComplexSentenceTest extends SentenceCommon {
     @Test
     public void sentenceTypeTest() {
         try {
-            GenericComplexSentence complex = new GenericComplexSentence("(A | B | C) & (E | F | G) => G");
-            assertSame(complex.type(), SentenceType.GENERIC_COMPLEX);
+            GenericComplexPropositionalSentence complex = new GenericComplexPropositionalSentence("(A | B | C) & (E | F | G) => G");
+            assertSame(complex.type(), PropositionalSentenceType.GENERIC_COMPLEX);
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
         }
@@ -117,13 +118,13 @@ class GenericComplexSentenceTest extends SentenceCommon {
     @Test
     public void satisfiabilityTypeTest() {
         try {
-            GenericComplexSentence complex = new GenericComplexSentence("(A & !A) & (B & !B & C)");
+            GenericComplexPropositionalSentence complex = new GenericComplexPropositionalSentence("(A & !A) & (B & !B & C)");
             assertSame(complex.satisfiabilityType(), SatisfiabilityType.CONTRADICTION);
 
-            complex = new GenericComplexSentence("A | !A");
+            complex = new GenericComplexPropositionalSentence("A | !A");
             assertSame(complex.satisfiabilityType(), SatisfiabilityType.TAUTOLOGY);
 
-            complex = new GenericComplexSentence("(a & b & c) & (d & e) & (f)");
+            complex = new GenericComplexPropositionalSentence("(a & b & c) & (d & e) & (f)");
             assertSame(complex.satisfiabilityType(), SatisfiabilityType.CONTINGENCY);
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -133,13 +134,13 @@ class GenericComplexSentenceTest extends SentenceCommon {
     @Test
     public void truthTableTest() {
         try {
-            GenericComplexSentence generic = new GenericComplexSentence("(A | !A) & (B | !B | C)");
+            GenericComplexPropositionalSentence generic = new GenericComplexPropositionalSentence("(A | !A) & (B | !B | C)");
             assertThrows(TautologyException.class, generic::truthTable);
 
-            generic = new GenericComplexSentence("A & !A");
+            generic = new GenericComplexPropositionalSentence("A & !A");
             assertThrows(ContradictionException.class, generic::truthTable);
 
-            generic = new GenericComplexSentence("(a & b & c) & (d & e) & (f)");
+            generic = new GenericComplexPropositionalSentence("(a & b & c) & (d & e) & (f)");
             assertNotNull(generic.truthTable());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -149,23 +150,23 @@ class GenericComplexSentenceTest extends SentenceCommon {
     @Test
     public void toStringTest() {
         try {
-            GenericComplexSentence sentence = new GenericComplexSentence("A => B <=> C & !(!C | !D)");
+            GenericComplexPropositionalSentence sentence = new GenericComplexPropositionalSentence("A => B <=> C & !(!C | !D)");
             assertEquals("(A => B) <=> (C & !(!C | !D))", sentence.toString());
 
-            sentence = new GenericComplexSentence(new Clause("a | b"), new Clause("c | d"),
+            sentence = new GenericComplexPropositionalSentence(new PropositionalClause("a | b"), new PropositionalClause("c | d"),
                     Connective.BICONDITIONAL);
             assertEquals("(a | b) <=> (c | d)", sentence.toString());
 
-            sentence = new GenericComplexSentence(new Clause("(a | b)"),
-                    new CNFSentence("(c | d |!e) & (f | g)"), Connective.IMPLICATION, true);
+            sentence = new GenericComplexPropositionalSentence(new PropositionalClause("(a | b)"),
+                    new PropositionalCNFSentence("(c | d |!e) & (f | g)"), Connective.IMPLICATION, true);
             assertEquals("!((a | b) => ((c | d | !e) & (f | g)))", sentence.toString());
 
-            sentence = new GenericComplexSentence(new Literal("A", true),
-                    new CNFSentence("a | b | c"), Connective.BICONDITIONAL);
+            sentence = new GenericComplexPropositionalSentence(new Literal("A", true),
+                    new PropositionalCNFSentence("a | b | c"), Connective.BICONDITIONAL);
             assertEquals("!A <=> (a | b | c)", sentence.toString());
 
-            sentence = new GenericComplexSentence(new Literal("A", true),
-                    new CNFSentence("(a | b | c) & (D | E)"), Connective.BICONDITIONAL);
+            sentence = new GenericComplexPropositionalSentence(new Literal("A", true),
+                    new PropositionalCNFSentence("(a | b | c) & (D | E)"), Connective.BICONDITIONAL);
             assertEquals("!A <=> ((a | b | c) & (D | E))", sentence.toString());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -175,24 +176,24 @@ class GenericComplexSentenceTest extends SentenceCommon {
     @Test
     public void equalsTest() {
         try {
-            GenericComplexSentence sentence1 = new GenericComplexSentence("a & b & c & d & e & f");
-            GenericComplexSentence sentence2 = new GenericComplexSentence("b & d & a & c & f & e");
+            GenericComplexPropositionalSentence sentence1 = new GenericComplexPropositionalSentence("a & b & c & d & e & f");
+            GenericComplexPropositionalSentence sentence2 = new GenericComplexPropositionalSentence("b & d & a & c & f & e");
             assertEquals(sentence1, sentence2);
 
-            sentence1 = new GenericComplexSentence("a | !a");
-            sentence2 = new GenericComplexSentence("b & !b");
+            sentence1 = new GenericComplexPropositionalSentence("a | !a");
+            sentence2 = new GenericComplexPropositionalSentence("b & !b");
             assertNotEquals(sentence1, sentence2);
 
-            sentence1 = new GenericComplexSentence("a | !a");
-            sentence2 = new GenericComplexSentence("b | !b");
+            sentence1 = new GenericComplexPropositionalSentence("a | !a");
+            sentence2 = new GenericComplexPropositionalSentence("b | !b");
             assertEquals(sentence1, sentence2);
 
-            sentence1 = new GenericComplexSentence("a & !a");
-            sentence2 = new GenericComplexSentence("b & !b");
+            sentence1 = new GenericComplexPropositionalSentence("a & !a");
+            sentence2 = new GenericComplexPropositionalSentence("b & !b");
             assertEquals(sentence1, sentence2);
 
-            sentence1 = new GenericComplexSentence("a | !a");
-            sentence2 = new GenericComplexSentence("b & c => d");
+            sentence1 = new GenericComplexPropositionalSentence("a | !a");
+            sentence2 = new GenericComplexPropositionalSentence("b & c => d");
             assertNotEquals(sentence1, sentence2);
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -202,24 +203,24 @@ class GenericComplexSentenceTest extends SentenceCommon {
     @Test
     public void hashCodeTest() {
         try {
-            GenericComplexSentence sentence1 = new GenericComplexSentence("a & b & c & d & e & f");
-            GenericComplexSentence sentence2 = new GenericComplexSentence("b & d & a & c & f & e");
+            GenericComplexPropositionalSentence sentence1 = new GenericComplexPropositionalSentence("a & b & c & d & e & f");
+            GenericComplexPropositionalSentence sentence2 = new GenericComplexPropositionalSentence("b & d & a & c & f & e");
             assertEquals(sentence1.hashCode(), sentence2.hashCode());
 
-            sentence1 = new GenericComplexSentence("a | !a");
-            sentence2 = new GenericComplexSentence("b & !b");
+            sentence1 = new GenericComplexPropositionalSentence("a | !a");
+            sentence2 = new GenericComplexPropositionalSentence("b & !b");
             assertNotEquals(sentence1.hashCode(), sentence2.hashCode());
 
-            sentence1 = new GenericComplexSentence("a | !a");
-            sentence2 = new GenericComplexSentence("b | !b");
+            sentence1 = new GenericComplexPropositionalSentence("a | !a");
+            sentence2 = new GenericComplexPropositionalSentence("b | !b");
             assertEquals(sentence1.hashCode(), sentence2.hashCode());
 
-            sentence1 = new GenericComplexSentence("a & !a");
-            sentence2 = new GenericComplexSentence("b & !b");
+            sentence1 = new GenericComplexPropositionalSentence("a & !a");
+            sentence2 = new GenericComplexPropositionalSentence("b & !b");
             assertEquals(sentence1.hashCode(), sentence2.hashCode());
 
-            sentence1 = new GenericComplexSentence("a | !a");
-            sentence2 = new GenericComplexSentence("b & c => d");
+            sentence1 = new GenericComplexPropositionalSentence("a | !a");
+            sentence2 = new GenericComplexPropositionalSentence("b & c => d");
             assertNotEquals(sentence1.hashCode(), sentence2.hashCode());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -229,33 +230,33 @@ class GenericComplexSentenceTest extends SentenceCommon {
     @Test
     public void minimalCNFTest() {
         try {
-            GenericComplexSentence sentence = new GenericComplexSentence("(A & B) | ((C | FALSE) & D)");
-            CNFSentence cnfSentence = sentence.minimalCNF();
+            GenericComplexPropositionalSentence sentence = new GenericComplexPropositionalSentence("(A & B) | ((C | FALSE) & D)");
+            PropositionalCNFSentence cnfSentence = sentence.minimalCNF();
             assertEquals(4, cnfSentence.size());
 
-            LinkedHashSet<Clause> clauseSet = new LinkedHashSet<>();
-            clauseSet.add(new Clause("C | A"));
-            clauseSet.add(new Clause("D | A"));
-            clauseSet.add(new Clause("C | B"));
-            clauseSet.add(new Clause("D | B"));
+            LinkedHashSet<PropositionalClause> clauseSet = new LinkedHashSet<>();
+            clauseSet.add(new PropositionalClause("C | A"));
+            clauseSet.add(new PropositionalClause("D | A"));
+            clauseSet.add(new PropositionalClause("C | B"));
+            clauseSet.add(new PropositionalClause("D | B"));
             assertEquals(clauseSet, cnfSentence.getClauses());
 
-            sentence = new GenericComplexSentence("(A & B) | ((FALSE) & D)");
+            sentence = new GenericComplexPropositionalSentence("(A & B) | ((FALSE) & D)");
             cnfSentence = sentence.minimalCNF();
             assertEquals(2, cnfSentence.size());
 
             clauseSet = new LinkedHashSet<>();
-            clauseSet.add(new Clause("A"));
-            clauseSet.add(new Clause("B"));
+            clauseSet.add(new PropositionalClause("A"));
+            clauseSet.add(new PropositionalClause("B"));
             assertEquals(clauseSet, cnfSentence.getClauses());
 
-            sentence = new GenericComplexSentence("(A & B) | (TRUE & ((FALSE) & (D | TRUE)))");
+            sentence = new GenericComplexPropositionalSentence("(A & B) | (TRUE & ((FALSE) & (D | TRUE)))");
             cnfSentence = sentence.minimalCNF();
             assertEquals(2, cnfSentence.size());
 
             clauseSet = new LinkedHashSet<>();
-            clauseSet.add(new Clause("A"));
-            clauseSet.add(new Clause("B"));
+            clauseSet.add(new PropositionalClause("A"));
+            clauseSet.add(new PropositionalClause("B"));
             assertEquals(clauseSet, cnfSentence.getClauses());
         } catch (Exception e) {
             fail("shouldn't have thrown an exception");
@@ -360,10 +361,10 @@ class GenericComplexSentenceTest extends SentenceCommon {
 
     private void compareMyGenericWithTheirs(String strMy, String strOther) {
         try {
-            CNFSentence myCNF = new GenericComplexSentence(strMy).minimalCNF();
-            LinkedHashSet<Clause> myClauses = myCNF.getClauses();
-            CNFSentence theirCNF = new CNFSentence(convertOnlineCalculatorString(strOther)).minimalCNF();
-            LinkedHashSet<Clause> theirClauses = theirCNF.getClauses();
+            PropositionalCNFSentence myCNF = new GenericComplexPropositionalSentence(strMy).minimalCNF();
+            LinkedHashSet<PropositionalClause> myClauses = myCNF.getClauses();
+            PropositionalCNFSentence theirCNF = new PropositionalCNFSentence(convertOnlineCalculatorString(strOther)).minimalCNF();
+            LinkedHashSet<PropositionalClause> theirClauses = theirCNF.getClauses();
             assertEquals(myClauses, theirClauses);
         } catch (Exception ex) {
             fail("shouldn't have thrown an exception");
@@ -372,7 +373,7 @@ class GenericComplexSentenceTest extends SentenceCommon {
 
     private void tautology(String str) {
         try {
-            CNFSentence cnfSentence = new GenericComplexSentence(str).minimalCNF();
+            PropositionalCNFSentence cnfSentence = new GenericComplexPropositionalSentence(str).minimalCNF();
             fail("not a tautology");
         } catch (Exception e) {
             assertTrue(e instanceof TautologyException);
@@ -381,7 +382,7 @@ class GenericComplexSentenceTest extends SentenceCommon {
 
     private void contradiction(String str) {
         try {
-            CNFSentence cnfSentence = new GenericComplexSentence(str).minimalCNF();
+            PropositionalCNFSentence cnfSentence = new GenericComplexPropositionalSentence(str).minimalCNF();
             fail("not a contradiction");
         } catch (Exception e) {
             assertTrue(e instanceof ContradictionException);

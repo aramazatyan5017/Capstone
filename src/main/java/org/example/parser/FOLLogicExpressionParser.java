@@ -4,10 +4,9 @@ import org.example.domain.Connective;
 import org.example.domain.supplementary.PostfixAndFuncArgCountMap;
 import org.example.parser.supplementary.Token;
 import org.example.parser.supplementary.TokenType;
-import org.example.temp_fol.TermType;
+import org.example.domain.sentence.fol.term.TermType;
 import org.example.util.SentenceUtils;
 
-import java.sql.Array;
 import java.text.ParseException;
 import java.util.*;
 

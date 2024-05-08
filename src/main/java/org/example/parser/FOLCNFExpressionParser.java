@@ -1,9 +1,13 @@
 package org.example.parser;
 
+import org.example.domain.sentence.fol.*;
+import org.example.domain.sentence.fol.term.Constant;
+import org.example.domain.sentence.fol.term.Function;
+import org.example.domain.sentence.fol.term.Term;
+import org.example.domain.sentence.fol.term.Variable;
 import org.example.domain.supplementary.PostfixAndFuncArgCountMap;
 import org.example.parser.supplementary.Token;
 import org.example.parser.supplementary.TokenType;
-import org.example.temp_fol.*;
 import org.example.util.SentenceUtils;
 import org.example.util.Utils;
 
@@ -20,7 +24,7 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
     public static FOLClause parseClause(String expression) throws ParseException {
         if (Utils.isNullOrBlank(expression)) throw new ParseException("null param", -1);
         if (expression.contains(SentenceUtils.IMPLICATION) || expression.contains(SentenceUtils.BICONDITIONAL) ||
-                expression.contains(SentenceUtils.AND)) throw new ParseException("not a cnf sentence", -1);
+                expression.contains(SentenceUtils.AND)) throw new ParseException("not a clause", -1);
 
         PostfixAndFuncArgCountMap postfixAndMap = postfixTokens(infixTokens(expression));
         return getClauseFromPostfix(postfixAndMap.postfix(), postfixAndMap.argCountMap());
@@ -146,7 +150,7 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
                     case CONSTANT -> stack.push(new Constant(token.getValue()));
                     case VARIABLE -> stack.push(new Variable(token.getValue()));
                     case FUNCTION, PREDICATE -> {
-                        LinkedHashSet<Term> terms = new LinkedHashSet<>();
+                        List<Term> terms = new ArrayList<>();
 
                         int argCount = argCountMap.get(token.getValue());
 
@@ -158,10 +162,7 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
                             --argCount;
                         }
 
-                        List<Term> termList = new ArrayList<>(terms);
-                        Collections.reverse(termList);
-                        terms = new LinkedHashSet<>(termList);
-
+                        Collections.reverse(terms);
                         boolean negated = i + 1 < postfix.size() && postfix.get(i + 1).getType() == NEGATION;
 
                         stack.push(token.getType() == FUNCTION
@@ -261,7 +262,7 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
                             : new Variable(token.getValue()));
                 }
                 case FUNCTION, PREDICATE -> {
-                    LinkedHashSet<Term> terms = new LinkedHashSet<>();
+                    List<Term> terms = new ArrayList<>();
 
                     int argCount = argCountMap.get(token.getValue());
 
@@ -270,10 +271,7 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
                         --argCount;
                     }
 
-                    List<Term> termList = new ArrayList<>(terms);
-                    Collections.reverse(termList);
-                    terms = new LinkedHashSet<>(termList);
-
+                    Collections.reverse(terms);
                     boolean negated = i + 1 < postfix.size() && postfix.get(i + 1).getType() == NEGATION;
 
                     stack.push(token.getType() == FUNCTION

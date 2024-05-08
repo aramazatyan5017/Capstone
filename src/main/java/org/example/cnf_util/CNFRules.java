@@ -1,8 +1,8 @@
 package org.example.cnf_util;
 
-import org.example.domain.sentence.CNFSentence;
-import org.example.domain.sentence.Clause;
-import org.example.domain.sentence.Literal;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.domain.sentence.propositional.PropositionalClause;
+import org.example.domain.sentence.propositional.Literal;
 import org.example.domain.Sentences;
 import org.example.exception.TautologyException;
 import org.example.exception.ContradictionException;
@@ -15,61 +15,61 @@ import java.util.*;
 public enum CNFRules {
     AND {
         @Override
-        public CNFSentence apply(CNFSentence cnfSentence1, CNFSentence cnfSentence2) throws ContradictionException, TautologyException {
+        public PropositionalCNFSentence apply(PropositionalCNFSentence cnfSentence1, PropositionalCNFSentence cnfSentence2) throws ContradictionException, TautologyException {
             if (cnfSentence1 == null || cnfSentence2 == null) throw new IllegalArgumentException("null param");
-            return new CNFSentence(combineClauses(cnfSentence1.getClauses(), cnfSentence2.getClauses()));
+            return new PropositionalCNFSentence(combineClauses(cnfSentence1.getClauses(), cnfSentence2.getClauses()));
         }
     },
     OR {
         @Override
-        public CNFSentence apply(CNFSentence cnfSentence1, CNFSentence cnfSentence2) throws ContradictionException, TautologyException {
+        public PropositionalCNFSentence apply(PropositionalCNFSentence cnfSentence1, PropositionalCNFSentence cnfSentence2) throws ContradictionException, TautologyException {
             if (cnfSentence1 == null || cnfSentence2 == null) throw new IllegalArgumentException("null param");
-            LinkedHashSet<Clause> s1 = cnfSentence1.getClauses();
-            LinkedHashSet<Clause> s2 = cnfSentence2.getClauses();
-            LinkedHashSet<Clause> combined = new LinkedHashSet<>();
-            for (Clause c1 : s1) {
+            LinkedHashSet<PropositionalClause> s1 = cnfSentence1.getClauses();
+            LinkedHashSet<PropositionalClause> s2 = cnfSentence2.getClauses();
+            LinkedHashSet<PropositionalClause> combined = new LinkedHashSet<>();
+            for (PropositionalClause c1 : s1) {
                 LinkedHashSet<Literal> l1 = c1.getLiterals();
-                for (Clause c2 : s2) {
+                for (PropositionalClause c2 : s2) {
                     LinkedHashSet<Literal> possCombined = combineLiterals(l1, c2.getLiterals());
-                    if (!possCombined.isEmpty()) combined.add(new Clause(possCombined));
+                    if (!possCombined.isEmpty()) combined.add(new PropositionalClause(possCombined));
                 }
             }
 
             if (combined.isEmpty()) throw new TautologyException();
-            return Sentences.optimizeCNF(new CNFSentence(combined));
+            return Sentences.optimizeCNF(new PropositionalCNFSentence(combined));
         }
     },
     IMPLIES {
         @Override
-        public CNFSentence apply(CNFSentence cnfSentence1, CNFSentence cnfSentence2) throws ContradictionException, TautologyException {
+        public PropositionalCNFSentence apply(PropositionalCNFSentence cnfSentence1, PropositionalCNFSentence cnfSentence2) throws ContradictionException, TautologyException {
             if (cnfSentence1 == null || cnfSentence2 == null) throw new IllegalArgumentException("null param");
             return OR.apply(negateCNF(cnfSentence1), cnfSentence2);
         }
     },
     BICONDITIONAL {
         @Override
-        public CNFSentence apply(CNFSentence cnfSentence1, CNFSentence cnfSentence2) throws ContradictionException, TautologyException {
+        public PropositionalCNFSentence apply(PropositionalCNFSentence cnfSentence1, PropositionalCNFSentence cnfSentence2) throws ContradictionException, TautologyException {
             if (cnfSentence1 == null || cnfSentence2 == null) throw new IllegalArgumentException("null param");
             return AND.apply(IMPLIES.apply(cnfSentence1, cnfSentence2), IMPLIES.apply(cnfSentence2, cnfSentence1));
         }
     },
     NEGATED_AND {
         @Override
-        public CNFSentence apply(CNFSentence cnfSentence1, CNFSentence cnfSentence2) throws ContradictionException, TautologyException {
+        public PropositionalCNFSentence apply(PropositionalCNFSentence cnfSentence1, PropositionalCNFSentence cnfSentence2) throws ContradictionException, TautologyException {
             if (cnfSentence1 == null || cnfSentence2 == null) throw new IllegalArgumentException("null param");
             return OR.apply(negateCNF(cnfSentence1), negateCNF(cnfSentence2));
         }
     },
     NEGATED_OR {
         @Override
-        public CNFSentence apply(CNFSentence cnfSentence1, CNFSentence cnfSentence2) throws ContradictionException, TautologyException {
+        public PropositionalCNFSentence apply(PropositionalCNFSentence cnfSentence1, PropositionalCNFSentence cnfSentence2) throws ContradictionException, TautologyException {
             if (cnfSentence1 == null || cnfSentence2 == null) throw new IllegalArgumentException("null param");
             return AND.apply(negateCNF(cnfSentence1), negateCNF(cnfSentence2));
         }
     },
     NEGATED_IMPLIES {
         @Override
-        public CNFSentence apply(CNFSentence cnfSentence1, CNFSentence cnfSentence2) throws ContradictionException, TautologyException {
+        public PropositionalCNFSentence apply(PropositionalCNFSentence cnfSentence1, PropositionalCNFSentence cnfSentence2) throws ContradictionException, TautologyException {
             if (cnfSentence1 == null || cnfSentence2 == null) throw new IllegalArgumentException("null param");
 //            return negateCNF(IMPLIES.apply(cnf1, cnf2));
             return AND.apply(cnfSentence1, negateCNF(cnfSentence2));
@@ -77,7 +77,7 @@ public enum CNFRules {
     },
     NEGATED_BICONDITIONAL {
         @Override
-        public CNFSentence apply(CNFSentence cnfSentence1, CNFSentence cnfSentence2) throws ContradictionException, TautologyException {
+        public PropositionalCNFSentence apply(PropositionalCNFSentence cnfSentence1, PropositionalCNFSentence cnfSentence2) throws ContradictionException, TautologyException {
             if (cnfSentence1 == null || cnfSentence2 == null) throw new IllegalArgumentException("null param");
 //            return negateCNF(BICONDITIONAL.apply(cnf1, cnf2));
             return BICONDITIONAL.apply(negateCNF(cnfSentence1), cnfSentence2);
@@ -94,31 +94,31 @@ public enum CNFRules {
         }
     }
 
-    public abstract CNFSentence apply(CNFSentence cnfSentence1, CNFSentence cnfSentence2) throws ContradictionException, TautologyException;
+    public abstract PropositionalCNFSentence apply(PropositionalCNFSentence cnfSentence1, PropositionalCNFSentence cnfSentence2) throws ContradictionException, TautologyException;
 
     private static LinkedHashSet<Literal> combineLiterals(LinkedHashSet<Literal> s1, LinkedHashSet<Literal> s2) {
         LinkedHashSet<Literal> combined = new LinkedHashSet<>();
         combined.addAll(s1);
         combined.addAll(s2);
         try {
-            return Sentences.optimizeClause(new Clause(combined)).getLiterals();
+            return Sentences.optimizeClause(new PropositionalClause(combined)).getLiterals();
         } catch (TautologyException | ContradictionException e) {
             return new LinkedHashSet<>();
         }
     }
 
-    private static LinkedHashSet<Clause> combineClauses(LinkedHashSet<Clause> s1, LinkedHashSet<Clause> s2) throws
+    private static LinkedHashSet<PropositionalClause> combineClauses(LinkedHashSet<PropositionalClause> s1, LinkedHashSet<PropositionalClause> s2) throws
             ContradictionException, TautologyException {
-        LinkedHashSet<Clause> combined = new LinkedHashSet<>();
+        LinkedHashSet<PropositionalClause> combined = new LinkedHashSet<>();
         combined.addAll(s1);
         combined.addAll(s2);
-        return Sentences.optimizeCNF(new CNFSentence(combined)).getClauses();
+        return Sentences.optimizeCNF(new PropositionalCNFSentence(combined)).getClauses();
     }
 
-    public static CNFSentence negateCNF(CNFSentence sentence) throws ContradictionException, TautologyException {
+    public static PropositionalCNFSentence negateCNF(PropositionalCNFSentence sentence) throws ContradictionException, TautologyException {
         sentence = sentence.isCanonical() ? Sentences.optimizeCanonicalCNF(sentence) : Sentences.optimizeCNF(sentence);
 
-        LinkedHashSet<Clause> combined = new LinkedHashSet<>();
+        LinkedHashSet<PropositionalClause> combined = new LinkedHashSet<>();
         List<LinkedHashSet<Literal>> clauseList = new ArrayList<>();
         sentence.getClauses().forEach(c -> clauseList.add(c.getLiterals()));
         Queue<ClauseState> queue = new ArrayDeque<>();
@@ -128,7 +128,7 @@ public enum CNFRules {
             ClauseState currentState = queue.poll();
 
             if (currentState.index == clauseList.size()) {
-                combined.add(new Clause(currentState.clause));
+                combined.add(new PropositionalClause(currentState.clause));
             } else {
                 for (Literal literal : clauseList.get(currentState.index)) {
                     LinkedHashSet<Literal> newClause = new LinkedHashSet<>(currentState.clause);
@@ -137,6 +137,6 @@ public enum CNFRules {
                 }
             }
         }
-        return Sentences.optimizeCNF(new CNFSentence(combined));
+        return Sentences.optimizeCNF(new PropositionalCNFSentence(combined));
     }
 }

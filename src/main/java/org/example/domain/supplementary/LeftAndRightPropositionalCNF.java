@@ -1,21 +1,21 @@
 package org.example.domain.supplementary;
 
-import org.example.domain.sentence.CNFSentence;
-import org.example.domain.sentence.Sentence;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.domain.sentence.propositional.PropositionalSentence;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 
 /**
  * @author aram.azatyan | 3/14/2024 4:39 PM
  */
-public class LeftAndRightCNF {
+public class LeftAndRightPropositionalCNF {
 
-    private CNFSentence cnfLeft = null;
-    private CNFSentence cnfRight = null;
+    private PropositionalCNFSentence cnfLeft = null;
+    private PropositionalCNFSentence cnfRight = null;
     private Boolean determinedLeft = null;
     private Boolean determinedRight = null;
 
-    public LeftAndRightCNF(Sentence left, Sentence right) {
+    public LeftAndRightPropositionalCNF(PropositionalSentence left, PropositionalSentence right) {
         if (left == null || right == null) throw new IllegalArgumentException("null param");
 
         try {
@@ -43,11 +43,11 @@ public class LeftAndRightCNF {
         return determinedRight != null;
     }
 
-    public CNFSentence getLeft() {
+    public PropositionalCNFSentence getLeft() {
         return cnfLeft;
     }
 
-    public CNFSentence getRight() {
+    public PropositionalCNFSentence getRight() {
         return cnfRight;
     }
 

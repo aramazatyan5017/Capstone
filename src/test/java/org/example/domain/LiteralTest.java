@@ -1,9 +1,9 @@
 package org.example.domain;
 
 import org.example.SentenceCommon;
-import org.example.domain.sentence.CNFSentence;
-import org.example.domain.sentence.Clause;
-import org.example.domain.sentence.Literal;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.domain.sentence.propositional.PropositionalClause;
+import org.example.domain.sentence.propositional.Literal;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 import org.junit.jupiter.api.Test;
@@ -59,16 +59,16 @@ class LiteralTest extends SentenceCommon {
     @Test
     public void sentenceTypeTest() {
         Literal l = new Literal("A", true);
-        assertSame(l.type(), SentenceType.LITERAL);
+        assertSame(l.type(), PropositionalSentenceType.LITERAL);
     }
 
     @Test
     public void minimalCNFTest() {
         try {
             Literal l = new Literal("A", true);
-            CNFSentence cnfSentence = l.minimalCNF();
+            PropositionalCNFSentence cnfSentence = l.minimalCNF();
             assertEquals(cnfSentence.getClauses().size(), 1);
-            Clause clause = cnfSentence.getClauseList().get(0);
+            PropositionalClause clause = cnfSentence.getClauseList().get(0);
             assertEquals(clause.size(), 1);
             assertEquals(clause.getLiteralList().get(0), l);
         } catch (Exception e) {

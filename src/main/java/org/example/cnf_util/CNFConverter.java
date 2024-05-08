@@ -1,10 +1,10 @@
 package org.example.cnf_util;
 
-import org.example.domain.sentence.CNFSentence;
-import org.example.domain.sentence.GenericComplexSentence;
-import org.example.domain.sentence.Sentence;
-import org.example.domain.SentenceType;
-import org.example.domain.supplementary.LeftAndRightCNF;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.domain.sentence.propositional.GenericComplexPropositionalSentence;
+import org.example.domain.sentence.propositional.PropositionalSentence;
+import org.example.domain.PropositionalSentenceType;
+import org.example.domain.supplementary.LeftAndRightPropositionalCNF;
 import org.example.exception.TautologyException;
 import org.example.exception.ContradictionException;
 
@@ -14,12 +14,12 @@ import org.example.exception.ContradictionException;
  */
 public class CNFConverter {
 
-    public static CNFSentence toCNF(Sentence sentence) throws ContradictionException, TautologyException {
+    public static PropositionalCNFSentence toPropositionalCNF(PropositionalSentence sentence) throws ContradictionException, TautologyException {
         if (sentence == null) throw new IllegalArgumentException("null param");
-        if (sentence.type() != SentenceType.GENERIC_COMPLEX) return sentence.minimalCNF();
-        GenericComplexSentence complexSentence = (GenericComplexSentence) sentence;
+        if (sentence.type() != PropositionalSentenceType.GENERIC_COMPLEX) return sentence.minimalCNF();
+        GenericComplexPropositionalSentence complexSentence = (GenericComplexPropositionalSentence) sentence;
 
-        LeftAndRightCNF info = new LeftAndRightCNF(complexSentence.getLeftSentence(), complexSentence.getRightSentence());
+        LeftAndRightPropositionalCNF info = new LeftAndRightPropositionalCNF(complexSentence.getLeftSentence(), complexSentence.getRightSentence());
 
         if (info.isLeftDetermined() && info.isRightDetermined()) {
             boolean evaluation = complexSentence.getConnective().evaluate(info.leftValue(), info.rightValue());
@@ -28,8 +28,8 @@ public class CNFConverter {
             if (evaluation) throw new TautologyException();
             else throw new ContradictionException();
         } else if (!info.isLeftDetermined() && !info.isRightDetermined()) {
-            CNFSentence cnfLeft = info.getLeft();
-            CNFSentence cnfRight = info.getRight();
+            PropositionalCNFSentence cnfLeft = info.getLeft();
+            PropositionalCNFSentence cnfRight = info.getRight();
 
             switch (complexSentence.getConnective()) {
                 case OR -> {

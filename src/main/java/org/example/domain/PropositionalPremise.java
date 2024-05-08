@@ -1,11 +1,12 @@
 package org.example.domain;
 
-import org.example.domain.sentence.CNFSentence;
-import org.example.domain.sentence.GenericComplexSentence;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.domain.sentence.propositional.GenericComplexPropositionalSentence;
 import org.example.domain.sentence.Sentence;
+import org.example.domain.sentence.propositional.PropositionalSentence;
 import org.example.exception.TautologyException;
 import org.example.exception.ContradictionException;
-import org.example.inference_rules.AndEliminationInferenceRule;
+import org.example.inference_rules.PropositionalAndEliminationInferenceRule;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,13 +14,13 @@ import java.util.stream.Collectors;
 /**
  * @author aram.azatyan | 3/25/2024 4:02 PM
  */
-public class Premise {
-    private final Set<Sentence> premise;
-    private final Sentence combinedSentence;
-    private CNFSentence minimalCNF;
+public class PropositionalPremise {
+    private final Set<PropositionalSentence> premise;
+    private final PropositionalSentence combinedSentence;
+    private PropositionalCNFSentence minimalCNF;
     private SatisfiabilityType satisfiabilityType;
 
-    public Premise(Set<Sentence> premise) {
+    public PropositionalPremise(Set<PropositionalSentence> premise) {
         if (premise == null) throw new IllegalArgumentException("null param");
         premise.remove(null);
         if (premise.isEmpty()) throw new IllegalArgumentException("null param");
@@ -28,9 +29,9 @@ public class Premise {
         this.combinedSentence = combineSentences(this.premise);
     }
 
-    public Premise(Sentence... premise) {
+    public PropositionalPremise(PropositionalSentence... premise) {
         if (premise == null) throw new IllegalArgumentException("null param");
-        Set<Sentence> temp = Arrays.stream(premise)
+        Set<PropositionalSentence> temp = Arrays.stream(premise)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(HashSet::new));
         if (temp.isEmpty()) throw new IllegalArgumentException("null param");
@@ -39,7 +40,7 @@ public class Premise {
         this.combinedSentence = combineSentences(this.premise);
     }
 
-    public boolean contains(Sentence sentence) {
+    public boolean contains(PropositionalSentence sentence) {
         return premise.contains(sentence);
     }
 
@@ -47,7 +48,7 @@ public class Premise {
         return premise.size();
     }
 
-    public CNFSentence minimalCNF() throws TautologyException, ContradictionException {
+    public PropositionalCNFSentence minimalCNF() throws TautologyException, ContradictionException {
         if (satisfiabilityType == null) {
             try {
                 minimalCNF = combinedSentence.minimalCNF();
@@ -78,17 +79,17 @@ public class Premise {
         return satisfiabilityType;
     }
 
-    public Sentence getCombinedSentence() {
+    public PropositionalSentence getCombinedSentence() {
         return combinedSentence;
     }
 
-    public Set<Sentence> getPremiseSentences() {
+    public Set<PropositionalSentence> getPremiseSentences() {
         return new HashSet<>(premise);
     }
 
-    private Set<Sentence> getInferredSet(Set<Sentence> set) {
-        Set<Sentence> inferred = new HashSet<>();
-        set.forEach(s -> inferred.addAll(AndEliminationInferenceRule.infer(s)));
+    private Set<PropositionalSentence> getInferredSet(Set<PropositionalSentence> set) {
+        Set<PropositionalSentence> inferred = new HashSet<>();
+        set.forEach(s -> inferred.addAll(PropositionalAndEliminationInferenceRule.infer(s)));
 
 
 //
@@ -104,9 +105,9 @@ public class Premise {
         return inferred;
     }
 
-    private Sentence combineSentences(Set<Sentence> sentences) {
+    private PropositionalSentence combineSentences(Set<PropositionalSentence> sentences) {
         return sentences.size() == 1
                 ? sentences.iterator().next()
-                : new GenericComplexSentence(new LinkedHashSet<>(sentences), Connective.AND, false);
+                : new GenericComplexPropositionalSentence(new LinkedHashSet<>(sentences), Connective.AND, false);
     }
 }

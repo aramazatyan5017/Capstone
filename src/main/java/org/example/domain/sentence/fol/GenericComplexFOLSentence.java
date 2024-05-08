@@ -1,18 +1,12 @@
-package org.example.temp_fol;
+package org.example.domain.sentence.fol;
 
 import org.example.domain.Connective;
 import org.example.domain.FOLSentenceType;
-import org.example.domain.SentenceType;
 import org.example.domain.Sentences;
-import org.example.domain.sentence.*;
-import org.example.domain.supplementary.LeftAndRightCNF;
-import org.example.exception.ContradictionException;
-import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
 
 import java.text.ParseException;
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import static org.example.util.SentenceUtils.NOT;
@@ -20,7 +14,7 @@ import static org.example.util.SentenceUtils.NOT;
 /**
  * @author aram.azatyan | 4/17/2024 2:41 PM
  */
-public class GenericComplexFOLSentence implements FOLSentence {
+public final class GenericComplexFOLSentence implements FOLSentence {
     private final FOLSentence leftSentence;
     private final FOLSentence rightSentence;
     private final Connective connective;
