@@ -1,10 +1,10 @@
 package org.example.parser;
 
 import org.example.domain.Connective;
-import org.example.domain.supplementary.PostfixAndFuncArgCountMap;
+import org.example.domain.sentence.fol.term.TermType;
+import org.example.domain.supplementary.TokenAndPossCount;
 import org.example.parser.supplementary.Token;
 import org.example.parser.supplementary.TokenType;
-import org.example.domain.sentence.fol.term.TermType;
 import org.example.util.SentenceUtils;
 
 import java.text.ParseException;
@@ -16,11 +16,10 @@ import static org.example.parser.supplementary.TokenType.*;
  * @author aram.azatyan | 4/17/2024 2:02 PM
  */
 public abstract class FOLLogicExpressionParser {
-    protected static PostfixAndFuncArgCountMap postfixTokens(List<Token> infixTokens) throws ParseException {
-        Map<String, Integer> argumentCountMap = new HashMap<>();
+    protected static List<TokenAndPossCount> postfixTokens(List<Token> infixTokens) throws ParseException {
         validateFixedInfixTokens(infixTokens);
         Deque<Token> stack = new ArrayDeque<>();
-        LinkedList<Token> queue = new LinkedList<>();
+        LinkedList<TokenAndPossCount> queue = new LinkedList<>();
 
         Deque<Boolean> wereValuesStack = new ArrayDeque<>();
         Deque<Integer> argCountStack = new ArrayDeque<>();
@@ -28,7 +27,7 @@ public abstract class FOLLogicExpressionParser {
         for (Token token : infixTokens) {
             switch (token.getType()) {
                 case VARIABLE, CONSTANT -> {
-                    queue.offer(token);
+                    queue.offer(new TokenAndPossCount(token, null));
                     if (!wereValuesStack.isEmpty()) {
                         wereValuesStack.pop();
                         wereValuesStack.push(true);
@@ -56,7 +55,7 @@ public abstract class FOLLogicExpressionParser {
                         while ((!stack.isEmpty() && stackTop.getType() != OPENING_PARENTHESES) &&
                                 (stackTopPrecedence > currentOperatorPrecedence ||
                                         (stackTopPrecedence == currentOperatorPrecedence && token.getType() != NEGATION))) {
-                            queue.offer(stack.pop());
+                            queue.offer(new TokenAndPossCount(stack.pop(), null));
                             stackTop = stack.peek();
                         }
                     }
@@ -65,7 +64,7 @@ public abstract class FOLLogicExpressionParser {
                 case COMMA -> {
                     Token stackTop = stack.peek();
                     while (!stack.isEmpty() && stackTop.getType() != OPENING_PARENTHESES) {
-                        queue.offer(stack.pop());
+                        queue.offer(new TokenAndPossCount(stack.pop(), null));
                         stackTop = stack.peek();
                     }
                     boolean wasValue = wereValuesStack.pop();
@@ -79,37 +78,41 @@ public abstract class FOLLogicExpressionParser {
                 case CLOSING_PARENTHESES -> {
                     if (stack.isEmpty()) throw new ParseException("invalid expression, unable to tokenize", -1);
                     while (stack.peek().getType() != OPENING_PARENTHESES) {
-                        queue.offer(stack.pop());
+                        queue.offer(new TokenAndPossCount(stack.pop(), null));
                     }
                     if (stack.isEmpty() || stack.peek().getType() != OPENING_PARENTHESES)
                         throw new ParseException("invalid expression, unable to tokenize", -1);
                     stack.pop();
                     if (!stack.isEmpty() && (stack.peek().getType() == PREDICATE || stack.peek().getType() == FUNCTION)) {
-                        Token f = stack.pop();
+                        Token funcOrPred = stack.pop();
                         int count = argCountStack.pop();
                         boolean wasValue = wereValuesStack.pop();
                         if (wasValue) {
                             ++count;
                         }
 
-                        if (argumentCountMap.containsKey(f.getValue()))
-                            throw new ParseException("invalid expression, unable to tokenize", -1);
+//                        NameAndCount nameAndCount = new NameAndCount(f.getValue(), count);
+//
+//                        if (argumentCountSet.contains(nameAndCount))
+//                            throw new ParseException("invalid expression, unable to tokenize", -1);
+//
+//                        argumentCountSet.add(nameAndCount);
 
-                        argumentCountMap.put(f.getValue(), count);
-                        queue.offer(f);
+                        queue.offer(new TokenAndPossCount(funcOrPred, count));
                     }
                 }
             }
         }
+
         while (!stack.isEmpty()) {
             if (stack.peek().getType() == OPENING_PARENTHESES) throw new ParseException("invalid expression, unable to tokenize", -1);
-            queue.offer(stack.pop());
+            queue.offer(new TokenAndPossCount(stack.pop(), null));
         }
 
         optimizeNegationsInPostfix(queue);
         validatePostfixTokens(queue);
 
-        return new PostfixAndFuncArgCountMap(queue, argumentCountMap);
+        return queue;
     }
 
     private static void validateFixedInfixTokens(List<Token> tokens) throws ParseException {
@@ -132,24 +135,26 @@ public abstract class FOLLogicExpressionParser {
         }
     }
 
-    private static void optimizeNegationsInPostfix(List<Token> postfix) {
+    private static void optimizeNegationsInPostfix(List<TokenAndPossCount> postfix) {
         for (int i = 0; i < postfix.size();) {
-            if (postfix.get(i).getType() == NEGATION) {
+            if (postfix.get(i).token().getType() == NEGATION) {
                 int start = i;
-                while (i < postfix.size() && postfix.get(i).getType() == NEGATION) i++;
+                while (i < postfix.size() && postfix.get(i).token().getType() == NEGATION)
+                    i++;
                 int end = i;
                 postfix.subList(start, end).clear();
-                if ((end - start) % 2 == 1) postfix.add(start, new Token(NEGATION));
+                if ((end - start) % 2 == 1)
+                    postfix.add(start, new TokenAndPossCount(new Token(NEGATION), null));
             } else {
                 i++;
             }
         }
     }
 
-    private static void validatePostfixTokens(List<Token> postfixTokens) throws ParseException {
-        Token previous = postfixTokens.get(0);
-        for (int i = 1; i < postfixTokens.size(); i++) {
-            Token current = postfixTokens.get(i);
+    private static void validatePostfixTokens(List<TokenAndPossCount> postfix) throws ParseException {
+        Token previous = postfix.get(0).token();
+        for (int i = 1; i < postfix.size(); i++) {
+            Token current = postfix.get(i).token();
             if (current.getType() == NEGATION && isNotOneOfThese(previous.getType(), CONNECTIVE, PREDICATE))
                 throw new ParseException("invalid expression, unable to tokenize", -1);
             previous = current;

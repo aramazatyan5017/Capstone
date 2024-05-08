@@ -5,7 +5,7 @@ import org.example.domain.sentence.fol.term.Constant;
 import org.example.domain.sentence.fol.term.Function;
 import org.example.domain.sentence.fol.term.Term;
 import org.example.domain.sentence.fol.term.Variable;
-import org.example.domain.supplementary.PostfixAndFuncArgCountMap;
+import org.example.domain.supplementary.TokenAndPossCount;
 import org.example.parser.supplementary.Token;
 import org.example.parser.supplementary.TokenType;
 import org.example.util.SentenceUtils;
@@ -26,8 +26,8 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
         if (expression.contains(SentenceUtils.IMPLICATION) || expression.contains(SentenceUtils.BICONDITIONAL) ||
                 expression.contains(SentenceUtils.AND)) throw new ParseException("not a clause", -1);
 
-        PostfixAndFuncArgCountMap postfixAndMap = postfixTokens(infixTokens(expression));
-        return getClauseFromPostfix(postfixAndMap.postfix(), postfixAndMap.argCountMap());
+        List<TokenAndPossCount> postfix = postfixTokens(infixTokens(expression));
+        return getClauseFromPostfix(postfix);
     }
 
     public static FOLCNFSentence parseCNF(String expression) throws ParseException {
@@ -35,14 +35,12 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
         if (expression.contains(SentenceUtils.IMPLICATION) || expression.contains(SentenceUtils.BICONDITIONAL))
             throw new ParseException("not a cnf sentence", -1);
 
-        PostfixAndFuncArgCountMap postfixAndMap = postfixTokens(infixTokens(expression));
-//        postfixAndMap.postfix().forEach(System.out::print);
-//        System.out.println();
-        return getCNFFromPostfix(postfixAndMap.postfix(), postfixAndMap.argCountMap());
+        List<TokenAndPossCount> postfix = postfixTokens(infixTokens(expression));
+        return getCNFFromPostfix(postfix);
     }
 
-    private static FOLClause getClauseFromPostfix(List<Token> postfix, Map<String, Integer> argCountMap) throws ParseException {
-        validateClausePostfixTokens(postfix, argCountMap);
+    private static FOLClause getClauseFromPostfix(List<TokenAndPossCount> postfix) throws ParseException {
+        validateClausePostfixTokens(postfix);
 
         LinkedHashSet<Predicate> predicates = new LinkedHashSet<>();
         int startIndex;
@@ -50,40 +48,40 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
         boolean isEnd = true;
 
         for (int i = postfix.size() - 1; i >= 0; i--) {
-            Token token = postfix.get(i);
+            Token token = postfix.get(i).token();
             if (token.getType() == TokenType.PREDICATE && isEnd) {
                 endIndex = i + 1;
-                if (endIndex < postfix.size() && postfix.get(endIndex).getType() == NEGATION)
+                if (endIndex < postfix.size() && postfix.get(endIndex).token().getType() == NEGATION)
                     endIndex = i + 2;
 
                 isEnd = !isEnd;
             } else if (token.getType() == TokenType.PREDICATE && !isEnd) {
                 startIndex = i + 1;
-                if (postfix.get(startIndex).getType() == NEGATION)
+                if (postfix.get(startIndex).token().getType() == NEGATION)
                     startIndex = i + 2;
 
-                List<Token> tempList = postfix.subList(startIndex, endIndex);
-                tempList.removeIf(e -> e.getType() == TokenType.CONNECTIVE);
-                predicates.add(clausePostfixToPredicate(tempList, argCountMap));
+                List<TokenAndPossCount> tempList = postfix.subList(startIndex, endIndex);
+                tempList.removeIf(e -> e.token().getType() == TokenType.CONNECTIVE);
+                predicates.add(clausePostfixToPredicate(tempList));
                 endIndex = startIndex;
             }
         }
 
-        predicates.add(clausePostfixToPredicate(postfix.subList(0, endIndex), argCountMap));
+        predicates.add(clausePostfixToPredicate(postfix.subList(0, endIndex)));
         List<Predicate> reversedPredicates = new ArrayList<>(predicates);
         Collections.reverse(reversedPredicates);
 
         return new FOLClause(new LinkedHashSet<>(reversedPredicates));
     }
 
-    private static void validateClausePostfixTokens(List<Token> postfix, Map<String, Integer> argCountMap) throws ParseException {
+    private static void validateClausePostfixTokens(List<TokenAndPossCount> postfix) throws ParseException {
         ParseException invalidClause = new ParseException("invalid clause", -1);
 
         int predicateCount = 0;
         int orCount = 0;
         int argCount = 0;
 
-        Token previous = postfix.get(0);
+        Token previous = postfix.get(0).token();
         switch (previous.getType()) {
             case PREDICATE -> predicateCount++;
             case CONNECTIVE -> orCount++;
@@ -92,7 +90,7 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
         }
 
         for (int i = 1; i < postfix.size(); i++) {
-            Token current = postfix.get(i);
+            Token current = postfix.get(i).token();
 
             switch (current.getType()) {
                 case PREDICATE -> predicateCount++;
@@ -106,28 +104,28 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
                 throw invalidClause;
         }
 
-        int mapArgCount = postfix.stream()
-                .filter(t -> argCountMap.containsKey(t.getValue()))
-                .map(t -> argCountMap.get(t.getValue()))
+        int receivedArgCount = postfix.stream()
+                .map(TokenAndPossCount::count)
+                .filter(Objects::nonNull)
                 .reduce(Integer::sum).get();
 
-        if (argCount != mapArgCount) throw invalidClause;
+        if (argCount != receivedArgCount) throw invalidClause;
         if (predicateCount - orCount != 1) throw invalidClause;
     }
 
-    private static FOLCNFSentence getCNFFromPostfix(List<Token> postfix, Map<String, Integer> argCountMap) throws ParseException {
+    private static FOLCNFSentence getCNFFromPostfix(List<TokenAndPossCount> postfix) throws ParseException {
         ParseException invalidCNF = new ParseException("invalid cnf", -1);
 
         Token andToken = new Token(TokenType.CONNECTIVE, SentenceUtils.AND);
         Token orToken = new Token(TokenType.CONNECTIVE, SentenceUtils.OR);
 
-        if (!postfix.contains(andToken)) {
-            return new FOLCNFSentence(getClauseFromPostfix(postfix, argCountMap));
+        if (!postfix.contains(new TokenAndPossCount(andToken, null))) {
+            return new FOLCNFSentence(getClauseFromPostfix(postfix));
         }
 
         for (int i = 1; i < postfix.size(); i++) {
-            Token previous = postfix.get(i - 1);
-            Token current = postfix.get(i);
+            Token previous = postfix.get(i - 1).token();
+            Token current = postfix.get(i).token();
             if (current.getType() == NEGATION &&
                     previous.getType() != PREDICATE) throw invalidCNF;
             if (current.equals(orToken) &&
@@ -139,7 +137,7 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
 
         try {
             for (int i = 0; i < postfix.size(); i++) {
-                Token token = postfix.get(i);
+                Token token = postfix.get(i).token();
 
                 //                        if (token.getValue().equalsIgnoreCase("true"))
 //                            stack.push(negated ? Literal.FALSE : Literal.TRUE);
@@ -152,7 +150,7 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
                     case FUNCTION, PREDICATE -> {
                         List<Term> terms = new ArrayList<>();
 
-                        int argCount = argCountMap.get(token.getValue());
+                        int argCount = postfix.get(i).count();
 
                         while (!stack.isEmpty() && argCount > 0) {
                             if (stack.peek() instanceof Constant) terms.add((Constant) stack.pop());
@@ -163,7 +161,7 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
                         }
 
                         Collections.reverse(terms);
-                        boolean negated = i + 1 < postfix.size() && postfix.get(i + 1).getType() == NEGATION;
+                        boolean negated = i + 1 < postfix.size() && postfix.get(i + 1).token().getType() == NEGATION;
 
                         stack.push(token.getType() == FUNCTION
                                 ? new Function(token.getValue(), terms)
@@ -250,10 +248,10 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
         return possCNF;
     }
 
-    private static Predicate clausePostfixToPredicate(List<Token> postfix, Map<String, Integer> argCountMap) {
+    private static Predicate clausePostfixToPredicate(List<TokenAndPossCount> postfix) {
         Deque<Object> stack = new ArrayDeque<>();
         for (int i = 0; i < postfix.size(); i++) {
-            Token token = postfix.get(i);
+            Token token = postfix.get(i).token();
 
             switch (token.getType()) {
                 case CONSTANT, VARIABLE -> {
@@ -264,7 +262,7 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
                 case FUNCTION, PREDICATE -> {
                     List<Term> terms = new ArrayList<>();
 
-                    int argCount = argCountMap.get(token.getValue());
+                    int argCount = postfix.get(i).count();
 
                     while (!stack.isEmpty() && argCount > 0) {
                         terms.add((Term) stack.pop());
@@ -272,7 +270,7 @@ public class FOLCNFExpressionParser extends FOLLogicExpressionParser {
                     }
 
                     Collections.reverse(terms);
-                    boolean negated = i + 1 < postfix.size() && postfix.get(i + 1).getType() == NEGATION;
+                    boolean negated = i + 1 < postfix.size() && postfix.get(i + 1).token().getType() == NEGATION;
 
                     stack.push(token.getType() == FUNCTION
                             ? new Function(token.getValue(), terms)

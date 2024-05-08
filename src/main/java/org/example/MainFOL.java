@@ -6,6 +6,7 @@ import org.example.parser.FOLCNFExpressionParser;
 import org.example.domain.sentence.fol.term.Function;
 import org.example.domain.sentence.fol.GenericComplexFOLSentence;
 import org.example.domain.sentence.fol.Predicate;
+import org.example.parser.FOLInfixExpressionParser;
 
 /**
  * @author aram.azatyan | 4/17/2024 8:55 PM
@@ -39,6 +40,8 @@ public class MainFOL {
         System.out.println(FOLCNFExpressionParser.parseCNF("Missile(x)"));
         System.out.println(FOLCNFExpressionParser.parseCNF("Missile(x) & Sells(y) & Kuku(NONO)"));
         System.out.println(FOLCNFExpressionParser.parseCNF("(Missile(x)) & (Sells(y)) & (Kuku(NONO))"));
+
+        System.out.println(FOLInfixExpressionParser.parseGeneric("Wow(x, y) | Wow(a, b, c) | Wow(x, y, z, e) | Wow(x, y)"));
 
 //        System.out.println(FOLCNFExpressionParser.parseCNF("(Missile(x) & Sells(x)) | Kuku(NONO)"));
 

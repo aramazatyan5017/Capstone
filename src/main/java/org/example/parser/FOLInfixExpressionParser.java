@@ -6,9 +6,7 @@ import org.example.domain.sentence.fol.term.Constant;
 import org.example.domain.sentence.fol.term.Function;
 import org.example.domain.sentence.fol.term.Term;
 import org.example.domain.sentence.fol.term.Variable;
-import org.example.domain.supplementary.ConnectiveAndNegation;
-import org.example.domain.supplementary.Node;
-import org.example.domain.supplementary.PostfixAndFuncArgCountMap;
+import org.example.domain.supplementary.*;
 import org.example.parser.supplementary.Token;
 import org.example.util.Utils;
 
@@ -68,13 +66,10 @@ public class FOLInfixExpressionParser extends FOLLogicExpressionParser {
                 connectiveAndNegation.getConnective(), connectiveAndNegation.isNegated());
     }
 
-    private static Node postfixToTree(PostfixAndFuncArgCountMap postfixAndMap) {
-        List<Token> postfix = postfixAndMap.postfix();
-        Map<String, Integer> argCountMap = postfixAndMap.argCountMap();
-
+    private static Node postfixToTree(List<TokenAndPossCount> postfix) {
         Deque<Node> stack = new ArrayDeque<>();
         for (int i = 0; i < postfix.size(); i++) {
-            Token token = postfix.get(i);
+            Token token = postfix.get(i).token();
 
             switch (token.getType()) {
                 case CONSTANT, VARIABLE -> {
@@ -85,7 +80,7 @@ public class FOLInfixExpressionParser extends FOLLogicExpressionParser {
                 case FUNCTION, PREDICATE -> {
                     List<Term> terms = new ArrayList<>();
 
-                    int argCount = argCountMap.get(token.getValue());
+                    int argCount = postfix.get(i).count();
 
                     while (!stack.isEmpty() && argCount > 0) {
                         terms.add((Term) stack.pop().getValue());
@@ -93,7 +88,7 @@ public class FOLInfixExpressionParser extends FOLLogicExpressionParser {
                     }
 
                     Collections.reverse(terms);
-                    boolean negated = i + 1 < postfix.size() && postfix.get(i + 1).getType() == NEGATION;
+                    boolean negated = i + 1 < postfix.size() && postfix.get(i + 1).token().getType() == NEGATION;
 
                     stack.push(new Node(token.getType() == FUNCTION
                             ? new Function(token.getValue(), terms)
@@ -105,7 +100,7 @@ public class FOLInfixExpressionParser extends FOLLogicExpressionParser {
                     Node n1 = stack.pop();
                     Node n2 = stack.pop();
 
-                    boolean negated = i + 1 < postfix.size() && postfix.get(i + 1).getType() == NEGATION;
+                    boolean negated = i + 1 < postfix.size() && postfix.get(i + 1).token().getType() == NEGATION;
 
                     Node operatorNode = new Node(new ConnectiveAndNegation(Connective.fromValue(token.getValue()),
                             negated), null, n2, n1);
@@ -122,7 +117,8 @@ public class FOLInfixExpressionParser extends FOLLogicExpressionParser {
     }
 
     public static void main(String[] args) throws Exception {
-        postfixTokens(infixTokens("(!(!(!Missile(x))) | !!!Sells(x, Wow(x, y)) | Kuku(a, b))")).postfix().forEach(System.out::print);
+        postfixTokens(infixTokens("(!(!(!Missile(x))) | !!!Sells(x, Wow(x, y)) | Kuku(a, b))"))
+                .forEach(t -> System.out.print(t.token()));
         System.out.println();
     }
 }
