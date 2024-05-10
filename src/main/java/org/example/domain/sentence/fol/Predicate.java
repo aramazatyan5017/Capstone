@@ -2,7 +2,13 @@ package org.example.domain.sentence.fol;
 
 import org.example.domain.FOLSentenceType;
 import org.example.domain.Sentences;
+import org.example.domain.sentence.BasicLogicElement;
 import org.example.domain.sentence.fol.term.Term;
+import org.example.domain.sentence.propositional.Literal;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.domain.sentence.propositional.PropositionalClause;
+import org.example.exception.ContradictionException;
+import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
 import org.example.util.Utils;
 
@@ -13,15 +19,25 @@ import java.util.stream.Collectors;
 /**
  * @author aram.azatyan | 4/14/2024 8:42 PM
  */
-public final class Predicate implements FOLSentence {
+public final class Predicate implements FOLSentence, BasicLogicElement {
     private final String name;
     private final boolean negated;
     private final List<Term> terms;
 
     private String stringRepresentation;
 
+    public static final Predicate TRUE;
+    public static final Predicate FALSE;
+
+    static {
+        TRUE = new Predicate(true);
+        FALSE = new Predicate(false);
+    }
+
     public Predicate(String name, boolean negated, List<Term> terms) {
         if (Utils.isNullOrBlank(name)) throw new IllegalArgumentException("null param");
+        if (name.equalsIgnoreCase("true") || name.equalsIgnoreCase("false"))
+            throw new IllegalArgumentException("only one instance of TRUE and FALSE available");
         if (terms == null || terms.isEmpty()) throw new IllegalArgumentException("null param");
         terms.remove(null);
         if (terms.size() == 0) throw new IllegalArgumentException("null clause passed");
@@ -33,6 +49,8 @@ public final class Predicate implements FOLSentence {
 
     public Predicate(String name, boolean negated, Term... terms) {
         if (Utils.isNullOrBlank(name)) throw new IllegalArgumentException("null param");
+        if (name.equalsIgnoreCase("true") || name.equalsIgnoreCase("false"))
+            throw new IllegalArgumentException("only one instance of TRUE and FALSE available");
         if (terms == null || terms.length == 0) throw new IllegalArgumentException("null param");
         List<Term> termList = Arrays.stream(terms)
                 .filter(Objects::nonNull)
@@ -47,13 +65,8 @@ public final class Predicate implements FOLSentence {
     public Predicate(String expression) throws ParseException {
         if (Utils.isNullOrBlank(expression)) throw new IllegalArgumentException("null param");
 
-        Predicate predicate;
+        Predicate predicate = Sentences.parsePredicateExpression(expression);
 
-        try {
-            predicate = Sentences.parsePredicateExpression(expression);
-        } catch (ParseException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
 //        if (literal.equals(TRUE) || literal.equals(FALSE)) throw
 //                new IllegalArgumentException("only one instance of TRUE and FALSE available");
 
@@ -62,9 +75,28 @@ public final class Predicate implements FOLSentence {
         this.terms = predicate.getTerms();
     }
 
+    private Predicate(boolean value) {
+        this.name = value ? "TRUE" : "FALSE";
+        this.negated = false;
+        this.terms = null;
+    }
+
     @Override
     public FOLSentenceType type() {
         return FOLSentenceType.PREDICATE;
+    }
+
+    @Override
+    public BasicLogicElement getNegated() {
+        // true or false
+        return new Predicate(this.name, !this.negated, new ArrayList<>(this.terms));
+    }
+
+    @Override
+    public FOLCNFSentence minimalCNF() throws TautologyException, ContradictionException {
+//        if (this == Literal.TRUE) throw new TautologyException();
+//        if (this == Literal.FALSE) throw new ContradictionException();
+        return new FOLCNFSentence(new FOLClause(this));
     }
 
     @Override
@@ -86,7 +118,20 @@ public final class Predicate implements FOLSentence {
     public boolean equals(Object other) {
         if (other == this) return true;
         if (!(other instanceof Predicate that)) return false;
-        return this.name.equals(that.name) && this.negated == that.negated && this.terms.equals(that.terms);
+
+        if (!this.name.equals(that.name)) return false;
+        if (this.negated != that.negated) return false;
+        if (this.terms.size() != that.terms.size()) return false;
+
+        for (int i = 0; i < terms.size(); i++) {
+            Term thisTerm = this.terms.get(i);
+            Term thatTerm = that.terms.get(i);
+
+            if (thisTerm.type() != thatTerm.type()) return false;
+            if (!thisTerm.equals(thatTerm)) return false;
+        }
+
+        return true;
     }
 
     @Override

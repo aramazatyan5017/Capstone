@@ -75,7 +75,18 @@ public final class Function implements Term {
     public boolean equals(Object other) {
         if (other == this) return true;
         if (!(other instanceof Function that)) return false;
-        return this.name.equals(that.name) && this.terms.equals(that.terms);
+        if (!this.name.equals(that.name)) return false;
+        if (this.terms.size() != that.terms.size()) return false;
+
+        for (int i = 0; i < terms.size(); i++) {
+            Term thisTerm = this.terms.get(i);
+            Term thatTerm = that.terms.get(i);
+
+            if (thisTerm.type() != thatTerm.type()) return false;
+            if (!thisTerm.equals(thatTerm)) return false;
+        }
+
+        return true;
     }
 
     @Override

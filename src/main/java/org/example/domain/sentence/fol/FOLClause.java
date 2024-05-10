@@ -2,7 +2,10 @@ package org.example.domain.sentence.fol;
 
 import org.example.domain.Connective;
 import org.example.domain.FOLSentenceType;
+import org.example.domain.LogicType;
 import org.example.domain.Sentences;
+import org.example.domain.sentence.Clause;
+import org.example.domain.sentence.BasicLogicElement;
 
 import java.text.ParseException;
 import java.util.Arrays;
@@ -14,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * @author aram.azatyan | 4/17/2024 8:30 PM
  */
-public final class FOLClause implements FOLSentence {
+public final class FOLClause implements FOLSentence, Clause {
     private final LinkedHashSet<Predicate> predicates;
     private String stringRepresentation;
 
@@ -55,6 +58,18 @@ public final class FOLClause implements FOLSentence {
     @Override
     public FOLSentenceType type() {
         return FOLSentenceType.CLAUSE;
+    }
+
+    @Override
+    public LogicType logicType() {
+        return LogicType.FOL;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public LinkedHashSet<BasicLogicElement> basicElements() {
+        LinkedHashSet<? extends BasicLogicElement> temp = getPredicates();
+        return (LinkedHashSet<BasicLogicElement>) temp;
     }
 
     @Override

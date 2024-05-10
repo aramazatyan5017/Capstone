@@ -43,7 +43,18 @@ public class MainFOL {
 
         System.out.println(FOLInfixExpressionParser.parseGeneric("Wow(x, y) | Wow(a, b, c) | Wow(x, y, z, e) | Wow(x, y)"));
 
+//        System.out.println(new GenericComplexFOLSentence("Wow(x, y) & a => c"));
 //        System.out.println(FOLCNFExpressionParser.parseCNF("(Missile(x) & Sells(x)) | Kuku(NONO)"));
 
+
+        System.out.println(new Function("Wow(x, y)").equals(new Function("Wow(y, x)")));
+        System.out.println(new Function("Wow(x)").equals(new Predicate("Wow(x)")));
+        System.out.println(new Function("Wow(x, Wow(z, u), Wow(x))").equals(new Function("Wow(x, Wow(z, u), Wow(x))")));
+        System.out.println(new Predicate("Wow(x, Wow(z, u), Wow(x))").equals(new Predicate("Wow(x, Wow(z, u), Wow(x))")));
+
+
+        // (a & !a)
+        // (Wow(x, y) & !Wow(y, x))
+        // Wow(a, b, c) & !Wow(d, e, f)
     }
 }

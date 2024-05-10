@@ -2,6 +2,7 @@ package org.example.domain;
 
 import org.example.algo.PropositionalResolution;
 import org.example.cnf_util.CNFConverter;
+import org.example.domain.sentence.Sentence;
 import org.example.domain.sentence.fol.*;
 import org.example.domain.sentence.fol.term.Function;
 import org.example.domain.sentence.propositional.*;
@@ -56,8 +57,8 @@ public class Sentences {
         return FOLCNFExpressionParser.parseCNF(expression);
     }
 
-    public static PropositionalCNFSentence toPropositionalCNF(PropositionalSentence sentence) throws ContradictionException, TautologyException {
-        return CNFConverter.toPropositionalCNF(sentence);
+    public static CNFSentence toCNF(Sentence sentence) throws ContradictionException, TautologyException {
+        return CNFConverter.toCNF(sentence);
     }
 
     public static PropositionalCNFSentence optimizeCNF(PropositionalCNFSentence sentence) throws ContradictionException, TautologyException {
@@ -133,9 +134,9 @@ public class Sentences {
             if (l1.equalsIgnoreNegation(l2)) {
                 throw new ContradictionException();
             }
-        } else if (compared.size() == 1 && current.size() != 1) 
+        } else if (compared.size() == 1)
             potentialRefineClause(current, compared, toBeRemoved, clauseRefinementMap);
-        else if (current.size() == 1 && compared.size() != 1) 
+        else if (current.size() == 1)
             potentialRefineClause(compared, current, toBeRemoved, clauseRefinementMap);
     }
     

@@ -164,17 +164,17 @@ public abstract class FOLLogicExpressionParser {
     protected static List<Token> infixTokens(String expression) throws ParseException {
         expression = preprocessExpression(expression);
         List<Token> tokenList = new ArrayList<>();
-        StringBuilder literalStringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < expression.length();) {
             if (expression.charAt(i) == SentenceUtils.OPENING_PARENTHESES) {
-                checkForWord(literalStringBuilder, tokenList);
+                checkForWord(stringBuilder, tokenList);
                 tokenList.add(new Token(OPENING_PARENTHESES));
             } else if (expression.charAt(i) == SentenceUtils.CLOSING_PARENTHESES) {
-                checkForWord(literalStringBuilder, tokenList);
+                checkForWord(stringBuilder, tokenList);
                 tokenList.add(new Token(CLOSING_PARENTHESES));
             } else if (Connective.getConnectiveSymbols().contains(String.valueOf(expression.charAt(i))) ||
                     isReachedImplOrBicond(i, expression)) {
-                checkForWord(literalStringBuilder, tokenList);
+                checkForWord(stringBuilder, tokenList);
                 if (isReachedImplOrBicond(i, expression)) {
                     if (expression.charAt(i) == '=') {
                         i += 2;
@@ -188,17 +188,17 @@ public abstract class FOLLogicExpressionParser {
                     tokenList.add(new Token(CONNECTIVE, String.valueOf(expression.charAt(i))));
                 }
             } else if (String.valueOf(expression.charAt(i)).equals(SentenceUtils.NOT)) {
-                checkForWord(literalStringBuilder, tokenList);
+                checkForWord(stringBuilder, tokenList);
                 tokenList.add(new Token(NEGATION));
             } else if (expression.charAt(i) == SentenceUtils.COMMA) {
-                checkForWord(literalStringBuilder, tokenList);
+                checkForWord(stringBuilder, tokenList);
                 tokenList.add(new Token(COMMA));
             } else {
-                literalStringBuilder.append(expression.charAt(i));
+                stringBuilder.append(expression.charAt(i));
             }
             i++;
         }
-        checkForWord(literalStringBuilder, tokenList);
+        checkForWord(stringBuilder, tokenList);
         validateRawInfixTokens(tokenList);
         fixInfix(tokenList);
         return tokenList;
@@ -229,8 +229,8 @@ public abstract class FOLLogicExpressionParser {
         if (!literalStringBuilder.isEmpty()) {
             String literalStr = literalStringBuilder.toString();
 
-//            if (literalStr.equalsIgnoreCase("true")) val = "TRUE";
-//            else if (literalStr.equalsIgnoreCase("false")) val = "FALSE";
+            if (literalStr.equalsIgnoreCase("true")) literalStr = "TRUE";
+            else if (literalStr.equalsIgnoreCase("false")) literalStr = "FALSE";
 
             tokenList.add(new Token(WORD, literalStr));
             literalStringBuilder.setLength(0);
@@ -252,6 +252,9 @@ public abstract class FOLLogicExpressionParser {
                 tokens.get(tokens.size() - 1).getType() == CONNECTIVE || tokens.get(tokens.size() - 1).getType() == NEGATION ||
                 tokens.get(tokens.size() - 1).getType() == OPENING_PARENTHESES) throw
                 new ParseException("invalid expression, wrong token position", -1);
+        if (tokens.size() == 1 && !(tokens.get(0).getValue().equalsIgnoreCase("true") ||
+                                    tokens.get(0).getValue().equalsIgnoreCase("false"))) throw
+                new ParseException("invalid expression", -1);
 
         ParseException possExc = new ParseException("invalid expression, unable to tokenize", -1);
 
@@ -259,7 +262,13 @@ public abstract class FOLLogicExpressionParser {
         for (int i = 1; i < tokens.size(); i++) {
             Token next = tokens.get(i);
             switch (previous.getType()) {
-                case WORD -> {if (isNotOneOfThese(next.getType(), OPENING_PARENTHESES, CLOSING_PARENTHESES, COMMA)) throw possExc;}
+                case WORD -> {
+                    if (previous.getValue().equalsIgnoreCase("true") ||
+                            previous.getValue().equalsIgnoreCase("false")) {
+                        if (isNotOneOfThese(next.getType(), CONNECTIVE, COMMA, CLOSING_PARENTHESES)) throw possExc;
+                    }
+                    if (isNotOneOfThese(next.getType(), OPENING_PARENTHESES, CLOSING_PARENTHESES, COMMA)) throw possExc;
+                }
                 case CONNECTIVE -> {if (isNotOneOfThese(next.getType(), NEGATION, WORD, OPENING_PARENTHESES)) throw possExc;}
                 case OPENING_PARENTHESES -> {if (isOneOfThese(next.getType(), CONNECTIVE, COMMA)) throw possExc;}
                 case CLOSING_PARENTHESES -> {if (isNotOneOfThese(next.getType(), CONNECTIVE, COMMA, CLOSING_PARENTHESES)) throw possExc;}

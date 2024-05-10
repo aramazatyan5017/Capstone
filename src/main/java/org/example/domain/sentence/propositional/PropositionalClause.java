@@ -1,8 +1,11 @@
 package org.example.domain.sentence.propositional;
 
 import org.example.domain.Connective;
+import org.example.domain.LogicType;
 import org.example.domain.PropositionalSentenceType;
 import org.example.domain.Sentences;
+import org.example.domain.sentence.Clause;
+import org.example.domain.sentence.BasicLogicElement;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 
@@ -18,7 +21,7 @@ import java.util.stream.Collectors;
  */
 
 //--  a disjunction of literals
-public final class PropositionalClause extends AbstractPropositionalSentence {
+public final class PropositionalClause extends AbstractPropositionalSentence implements Clause {
     private final LinkedHashSet<Literal> literals;
     private String stringRepresentation;
 
@@ -59,6 +62,18 @@ public final class PropositionalClause extends AbstractPropositionalSentence {
     @Override
     public PropositionalSentenceType type() {
         return PropositionalSentenceType.CLAUSE;
+    }
+
+    @Override
+    public LogicType logicType() {
+        return LogicType.PROPOSITIONAL;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public LinkedHashSet<BasicLogicElement> basicElements() {
+        LinkedHashSet<? extends BasicLogicElement> temp = getLiterals();
+        return (LinkedHashSet<BasicLogicElement>) temp;
     }
 
     @Override

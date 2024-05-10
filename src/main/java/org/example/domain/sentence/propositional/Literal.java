@@ -2,6 +2,7 @@ package org.example.domain.sentence.propositional;
 
 import org.example.domain.PropositionalSentenceType;
 import org.example.domain.Sentences;
+import org.example.domain.sentence.BasicLogicElement;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
@@ -13,7 +14,7 @@ import java.util.Objects;
 /**
  * @author aram.azatyan | 2/21/2024 11:50 AM
  */
-public final class Literal extends AbstractPropositionalSentence {
+public final class Literal extends AbstractPropositionalSentence implements BasicLogicElement {
     private final String name;
     private final boolean negated;
 
@@ -64,6 +65,13 @@ public final class Literal extends AbstractPropositionalSentence {
         if (this == Literal.TRUE) throw new TautologyException();
         if (this == Literal.FALSE) throw new ContradictionException();
         return new PropositionalCNFSentence(new PropositionalClause(this));
+    }
+
+    @Override
+    public BasicLogicElement getNegated() {
+        if (this == Literal.TRUE) return Literal.FALSE;
+        if (this == Literal.FALSE) return Literal.TRUE;
+        return new Literal(this.name, !this.negated);
     }
 
     @Override

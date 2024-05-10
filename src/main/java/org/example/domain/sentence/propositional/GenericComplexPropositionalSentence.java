@@ -113,7 +113,7 @@ public final class GenericComplexPropositionalSentence extends AbstractPropositi
 
     @Override
     protected PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
-        return Sentences.toPropositionalCNF(this);
+        return (PropositionalCNFSentence) Sentences.toCNF(this);
     }
 
     @Override

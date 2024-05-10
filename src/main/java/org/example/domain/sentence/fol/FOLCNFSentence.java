@@ -1,7 +1,9 @@
 package org.example.domain.sentence.fol;
 
+import org.example.domain.LogicType;
 import org.example.domain.FOLSentenceType;
 import org.example.domain.Sentences;
+import org.example.domain.sentence.Clause;
 import org.example.util.SentenceUtils;
 
 import java.text.ParseException;
@@ -11,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * @author aram.azatyan | 4/17/2024 8:39 PM
  */
-public final class FOLCNFSentence implements FOLSentence {
+public final class FOLCNFSentence implements FOLSentence, CNFSentence {
     private final LinkedHashSet<FOLClause> clauses;
     private String stringRepresentation;
     private Boolean isCanonical;
@@ -93,6 +95,18 @@ public final class FOLCNFSentence implements FOLSentence {
     @Override
     public FOLSentenceType type() {
         return FOLSentenceType.CNF;
+    }
+
+    @Override
+    public LogicType logicType() {
+        return LogicType.FOL;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public LinkedHashSet<Clause> clauses() {
+        LinkedHashSet<? extends Clause> temp = getClauses();
+        return (LinkedHashSet<Clause>) temp;
     }
 
 //    @Override

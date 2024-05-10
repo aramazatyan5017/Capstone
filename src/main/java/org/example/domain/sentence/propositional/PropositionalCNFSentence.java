@@ -1,7 +1,9 @@
 package org.example.domain.sentence.propositional;
 
+import org.example.domain.LogicType;
 import org.example.domain.PropositionalSentenceType;
 import org.example.domain.Sentences;
+import org.example.domain.sentence.Clause;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
@@ -13,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * @author aram.azatyan | 2/28/2024 5:20 PM
  */
-public final class PropositionalCNFSentence extends AbstractPropositionalSentence {
+public final class PropositionalCNFSentence extends AbstractPropositionalSentence implements CNFSentence {
     private final LinkedHashSet<PropositionalClause> clauses;
     private String stringRepresentation;
     private Boolean isCanonical;
@@ -91,6 +93,18 @@ public final class PropositionalCNFSentence extends AbstractPropositionalSentenc
     @Override
     public PropositionalSentenceType type() {
         return PropositionalSentenceType.CNF;
+    }
+
+    @Override
+    public LogicType logicType() {
+        return LogicType.PROPOSITIONAL;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public LinkedHashSet<Clause> clauses() {
+        LinkedHashSet<? extends Clause> temp = getClauses();
+        return (LinkedHashSet<Clause>) temp;
     }
 
     public int size() {

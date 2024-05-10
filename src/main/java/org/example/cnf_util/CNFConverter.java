@@ -1,8 +1,8 @@
 package org.example.cnf_util;
 
+import org.example.domain.sentence.Sentence;
 import org.example.domain.sentence.propositional.PropositionalCNFSentence;
 import org.example.domain.sentence.propositional.GenericComplexPropositionalSentence;
-import org.example.domain.sentence.propositional.PropositionalSentence;
 import org.example.domain.PropositionalSentenceType;
 import org.example.domain.supplementary.LeftAndRightPropositionalCNF;
 import org.example.exception.TautologyException;
@@ -14,7 +14,7 @@ import org.example.exception.ContradictionException;
  */
 public class CNFConverter {
 
-    public static PropositionalCNFSentence toPropositionalCNF(PropositionalSentence sentence) throws ContradictionException, TautologyException {
+    public static CNFSentence toCNF(Sentence sentence) throws ContradictionException, TautologyException {
         if (sentence == null) throw new IllegalArgumentException("null param");
         if (sentence.type() != PropositionalSentenceType.GENERIC_COMPLEX) return sentence.minimalCNF();
         GenericComplexPropositionalSentence complexSentence = (GenericComplexPropositionalSentence) sentence;
