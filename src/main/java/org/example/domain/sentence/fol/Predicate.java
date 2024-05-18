@@ -1,9 +1,10 @@
 package org.example.domain.sentence.fol;
 
 import org.example.domain.FOLSentenceType;
+import org.example.domain.LogicType;
 import org.example.domain.Sentences;
 import org.example.domain.sentence.BasicLogicElement;
-import org.example.domain.sentence.fol.term.Term;
+import org.example.domain.sentence.fol.term.*;
 import org.example.domain.sentence.propositional.Literal;
 import org.example.domain.sentence.propositional.PropositionalCNFSentence;
 import org.example.domain.sentence.propositional.PropositionalClause;
@@ -87,15 +88,51 @@ public final class Predicate implements FOLSentence, BasicLogicElement {
     }
 
     @Override
+    public LogicType logicType() {
+        return LogicType.FOL;
+    }
+
+    @Override
+    public BasicLogicElement getFalse() {
+        return Predicate.FALSE;
+    }
+
+    @Override
+    public BasicLogicElement getTrue() {
+        return Predicate.TRUE;
+    }
+
+    @Override
     public BasicLogicElement getNegated() {
         // true or false
         return new Predicate(this.name, !this.negated, new ArrayList<>(this.terms));
     }
 
     @Override
+    public boolean equalsIgnoreNegation(BasicLogicElement other) {
+        if (other == null) return false;
+        if (other.logicType() != LogicType.FOL) return false;
+
+        Predicate that = (Predicate) other;
+
+        if (!this.name.equals(that.name)) return false;
+        if (this.terms.size() != that.terms.size()) return false;
+
+        for (int i = 0; i < terms.size(); i++) {
+            Term thisTerm = this.terms.get(i);
+            Term thatTerm = that.terms.get(i);
+
+            if (thisTerm.type() != thatTerm.type()) return false;
+            if (!thisTerm.equals(thatTerm)) return false;
+        }
+
+        return true;
+    }
+
+    @Override
     public FOLCNFSentence minimalCNF() throws TautologyException, ContradictionException {
-//        if (this == Literal.TRUE) throw new TautologyException();
-//        if (this == Literal.FALSE) throw new ContradictionException();
+        if (this == Predicate.TRUE) throw new TautologyException();
+        if (this == Predicate.FALSE) throw new ContradictionException();
         return new FOLCNFSentence(new FOLClause(this));
     }
 
@@ -145,6 +182,45 @@ public final class Predicate implements FOLSentence, BasicLogicElement {
 
     public boolean isNegated() {
         return negated;
+    }
+
+    public void substitute(Variable variable, Constant constant) {
+        if (variable == null || constant == null) throw new IllegalArgumentException("null param");
+        for (int i = 0; i < terms.size(); i++) {
+            if (terms.get(i).equals(variable)) {
+                terms.set(i, constant);
+            } else if (terms.get(i).type() == TermType.FUNCTION) {
+                ((Function) terms.get(i)).substitute(variable, constant);
+            }
+        }
+    }
+
+    public Set<Constant> getConstants() {
+        Set<Constant> constants = new HashSet<>();
+
+        getTerms().forEach(t -> {
+            if (t.type() == TermType.CONSTANT) {
+                constants.add((Constant) t);
+            } else if (t.type() == TermType.FUNCTION) {
+                constants.addAll(((Function) t).getConstants());
+            }
+        });
+
+        return constants;
+    }
+
+    public Set<Variable> getVariables() {
+        Set<Variable> variables = new HashSet<>();
+
+        getTerms().forEach(t -> {
+            if (t.type() == TermType.VARIABLE) {
+                variables.add((Variable) t);
+            } else if (t.type() == TermType.FUNCTION) {
+                variables.addAll(((Function) t).getVariables());
+            }
+        });
+
+        return variables;
     }
 
     public List<Term> getTerms() {

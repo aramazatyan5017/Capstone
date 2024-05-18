@@ -91,13 +91,6 @@ public abstract class FOLLogicExpressionParser {
                             ++count;
                         }
 
-//                        NameAndCount nameAndCount = new NameAndCount(f.getValue(), count);
-//
-//                        if (argumentCountSet.contains(nameAndCount))
-//                            throw new ParseException("invalid expression, unable to tokenize", -1);
-//
-//                        argumentCountSet.add(nameAndCount);
-
                         queue.offer(new TokenAndPossCount(funcOrPred, count));
                     }
                 }
@@ -295,7 +288,6 @@ public abstract class FOLLogicExpressionParser {
                     if (isInsidePredicate || tokens.get(i + 1).getType() != OPENING_PARENTHESES) throw exception;
                     current.setType(PREDICATE);
                 } else if (previous.getType() == COMMA || previous.getType() == OPENING_PARENTHESES) {
-//                    if (!isInsidePredicate) throw exception;
                     current.setType(tokens.get(i + 1).getType() == OPENING_PARENTHESES
                             ? (isInsidePredicate ? FUNCTION : PREDICATE)
                             : (determineConstOrVar(current.getValue()) == TermType.CONSTANT

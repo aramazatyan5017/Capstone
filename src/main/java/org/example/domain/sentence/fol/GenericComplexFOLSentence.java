@@ -2,11 +2,19 @@ package org.example.domain.sentence.fol;
 
 import org.example.domain.Connective;
 import org.example.domain.FOLSentenceType;
+import org.example.domain.LogicType;
 import org.example.domain.Sentences;
+import org.example.domain.sentence.CNFSentence;
+import org.example.domain.sentence.Sentence;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.domain.supplementary.LeftAndRightCNF;
+import org.example.exception.ContradictionException;
+import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
 
 import java.text.ParseException;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import static org.example.util.SentenceUtils.NOT;
@@ -99,14 +107,19 @@ public final class GenericComplexFOLSentence implements FOLSentence {
     }
 
     @Override
+    public LogicType logicType() {
+        return LogicType.FOL;
+    }
+
+    @Override
     public FOLSentenceType type() {
         return FOLSentenceType.GENERIC_COMPLEX;
     }
 
-//    @Override
-//    protected CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
-//        return Sentences.toCNF(this);
-//    }
+    @Override
+    public FOLCNFSentence minimalCNF() throws TautologyException, ContradictionException {
+        return (FOLCNFSentence) Sentences.toCNF(this);
+    }
 
     @Override
     public String toString() {
@@ -117,61 +130,63 @@ public final class GenericComplexFOLSentence implements FOLSentence {
         return stringRepresentation;
     }
 
-//    // TODO: 4/2/2024 should I compare truth tables
-//    @Override
-//    public boolean equals(Object other) {
-//        if (other == this) return true;
-//        if (!(other instanceof GenericComplexSentence that)) return false;
-//
-//        LeftAndRightCNF thisAndThatInfo = new LeftAndRightCNF(this, that);
-//
-//        if (thisAndThatInfo.isLeftDetermined() && thisAndThatInfo.isRightDetermined()) {
-//            return thisAndThatInfo.leftValue() == thisAndThatInfo.rightValue();
-//        } else if (!thisAndThatInfo.isLeftDetermined() && !thisAndThatInfo.isRightDetermined()) {
-//            if (thisAndThatInfo.getLeft().equals(thisAndThatInfo.getRight())) return true;
-//
-//            Sentence opt1 = thisAndThatInfo.getLeft();
-//            Sentence opt2 = thisAndThatInfo.getRight();
-//
-//            if (thisAndThatInfo.getLeft().isCanonical()) {
-//                try {
-//                    opt1 = Sentences.optimizeCanonicalCNF(thisAndThatInfo.getLeft());
-//                } catch (TautologyException e) {
-//                    opt1 = Literal.TRUE;
-//                } catch (ContradictionException e) {
-//                    opt1 = Literal.FALSE;
-//                }
-//            }
-//
-//            if (thisAndThatInfo.getRight().isCanonical()) {
-//                try {
-//                    opt2 = Sentences.optimizeCanonicalCNF(thisAndThatInfo.getRight());
-//                } catch (TautologyException e) {
-//                    opt2 = Literal.TRUE;
-//                } catch (ContradictionException e) {
-//                    opt2 = Literal.FALSE;
-//                }
-//            }
-//
-//            if ((opt1.type() == SentenceType.LITERAL && opt2.type() == SentenceType.LITERAL)
-//                    ||
-//                    (opt1.type() == SentenceType.CNF && opt2.type() == SentenceType.CNF)) return opt1.equals(opt2);
-//        }
-//
-//        return false;
-//    }
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) return true;
+        if (!(other instanceof GenericComplexFOLSentence that)) return false;
 
-//    @Override
-//    public int hashCode() {
-//        try {
-//            CNFSentence cnfSentence = minimalCNF();
-//            return cnfSentence.hashCode();
-//        } catch (TautologyException e) {
-//            return Objects.hash(true);
-//        } catch (ContradictionException e) {
-//            return Objects.hash(false);
-//        }
-//    }
+        LeftAndRightCNF thisAndThatInfo = new LeftAndRightCNF(this, that);
+
+        if (thisAndThatInfo.isLeftDetermined() && thisAndThatInfo.isRightDetermined()) {
+            return thisAndThatInfo.leftValue() == thisAndThatInfo.rightValue();
+        } else if (!thisAndThatInfo.isLeftDetermined() && !thisAndThatInfo.isRightDetermined()) {
+            if (thisAndThatInfo.getLeft().equals(thisAndThatInfo.getRight())) return true;
+
+            Sentence opt1 = thisAndThatInfo.getLeft();
+            Sentence opt2 = thisAndThatInfo.getRight();
+
+            if (thisAndThatInfo.getLeft().isCanonical()) {
+                try {
+                    opt1 = Sentences.optimizeCanonicalCNF(thisAndThatInfo.getLeft());
+                } catch (TautologyException e) {
+                    opt1 = Predicate.TRUE;
+                } catch (ContradictionException e) {
+                    opt1 = Predicate.FALSE;
+                }
+            }
+
+            if (thisAndThatInfo.getRight().isCanonical()) {
+                try {
+                    opt2 = Sentences.optimizeCanonicalCNF(thisAndThatInfo.getRight());
+                } catch (TautologyException e) {
+                    opt2 = Predicate.TRUE;
+                } catch (ContradictionException e) {
+                    opt2 = Predicate.FALSE;
+                }
+            }
+
+
+
+            if ((((FOLSentence) opt1).type() == FOLSentenceType.PREDICATE && ((FOLSentence) opt2).type() == FOLSentenceType.PREDICATE)
+                    ||
+                    (((FOLSentence) opt1).type() == FOLSentenceType.CNF && ((FOLSentence) opt2).type() == FOLSentenceType.CNF))
+                return opt1.equals(opt2);
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        try {
+            FOLCNFSentence cnfSentence = minimalCNF();
+            return cnfSentence.hashCode();
+        } catch (TautologyException e) {
+            return Objects.hash(true);
+        } catch (ContradictionException e) {
+            return Objects.hash(false);
+        }
+    }
 
     private String constructToString(boolean isFirstLevel) {
         String core = String.join(" ",

@@ -1,5 +1,10 @@
 package org.example.domain.supplementary;
 
+import org.example.domain.LogicType;
+import org.example.domain.sentence.CNFSentence;
+import org.example.domain.sentence.Sentence;
+import org.example.domain.sentence.fol.FOLCNFSentence;
+import org.example.domain.sentence.fol.FOLSentence;
 import org.example.domain.sentence.propositional.PropositionalCNFSentence;
 import org.example.domain.sentence.propositional.PropositionalSentence;
 import org.example.exception.ContradictionException;
@@ -8,18 +13,21 @@ import org.example.exception.TautologyException;
 /**
  * @author aram.azatyan | 3/14/2024 4:39 PM
  */
-public class LeftAndRightPropositionalCNF {
+public class LeftAndRightCNF {
 
-    private PropositionalCNFSentence cnfLeft = null;
-    private PropositionalCNFSentence cnfRight = null;
+    private CNFSentence cnfLeft = null;
+    private CNFSentence cnfRight = null;
     private Boolean determinedLeft = null;
     private Boolean determinedRight = null;
 
-    public LeftAndRightPropositionalCNF(PropositionalSentence left, PropositionalSentence right) {
+    public LeftAndRightCNF(Sentence left, Sentence right) {
         if (left == null || right == null) throw new IllegalArgumentException("null param");
+        if (left.logicType() != right.logicType()) throw new IllegalArgumentException("sentences of different logic types");
 
         try {
-            cnfLeft = left.minimalCNF();
+            cnfLeft = left.logicType() == LogicType.PROPOSITIONAL
+                    ? ((PropositionalSentence) left).minimalCNF()
+                    : ((FOLSentence) left).minimalCNF();
         } catch (ContradictionException e) {
             determinedLeft = false;
         } catch (TautologyException e) {
@@ -27,7 +35,9 @@ public class LeftAndRightPropositionalCNF {
         }
 
         try {
-            cnfRight = right.minimalCNF();
+            cnfRight = right.logicType() == LogicType.PROPOSITIONAL
+                    ? ((PropositionalSentence) right).minimalCNF()
+                    : ((FOLSentence) right).minimalCNF();
         } catch (ContradictionException e) {
             determinedRight = false;
         } catch (TautologyException e) {
@@ -43,11 +53,11 @@ public class LeftAndRightPropositionalCNF {
         return determinedRight != null;
     }
 
-    public PropositionalCNFSentence getLeft() {
+    public CNFSentence getLeft() {
         return cnfLeft;
     }
 
-    public PropositionalCNFSentence getRight() {
+    public CNFSentence getRight() {
         return cnfRight;
     }
 

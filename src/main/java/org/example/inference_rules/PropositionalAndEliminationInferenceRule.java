@@ -14,7 +14,6 @@ import java.util.Set;
 /**
  * @author aram.azatyan | 3/27/2024 4:03 PM
  */
-// TODO: 3/27/2024 im karciqov, esi chpiti patasxanatu lini satisfiablitii hamar
 public class PropositionalAndEliminationInferenceRule {
 
     public static Set<PropositionalSentence> infer(PropositionalSentence sentence) {

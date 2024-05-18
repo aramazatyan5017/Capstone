@@ -2,10 +2,12 @@ package org.example.truth_table;
 
 import org.example.domain.Connective;
 import org.example.domain.SatisfiabilityType;
+import org.example.domain.sentence.CNFSentence;
 import org.example.domain.sentence.propositional.*;
 import org.example.domain.supplementary.TruthTableRow;
 import org.example.exception.TautologyException;
 import org.example.exception.ContradictionException;
+import org.example.util.SentenceUtils;
 import org.example.util.Utils;
 
 import java.util.*;
@@ -159,7 +161,6 @@ public class TruthTable implements Iterable<TruthTableRow> {
         return literalValueMap;
     }
 
-    // TODO: 3/15/2024 kareli a hetagayaum cnf ov sarqel
     private boolean evaluateSentence(Map<String, Boolean> literalValueMap, PropositionalSentence sentence) {
         switch (sentence.type()) {
             case LITERAL -> {

@@ -110,4 +110,9 @@ public class PropositionalPremise {
                 ? sentences.iterator().next()
                 : new GenericComplexPropositionalSentence(new LinkedHashSet<>(sentences), Connective.AND, false);
     }
+
+    @Override
+    public String toString() {
+        return combinedSentence.toString();
+    }
 }

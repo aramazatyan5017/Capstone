@@ -1,5 +1,6 @@
 package org.example.domain.sentence.propositional;
 
+import org.example.domain.LogicType;
 import org.example.domain.SatisfiabilityType;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
@@ -15,6 +16,11 @@ public sealed abstract class AbstractPropositionalSentence implements Propositio
     private TruthTable truthTable;
 
     protected abstract PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException;
+
+    @Override
+    public LogicType logicType() {
+        return LogicType.PROPOSITIONAL;
+    }
 
     @Override
     public PropositionalCNFSentence minimalCNF() throws ContradictionException, TautologyException {

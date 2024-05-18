@@ -101,4 +101,43 @@ public final class Function implements Term {
     public List<Term> getTerms() {
         return new ArrayList<>(terms);
     }
+
+    public void substitute(Variable variable, Constant constant) {
+        if (variable == null || constant == null) throw new IllegalArgumentException("null param");
+        for (int i = 0; i < terms.size(); i++) {
+            if (terms.get(i).equals(variable)) {
+                terms.set(i, constant);
+            } else if (terms.get(i).type() == TermType.FUNCTION) {
+                ((Function) terms.get(i)).substitute(variable, constant);
+            }
+        }
+    }
+
+    public Set<Constant> getConstants() {
+        Set<Constant> constants = new HashSet<>();
+
+        getTerms().forEach(t -> {
+            if (t.type() == TermType.CONSTANT) {
+                constants.add((Constant) t);
+            } else if (t.type() == TermType.FUNCTION) {
+                constants.addAll(((Function) t).getConstants());
+            }
+        });
+
+        return constants;
+    }
+
+    public Set<Variable> getVariables() {
+        Set<Variable> variables = new HashSet<>();
+
+        getTerms().forEach(t -> {
+            if (t.type() == TermType.VARIABLE) {
+                variables.add((Variable) t);
+            } else if (t.type() == TermType.FUNCTION) {
+                variables.addAll(((Function) t).getVariables());
+            }
+        });
+
+        return variables;
+    }
 }

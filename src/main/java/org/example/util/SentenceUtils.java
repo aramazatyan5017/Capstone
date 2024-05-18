@@ -19,6 +19,9 @@ public class SentenceUtils {
     public static char CLOSING_PARENTHESES = ')';
     public static char COMMA = ',';
 
+    public static char EXISTENTIAL = (char) 8707;
+    public static char UNIVERSAL = (char) 8704;
+
     public static final Set<String> CONNECTIVE_AND_NEGATION_AND_PARENTHESES_AND_COMMA_SYMBOLS;
 
     static {

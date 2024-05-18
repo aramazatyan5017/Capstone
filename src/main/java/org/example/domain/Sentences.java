@@ -1,7 +1,10 @@
 package org.example.domain;
 
-import org.example.algo.PropositionalResolution;
+import org.example.algo.Resolution;
 import org.example.cnf_util.CNFConverter;
+import org.example.domain.sentence.BasicLogicElement;
+import org.example.domain.sentence.CNFSentence;
+import org.example.domain.sentence.Clause;
 import org.example.domain.sentence.Sentence;
 import org.example.domain.sentence.fol.*;
 import org.example.domain.sentence.fol.term.Function;
@@ -61,28 +64,32 @@ public class Sentences {
         return CNFConverter.toCNF(sentence);
     }
 
-    public static PropositionalCNFSentence optimizeCNF(PropositionalCNFSentence sentence) throws ContradictionException, TautologyException {
+    @SuppressWarnings("unchecked")
+    public static CNFSentence optimizeCNF(CNFSentence sentence) throws ContradictionException, TautologyException {
         if (sentence == null) throw new IllegalArgumentException("null param");
-        LinkedHashSet<PropositionalClause> clauses = new LinkedHashSet<>();
-        for (PropositionalClause clause : sentence.getClauses()) {
+
+        LogicType logicType = sentence.logicType();
+
+        LinkedHashSet<Clause> clauses = new LinkedHashSet<>();
+        for (Clause clause : sentence.clauses()) {
             try {
                 clauses.add(optimizeClause(clause));
             } catch (TautologyException ignored) {}
         }
         if (clauses.isEmpty()) throw new TautologyException();
 
-        Set<PropositionalClause> toBeRemoved = new HashSet<>();
-        Map<PropositionalClause, Set<Literal>> clauseRefinementMap = new HashMap<>();
+        Set<Clause> toBeRemoved = new HashSet<>();
+        Map<Clause, Set<BasicLogicElement>> clauseRefinementMap = new HashMap<>();
 
-        for (PropositionalClause compared : clauses) {
-            for (PropositionalClause current : clauses) {
+        for (Clause compared : clauses) {
+            for (Clause current : clauses) {
                 if (compared.equals(current)) continue;
                 if (compared.size() == 1 || current.size() == 1) 
-                    optimizeForOneLiteralClause(compared, current, toBeRemoved, clauseRefinementMap);
+                    optimizeForOneElementClause(compared, current, toBeRemoved, clauseRefinementMap);
                 else {
-                    if (current.getLiterals().containsAll(compared.getLiterals())) {
+                    if (current.basicElements().containsAll(compared.basicElements())) {
                         toBeRemoved.add(current);
-                    } else if (compared.getLiterals().containsAll(current.getLiterals())) {
+                    } else if (compared.basicElements().containsAll(current.basicElements())) {
                         toBeRemoved.add(compared);
                     }
                 }
@@ -92,18 +99,29 @@ public class Sentences {
         clauses.removeIf(toBeRemoved::contains);
         if (clauses.isEmpty()) throw new ContradictionException();
 
-
         clauseRefinementMap.entrySet().removeIf(entry -> !clauses.contains(entry.getKey()));
-        if (clauseRefinementMap.isEmpty()) return new PropositionalCNFSentence(clauses);
+        if (clauseRefinementMap.isEmpty()) {
+            LinkedHashSet<? extends Clause> temp = clauses;
+            switch (logicType) {
+                case PROPOSITIONAL -> {return new PropositionalCNFSentence((LinkedHashSet<PropositionalClause>) temp);}
+                case FOL -> {return new FOLCNFSentence((LinkedHashSet<FOLClause>) temp);}
+            }
+        }
 
-        Set<PropositionalClause> toBeAdded = new HashSet<>();
-        for (Iterator<PropositionalClause> iterator = clauses.iterator(); iterator.hasNext();) {
-            PropositionalClause clause = iterator.next();
+        Set<Clause> toBeAdded = new HashSet<>();
+        for (Iterator<Clause> iterator = clauses.iterator(); iterator.hasNext();) {
+            Clause clause = iterator.next();
             if (clauseRefinementMap.containsKey(clause)) {
-                Set<Literal> toBeRemovedLiterals = clauseRefinementMap.get(clause);
-                LinkedHashSet<Literal> clauseLiterals = clause.getLiterals();
+                Set<BasicLogicElement> toBeRemovedLiterals = clauseRefinementMap.get(clause);
+                LinkedHashSet<BasicLogicElement> clauseLiterals = clause.basicElements();
                 clauseLiterals.removeIf(toBeRemovedLiterals::contains);
-                if (!clauseLiterals.isEmpty()) toBeAdded.add(new PropositionalClause(clauseLiterals));
+                if (!clauseLiterals.isEmpty()) {
+                    LinkedHashSet<? extends BasicLogicElement> temp = clauseLiterals;
+                    switch (logicType) {
+                        case PROPOSITIONAL -> toBeAdded.add(new PropositionalClause((LinkedHashSet<Literal>) temp));
+                        case FOL -> toBeAdded.add(new FOLClause((LinkedHashSet<Predicate>) temp));
+                    }
+                }
                 iterator.remove();
             }
         }
@@ -111,26 +129,41 @@ public class Sentences {
         clauses.addAll(toBeAdded);
         if (clauses.isEmpty()) throw new ContradictionException();
 
-        return new PropositionalCNFSentence(clauses);
+        LinkedHashSet<? extends Clause> temp = clauses;
+
+        switch (logicType) {
+            case PROPOSITIONAL -> {return new PropositionalCNFSentence((LinkedHashSet<PropositionalClause>) temp);}
+            case FOL -> {return new FOLCNFSentence((LinkedHashSet<FOLClause>) temp);}
+            default -> {return null;}
+        }
     }
 
-    // TODO: 4/3/2024 check
-    public static PropositionalCNFSentence optimizeCanonicalCNF(PropositionalCNFSentence ccnf) throws TautologyException, ContradictionException {
+    @SuppressWarnings("unchecked")
+    public static CNFSentence optimizeCanonicalCNF(CNFSentence ccnf) throws TautologyException, ContradictionException {
         if (ccnf == null) throw new IllegalArgumentException("null param");
         if (!ccnf.isCanonical()) throw new IllegalArgumentException("not canonical cnf");
 
-        Set<PropositionalCNFSentence> set = new HashSet<>();
+        Set<CNFSentence> set = new HashSet<>();
         set.add(ccnf);
-        return Sentences.optimizeCNF(new PropositionalCNFSentence(new LinkedHashSet<>(new PropositionalResolution(set, false).resolveAndGet())));
+
+        LogicType logicType = ccnf.logicType();
+
+        Set<? extends Clause> temp = new Resolution(set, false).resolveAndGet();
+
+        switch (logicType) {
+            case PROPOSITIONAL -> {return Sentences.optimizeCNF(new PropositionalCNFSentence(new LinkedHashSet<>((HashSet<PropositionalClause>) temp)));}
+            case FOL -> {return Sentences.optimizeCNF(new FOLCNFSentence(new LinkedHashSet<>((HashSet<FOLClause>) temp)));}
+            default -> {return null;}
+        }
     }
-    
-    private static void optimizeForOneLiteralClause(PropositionalClause compared, PropositionalClause current,
-                                                    Set<PropositionalClause> toBeRemoved,
-                                                    Map<PropositionalClause, Set<Literal>> clauseRefinementMap)
+
+    private static void optimizeForOneElementClause(Clause compared, Clause current,
+                                                    Set<Clause> toBeRemoved,
+                                                    Map<Clause, Set<BasicLogicElement>> clauseRefinementMap)
             throws ContradictionException {
         if (compared.size() == 1 && current.size() == 1) {
-            Literal l1 = current.getLiterals().iterator().next();
-            Literal l2 = compared.getLiterals().iterator().next();
+            BasicLogicElement l1 = current.basicElements().iterator().next();
+            BasicLogicElement l2 = compared.basicElements().iterator().next();
             if (l1.equalsIgnoreNegation(l2)) {
                 throw new ContradictionException();
             }
@@ -139,41 +172,47 @@ public class Sentences {
         else if (current.size() == 1)
             potentialRefineClause(compared, current, toBeRemoved, clauseRefinementMap);
     }
-    
-    private static void potentialRefineClause(PropositionalClause larger, PropositionalClause smaller,
-                                              Set<PropositionalClause> toBeRemoved, Map<PropositionalClause, Set<Literal>> clauseRefinementMap)
+
+    private static void potentialRefineClause(Clause larger, Clause smaller,
+                                              Set<Clause> toBeRemoved, Map<Clause, Set<BasicLogicElement>> clauseRefinementMap)
             throws ContradictionException {
-        Literal literal = smaller.getLiterals().iterator().next();
-        if (larger.getLiterals().contains(literal)) toBeRemoved.add(larger);
-        else if (larger.getLiterals().contains(new Literal(literal.getName(), !literal.isNegated()))) {
+        BasicLogicElement element = smaller.basicElements().iterator().next();
+        if (larger.basicElements().contains(element)) toBeRemoved.add(larger);
+        else if (larger.basicElements().contains(element.getNegated())) {
             if (clauseRefinementMap.containsKey(larger)) {
-                clauseRefinementMap.get(larger).add(new Literal(literal.getName(), !literal.isNegated()));
-                Set<Literal> literalSet = clauseRefinementMap.get(larger);
-                if (larger.size() == literalSet.size()) {
-                    throw new ContradictionException();
-                }
+                clauseRefinementMap.get(larger).add(element.getNegated());
+                Set<BasicLogicElement> basicLogicElementSet = clauseRefinementMap.get(larger);
+                if (larger.size() == basicLogicElementSet.size()) throw new ContradictionException();
             } else {
-                Set<Literal> set = new HashSet<>();
-                set.add(new Literal(literal.getName(), !literal.isNegated()));
+                Set<BasicLogicElement> set = new HashSet<>();
+                set.add(element.getNegated());
                 clauseRefinementMap.put(larger, set);
             }
         }
     }
 
-    public static PropositionalClause optimizeClause(PropositionalClause clause) throws TautologyException, ContradictionException {
+    @SuppressWarnings("unchecked")
+    public static Clause optimizeClause(Clause clause) throws TautologyException, ContradictionException {
         if (clause == null) throw new IllegalArgumentException("null param");
-        LinkedHashSet<Literal> literals = clause.getLiterals();
-        literals.removeIf(l -> l == Literal.FALSE);
-        if (literals.isEmpty()) throw new ContradictionException();
+        LinkedHashSet<BasicLogicElement> elements = clause.basicElements();
+        elements.removeIf(l -> l == l.getFalse());
+        if (elements.isEmpty()) throw new ContradictionException();
 
-        for (Literal compared : literals) {
-            for (Literal current : literals) {
-                if (current == Literal.TRUE) throw new TautologyException();
+        for (BasicLogicElement compared : elements) {
+            for (BasicLogicElement current : elements) {
+                if (current == current.getTrue()) throw new TautologyException();
                 if (compared.equals(current)) continue;
                 if (compared.equalsIgnoreNegation(current)) throw new TautologyException();
             }
         }
-        return new PropositionalClause(literals);
+
+        LinkedHashSet<? extends BasicLogicElement> temp = elements;
+
+        switch (elements.iterator().next().logicType()) {
+            case PROPOSITIONAL -> {return new PropositionalClause((LinkedHashSet<Literal>) temp);}
+            case FOL -> {return new FOLClause((LinkedHashSet<Predicate>) temp);}
+            default -> {return null;}
+        }
     }
 
 }

@@ -28,7 +28,6 @@ public sealed interface PropositionalSentence extends Sentence permits AbstractP
 
     TruthTable truthTable() throws ContradictionException, TautologyException;
 
-    // TODO: 4/3/2024 we assume that the each sentence has a unique minimal cnf
     static boolean isEquivalent(PropositionalSentence s1, PropositionalSentence s2) {
         if (s1 == null || s2 == null) throw new IllegalArgumentException("null param");
         if (s1.satisfiabilityType() != s2.satisfiabilityType()) return false;
@@ -38,8 +37,8 @@ public sealed interface PropositionalSentence extends Sentence permits AbstractP
                 s2.satisfiabilityType() == SatisfiabilityType.CONTRADICTION) return true;
 
         try {
-            PropositionalSentence opt1 = s1.minimalCNF();
-            PropositionalSentence opt2 = s2.minimalCNF();
+            Sentence opt1 = s1.minimalCNF();
+            Sentence opt2 = s2.minimalCNF();
 
             if (((PropositionalCNFSentence) opt1).isCanonical()) {
                 try {
@@ -61,9 +60,9 @@ public sealed interface PropositionalSentence extends Sentence permits AbstractP
                 }
             }
 
-            if ((opt1.type() == PropositionalSentenceType.LITERAL && opt2.type() == PropositionalSentenceType.LITERAL)
+            if ((((PropositionalSentence) opt1).type() == PropositionalSentenceType.LITERAL && ((PropositionalSentence) opt2).type() == PropositionalSentenceType.LITERAL)
                     ||
-                    (opt1.type() == PropositionalSentenceType.CNF && opt2.type() == PropositionalSentenceType.CNF)) return opt1.equals(opt2);
+                    (((PropositionalSentence) opt1).type() == PropositionalSentenceType.CNF && ((PropositionalSentence) opt2).type() == PropositionalSentenceType.CNF)) return opt1.equals(opt2);
         } catch (TautologyException | ContradictionException ignored) {}
 
         return false;
@@ -116,8 +115,6 @@ public sealed interface PropositionalSentence extends Sentence permits AbstractP
     private static PropositionalSentence tryOptimize(GenericComplexPropositionalSentence genericSentence) throws ParseException {
         PropositionalSentence left = optimizedParse(genericSentence.getLeftSentence().toString());
         PropositionalSentence right = optimizedParse(genericSentence.getRightSentence().toString());
-
-        // TODO: 4/3/2024 no true, false values inside a clause or cnf.
 
         switch (genericSentence.getConnective()) {
             case OR -> {

@@ -3,6 +3,7 @@ package org.example.domain.sentence.propositional;
 import org.example.domain.LogicType;
 import org.example.domain.PropositionalSentenceType;
 import org.example.domain.Sentences;
+import org.example.domain.sentence.CNFSentence;
 import org.example.domain.sentence.Clause;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
@@ -112,11 +113,11 @@ public final class PropositionalCNFSentence extends AbstractPropositionalSentenc
     }
 
     @Override
-    protected PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
+    public PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
 //        return Sentences.optimizeCNF(this);
-        PropositionalCNFSentence possCNF = Sentences.optimizeCNF(this);
+        PropositionalCNFSentence possCNF = (PropositionalCNFSentence) Sentences.optimizeCNF(this);
         if (possCNF.size() == 1) return possCNF;
-        return possCNF.isCanonical() ? Sentences.optimizeCanonicalCNF(possCNF) : possCNF;
+        return possCNF.isCanonical() ? (PropositionalCNFSentence) Sentences.optimizeCanonicalCNF(possCNF) : possCNF;
     }
 
     @Override

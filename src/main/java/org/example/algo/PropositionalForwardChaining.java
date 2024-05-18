@@ -3,14 +3,17 @@ package org.example.algo;
 import org.example.cnf_util.CNFRules;
 import org.example.domain.Connective;
 import org.example.domain.SatisfiabilityType;
-import org.example.domain.sentence.*;
 import org.example.domain.PropositionalPremise;
 import org.example.domain.sentence.propositional.*;
-import org.example.domain.supplementary.PremiseAndConclusion;
+import org.example.domain.supplementary.PropositionalPremiseAndConclusion;
 import org.example.exception.TautologyException;
 import org.example.exception.ContradictionException;
 import org.example.inference_rules.PropositionalAndEliminationInferenceRule;
+
+import java.sql.Array;
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * @author aram.azatyan | 3/20/2024 12:39 PM
@@ -46,7 +49,7 @@ public class PropositionalForwardChaining {
         if (toBeEntailed == null) throw new IllegalArgumentException("null param");
         toBeEntailed.minimalCNF();
 
-        Map<PremiseAndConclusion, Integer> countMap = constructCount();
+        Map<PropositionalPremiseAndConclusion, Integer> countMap = constructCount();
         Map<PropositionalSentence, Boolean> inferredMap = constructInferred();
 
         Queue<PropositionalSentence> queue = new LinkedList<>();
@@ -61,10 +64,9 @@ public class PropositionalForwardChaining {
                 inferredMap.put(sentence, true);
                 implications.forEach((premise, conclusion) -> {
                     if (premise.contains(sentence)) {
-                        PremiseAndConclusion obj = new PremiseAndConclusion(premise, conclusion);
+                        PropositionalPremiseAndConclusion obj = new PropositionalPremiseAndConclusion(premise, conclusion);
                         int count = countMap.get(obj);
                         countMap.put(obj, --count);
-                        // TODO: 3/29/2024 ete arder inferred a, chqcel queue
                         if (count == 0) PropositionalAndEliminationInferenceRule.infer(conclusion).forEach(queue::offer);
                     }
                 });
@@ -75,7 +77,7 @@ public class PropositionalForwardChaining {
 
     private void preprocessKnowledgeBase(Map<PropositionalPremise, PropositionalSentence> kb) {
         Set<PropositionalSentence> inferredOrGiven = new HashSet<>();
-        Set<PremiseAndConclusion> kbRefinedSentences = new HashSet<>();
+        Set<PropositionalPremiseAndConclusion> kbRefinedSentences = new HashSet<>();
 
         KB_LOOP: for (var iterator = kb.entrySet().iterator(); iterator.hasNext(); iterator.remove()) {
             var premiseAndConclusion = iterator.next();
@@ -109,7 +111,7 @@ public class PropositionalForwardChaining {
                             switch (premiseAndConclusion.getValue().satisfiabilityType()) {
                                 case CONTRADICTION -> {
                                     try {
-                                        inferredOrGiven.add(CNFRules.negateCNF(premise.minimalCNF()));
+                                        inferredOrGiven.add((PropositionalSentence) CNFRules.negateCNF(premise.minimalCNF()));
                                     } catch (TautologyException | ContradictionException ignored) {} //-- certain that won't throw
                                 }
                                 case CONTINGENCY -> {
@@ -118,7 +120,7 @@ public class PropositionalForwardChaining {
                                             premiseAndConclusion.getValue(), Connective.IMPLICATION);
 
                                     if (possNotContingentGeneric.satisfiabilityType() == SatisfiabilityType.CONTINGENCY) {
-                                        kbRefinedSentences.add(new PremiseAndConclusion(premise,
+                                        kbRefinedSentences.add(new PropositionalPremiseAndConclusion(premise,
                                                 premiseAndConclusion.getValue()));
                                     }
                                 }
@@ -142,9 +144,9 @@ public class PropositionalForwardChaining {
         });
     }
 
-    private Map<PremiseAndConclusion, Integer> constructCount() {
-        Map<PremiseAndConclusion, Integer> countMap = new HashMap<>();
-        implications.forEach((k, v) -> countMap.put(new PremiseAndConclusion(k, v), k.size()));
+    private Map<PropositionalPremiseAndConclusion, Integer> constructCount() {
+        Map<PropositionalPremiseAndConclusion, Integer> countMap = new HashMap<>();
+        implications.forEach((k, v) -> countMap.put(new PropositionalPremiseAndConclusion(k, v), k.size()));
         return countMap;
     }
 
@@ -161,15 +163,15 @@ public class PropositionalForwardChaining {
     public static void main(String[] args) throws Exception {
         Map<PropositionalPremise, PropositionalSentence> kb = new HashMap<>();
 
-        kb.put(new PropositionalPremise(new Literal("P")), new Literal("Q"));
-        kb.put(new PropositionalPremise(new PropositionalCNFSentence("L & M")), new GenericComplexPropositionalSentence("P & U"));
-        kb.put(new PropositionalPremise(new GenericComplexPropositionalSentence("B & !!L")), new PropositionalClause("M"));
-        kb.put(new PropositionalPremise(new Literal("A"), new PropositionalClause("P")), new PropositionalCNFSentence("L"));
-        kb.put(new PropositionalPremise(new PropositionalCNFSentence("A"), new Literal("B")), new Literal("L"));
-        kb.put(new PropositionalPremise(new Literal("A")), null);
-        kb.put(new PropositionalPremise(new PropositionalCNFSentence("B")), null);
-
-        System.out.println(new PropositionalForwardChaining(kb).isEntail(new Literal("Q")));
+//        kb.put(new PropositionalPremise(new Literal("P")), new Literal("Q"));
+//        kb.put(new PropositionalPremise(new PropositionalCNFSentence("L & M")), new GenericComplexPropositionalSentence("P & U"));
+//        kb.put(new PropositionalPremise(new GenericComplexPropositionalSentence("B & !!L")), new PropositionalClause("M"));
+//        kb.put(new PropositionalPremise(new Literal("A"), new PropositionalClause("P")), new PropositionalCNFSentence("L"));
+//        kb.put(new PropositionalPremise(new PropositionalCNFSentence("A"), new Literal("B")), new Literal("L"));
+//        kb.put(new PropositionalPremise(new Literal("A")), null);
+//        kb.put(new PropositionalPremise(new PropositionalCNFSentence("B")), null);
+//
+//        System.out.println(new PropositionalForwardChaining(kb).isEntail(new Literal("Q")));
 
 //        kb.put(new Premise(new CNFSentence("(a | b) & (a | b | c)")), new CNFSentence("(a | b | !a | c)"));
 //        kb.put(new Premise(new CNFSentence("(b | c)")), new Literal("Q"));
@@ -188,5 +190,24 @@ public class PropositionalForwardChaining {
 //
 //        System.out.println(new ForwardChaining(kb).isEntail(new Literal("X")));
 //        System.out.println(new ForwardChaining(kb).isEntail(new Literal("Y")));
+
+
+        kb.put(new PropositionalPremise(new Literal("AmericanWEST"), new Literal("WeaponC1"),
+                new Literal("SellsWESTC1NONO"), new Literal("HostileNONO")), new Literal("CriminalWEST"));
+        kb.put(new PropositionalPremise(PropositionalSentence.optimizedParse("MissileC1 & OwnsNONOC1")), PropositionalSentence.optimizedParse("SellsWESTC1NONO"));
+        kb.put(new PropositionalPremise(PropositionalSentence.optimizedParse("MissileC1")), PropositionalSentence.optimizedParse("WeaponC1"));
+        kb.put(new PropositionalPremise(PropositionalSentence.optimizedParse("EnemyNONOAMERICA")), PropositionalSentence.optimizedParse("HostileNONO"));
+        kb.put(new PropositionalPremise(PropositionalSentence.optimizedParse("OwnsNONOC1")), null);
+        kb.put(new PropositionalPremise(PropositionalSentence.optimizedParse("MissileC1")), null);
+        kb.put(new PropositionalPremise(PropositionalSentence.optimizedParse("AmericanWEST")), null);
+        kb.put(new PropositionalPremise(PropositionalSentence.optimizedParse("EnemyNONOAMERICA")), null);
+
+        System.out.println(new PropositionalForwardChaining(kb).isEntail(new Literal("CriminalWEST")));
+
+        System.out.println(PropositionalSentence.optimizedParse("((WestIsAmerican & MisWeapon & WestSellsMToNono & NonoIsHostile => WestIsCriminal) & " +
+                "(MisMissile & NonoOwnsM => WestSellsMToNono) & " +
+                "(MisMissile => MisWeapon) & " +
+                "(NonoIsEnemyOfAmerica => NonoIsHostile) & " +
+                "(NonoOwnsM & MisMissile & WestIsAmerican & NonoIsEnemyOfAmerica)) => WestIsCriminal"));
     }
 }

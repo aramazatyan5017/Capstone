@@ -1,7 +1,8 @@
 package org.example;
 
-import org.example.algo.PropositionalResolution;
+import org.example.algo.Resolution;
 import org.example.domain.Sentences;
+import org.example.domain.sentence.CNFSentence;
 import org.example.domain.sentence.propositional.GenericComplexPropositionalSentence;
 import org.example.domain.sentence.propositional.PropositionalCNFSentence;
 import org.example.domain.sentence.propositional.PropositionalSentence;
@@ -63,10 +64,10 @@ public class Main {
 
         System.out.println(PropositionalSentence.optimizedParse("(" + str1 + ")=>(" + str2 + ")"));
 
-        Set<PropositionalCNFSentence> set = new HashSet<>();
+        Set<CNFSentence> set = new HashSet<>();
         set.add(new GenericComplexPropositionalSentence("((B & C) => (A | T | G)) & ((G | T | A) => (C & B))").minimalCNF());
         System.out.println(set.iterator().next().size());
-        System.out.println(new PropositionalResolution(set, false).resolveAndGet().size());
+        System.out.println(new Resolution(set, false).resolveAndGet().size());
 
         System.out.println(new GenericComplexPropositionalSentence(str1).minimalCNF());
 

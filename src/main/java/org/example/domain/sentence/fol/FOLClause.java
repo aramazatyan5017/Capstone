@@ -6,6 +6,10 @@ import org.example.domain.LogicType;
 import org.example.domain.Sentences;
 import org.example.domain.sentence.Clause;
 import org.example.domain.sentence.BasicLogicElement;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.domain.sentence.propositional.PropositionalClause;
+import org.example.exception.ContradictionException;
+import org.example.exception.TautologyException;
 
 import java.text.ParseException;
 import java.util.Arrays;
@@ -73,6 +77,11 @@ public final class FOLClause implements FOLSentence, Clause {
     }
 
     @Override
+    public FOLCNFSentence minimalCNF() throws TautologyException, ContradictionException {
+        return new FOLCNFSentence((FOLClause) Sentences.optimizeClause(this));
+    }
+
+    @Override
     public String toString() {
         if (stringRepresentation == null) {
             StringBuilder str = new StringBuilder();
@@ -86,17 +95,17 @@ public final class FOLClause implements FOLSentence, Clause {
         return stringRepresentation;
     }
 
-//    @Override
-//    public boolean equals(Object other) {
-//        if (other == this) return true;
-//        if (!(other instanceof Clause that)) return false;
-//        return this.literals.equals(that.getLiterals());
-//    }
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) return true;
+        if (!(other instanceof FOLClause that)) return false;
+        return this.predicates.equals(that.predicates);
+    }
 
-//    @Override
-//    public int hashCode() {
-//        return literals.hashCode();
-//    }
+    @Override
+    public int hashCode() {
+        return predicates.hashCode();
+    }
 
     public LinkedHashSet<Predicate> getPredicates() {
         return new LinkedHashSet<>(predicates);

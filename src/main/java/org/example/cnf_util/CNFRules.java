@@ -1,6 +1,7 @@
 package org.example.cnf_util;
 
 import org.example.domain.sentence.BasicLogicElement;
+import org.example.domain.sentence.CNFSentence;
 import org.example.domain.sentence.Clause;
 import org.example.domain.Sentences;
 import org.example.exception.TautologyException;
@@ -100,7 +101,7 @@ public enum CNFRules {
         combined.addAll(s1);
         combined.addAll(s2);
         try {
-            return Sentences.optimizeClause(Clause.createClause(combined)).getLiterals();
+            return Sentences.optimizeClause(Clause.createClause(combined)).basicElements();
         } catch (TautologyException | ContradictionException e) {
             return new LinkedHashSet<>();
         }
@@ -111,7 +112,7 @@ public enum CNFRules {
         LinkedHashSet<Clause> combined = new LinkedHashSet<>();
         combined.addAll(s1);
         combined.addAll(s2);
-        return Sentences.optimizeCNF(CNFSentence.createCNF(combined)).getClauses();
+        return Sentences.optimizeCNF(CNFSentence.createCNF(combined)).clauses();
     }
 
     private static void validateCNFSentences(CNFSentence cnf1, CNFSentence cnf2) {

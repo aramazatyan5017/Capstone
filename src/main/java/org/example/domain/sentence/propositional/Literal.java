@@ -1,5 +1,6 @@
 package org.example.domain.sentence.propositional;
 
+import org.example.domain.LogicType;
 import org.example.domain.PropositionalSentenceType;
 import org.example.domain.Sentences;
 import org.example.domain.sentence.BasicLogicElement;
@@ -61,10 +62,25 @@ public final class Literal extends AbstractPropositionalSentence implements Basi
     }
 
     @Override
-    protected PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
+    public PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
         if (this == Literal.TRUE) throw new TautologyException();
         if (this == Literal.FALSE) throw new ContradictionException();
         return new PropositionalCNFSentence(new PropositionalClause(this));
+    }
+
+    @Override
+    public LogicType logicType() {
+        return LogicType.PROPOSITIONAL;
+    }
+
+    @Override
+    public BasicLogicElement getFalse() {
+        return Literal.FALSE;
+    }
+
+    @Override
+    public BasicLogicElement getTrue() {
+        return Literal.TRUE;
     }
 
     @Override
@@ -86,9 +102,11 @@ public final class Literal extends AbstractPropositionalSentence implements Basi
         return this.name.equals(that.name) && this.negated == that.negated;
     }
 
-    public boolean equalsIgnoreNegation(Literal other) {
+    @Override
+    public boolean equalsIgnoreNegation(BasicLogicElement other) {
         if (other == null) return false;
-        return name.equals(other.getName());
+        if (other.logicType() != LogicType.PROPOSITIONAL) return false;
+        return name.equals(((Literal) other).getName());
     }
 
     @Override

@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author aram.azatyan | 3/29/2024 2:45 PM
  */
-class PropositionalPropositionalResolutionInferenceRuleTest {
+class PropositionalResolutionInferenceRuleTest {
     @Test
     void resolveAbnormal() {
         assertThrows(IllegalArgumentException.class, () -> resolve(null, null));

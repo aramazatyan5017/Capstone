@@ -55,8 +55,8 @@ public final class PropositionalClause extends AbstractPropositionalSentence imp
     }
 
     @Override
-    protected PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
-        return new PropositionalCNFSentence(Sentences.optimizeClause(this));
+    public PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
+        return new PropositionalCNFSentence((PropositionalClause) Sentences.optimizeClause(this));
     }
 
     @Override

@@ -3,7 +3,8 @@ package org.example.domain.sentence.propositional;
 import org.example.domain.Connective;
 import org.example.domain.PropositionalSentenceType;
 import org.example.domain.Sentences;
-import org.example.domain.supplementary.LeftAndRightPropositionalCNF;
+import org.example.domain.sentence.Sentence;
+import org.example.domain.supplementary.LeftAndRightCNF;
 import org.example.exception.ContradictionException;
 import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
@@ -112,7 +113,7 @@ public final class GenericComplexPropositionalSentence extends AbstractPropositi
     }
 
     @Override
-    protected PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
+    public PropositionalCNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
         return (PropositionalCNFSentence) Sentences.toCNF(this);
     }
 
@@ -125,21 +126,20 @@ public final class GenericComplexPropositionalSentence extends AbstractPropositi
         return stringRepresentation;
     }
 
-    // TODO: 4/2/2024 should I compare truth tables
     @Override
     public boolean equals(Object other) {
         if (other == this) return true;
         if (!(other instanceof GenericComplexPropositionalSentence that)) return false;
 
-        LeftAndRightPropositionalCNF thisAndThatInfo = new LeftAndRightPropositionalCNF(this, that);
+        LeftAndRightCNF thisAndThatInfo = new LeftAndRightCNF(this, that);
 
         if (thisAndThatInfo.isLeftDetermined() && thisAndThatInfo.isRightDetermined()) {
             return thisAndThatInfo.leftValue() == thisAndThatInfo.rightValue();
         } else if (!thisAndThatInfo.isLeftDetermined() && !thisAndThatInfo.isRightDetermined()) {
             if (thisAndThatInfo.getLeft().equals(thisAndThatInfo.getRight())) return true;
 
-            PropositionalSentence opt1 = thisAndThatInfo.getLeft();
-            PropositionalSentence opt2 = thisAndThatInfo.getRight();
+            Sentence opt1 = thisAndThatInfo.getLeft();
+            Sentence opt2 = thisAndThatInfo.getRight();
 
             if (thisAndThatInfo.getLeft().isCanonical()) {
                 try {
@@ -161,9 +161,10 @@ public final class GenericComplexPropositionalSentence extends AbstractPropositi
                 }
             }
 
-            if ((opt1.type() == PropositionalSentenceType.LITERAL && opt2.type() == PropositionalSentenceType.LITERAL)
+            if ((((PropositionalSentence) opt1).type() == PropositionalSentenceType.LITERAL && ((PropositionalSentence) opt2).type() == PropositionalSentenceType.LITERAL)
                     ||
-               (opt1.type() == PropositionalSentenceType.CNF && opt2.type() == PropositionalSentenceType.CNF)) return opt1.equals(opt2);
+                    (((PropositionalSentence) opt1).type() == PropositionalSentenceType.CNF && ((PropositionalSentence) opt2).type() == PropositionalSentenceType.CNF))
+                return opt1.equals(opt2);
         }
 
         return false;

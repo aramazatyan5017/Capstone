@@ -39,7 +39,7 @@ public class OptimizedPropositionalSentenceParserHelper {
         literals.add(literal);
 
         try {
-            PropositionalClause optClause = Sentences.optimizeClause(new PropositionalClause(literals));
+            PropositionalClause optClause = (PropositionalClause) Sentences.optimizeClause(new PropositionalClause(literals));
             return optClause.size() == 1 ? optClause.getLiterals().iterator().next() : optClause;
         } catch (TautologyException e) {
             return Literal.TRUE;
@@ -54,8 +54,6 @@ public class OptimizedPropositionalSentenceParserHelper {
 
         if (literal == Literal.TRUE) return Literal.TRUE;
         if (literal == Literal.FALSE) return cnf;
-
-        // TODO: 4/3/2024 chi kara cnf lini, vori size y 1 a
 
         return new GenericComplexPropositionalSentence(left, right, Connective.OR);
     }
@@ -79,7 +77,7 @@ public class OptimizedPropositionalSentenceParserHelper {
         literals.addAll(c2.getLiterals());
 
         try {
-            PropositionalClause optClause = Sentences.optimizeClause(new PropositionalClause(literals));
+            PropositionalClause optClause = (PropositionalClause) Sentences.optimizeClause(new PropositionalClause(literals));
             return optClause.size() == 1 ? optClause.getLiterals().iterator().next() : optClause;
         } catch (TautologyException e) {
             return Literal.TRUE;
@@ -146,7 +144,7 @@ public class OptimizedPropositionalSentenceParserHelper {
         literals.add(literal);
 
         try {
-            PropositionalClause optClause = Sentences.optimizeClause(new PropositionalClause(literals));
+            PropositionalClause optClause = (PropositionalClause) Sentences.optimizeClause(new PropositionalClause(literals));
             if (optClause.size() == 1) {
                 Literal l = optClause.getLiterals().iterator().next();
                 return new Literal(l.getName(), !l.isNegated());
@@ -197,7 +195,7 @@ public class OptimizedPropositionalSentenceParserHelper {
         literals.addAll(c2.getLiterals());
 
         try {
-            PropositionalClause optClause = Sentences.optimizeClause(new PropositionalClause(literals));
+            PropositionalClause optClause = (PropositionalClause) Sentences.optimizeClause(new PropositionalClause(literals));
             if (optClause.size() == 1) {
                 Literal l = optClause.getLiterals().iterator().next();
                 return new Literal(l.getName(), !l.isNegated());
@@ -262,7 +260,7 @@ public class OptimizedPropositionalSentenceParserHelper {
         if (literal == Literal.TRUE) return clause;
 
         try {
-            PropositionalCNFSentence cnf = Sentences.optimizeCNF(new PropositionalCNFSentence(new PropositionalClause(literal), clause));
+            PropositionalCNFSentence cnf = (PropositionalCNFSentence) Sentences.optimizeCNF(new PropositionalCNFSentence(new PropositionalClause(literal), clause));
             if (cnf.size() == 1) {
                 PropositionalClause c = cnf.getClauses().iterator().next();
                 if (c.size() == 1) return c.getLiterals().iterator().next();
@@ -286,7 +284,7 @@ public class OptimizedPropositionalSentenceParserHelper {
         try {
             LinkedHashSet<PropositionalClause> clauses = cnf.getClauses();
             clauses.add(new PropositionalClause(literal));
-            PropositionalCNFSentence optCnf = Sentences.optimizeCNF(new PropositionalCNFSentence(clauses));
+            PropositionalCNFSentence optCnf = (PropositionalCNFSentence) Sentences.optimizeCNF(new PropositionalCNFSentence(clauses));
             if (optCnf.size() == 1) {
                 PropositionalClause c = optCnf.getClauses().iterator().next();
                 if (c.size() == 1) return c.getLiterals().iterator().next();
@@ -313,7 +311,7 @@ public class OptimizedPropositionalSentenceParserHelper {
     public static PropositionalSentence clauseAndClause(PropositionalSentence left, PropositionalSentence right) {
         if (left.equals(right)) return left;
         try {
-            PropositionalCNFSentence cnf = Sentences.optimizeCNF(new PropositionalCNFSentence((PropositionalClause) left, (PropositionalClause) right));
+            PropositionalCNFSentence cnf = (PropositionalCNFSentence) Sentences.optimizeCNF(new PropositionalCNFSentence((PropositionalClause) left, (PropositionalClause) right));
             if (cnf.size() == 1) {
                 PropositionalClause c = cnf.getClauses().iterator().next();
                 if (c.size() == 1) return c.getLiterals().iterator().next();
@@ -335,7 +333,7 @@ public class OptimizedPropositionalSentenceParserHelper {
         clauses.add(clause);
 
         try {
-            PropositionalCNFSentence optCnf = Sentences.optimizeCNF(new PropositionalCNFSentence(clauses));
+            PropositionalCNFSentence optCnf = (PropositionalCNFSentence) Sentences.optimizeCNF(new PropositionalCNFSentence(clauses));
             if (optCnf.size() == 1) {
                 PropositionalClause c = optCnf.getClauses().iterator().next();
                 if (c.size() == 1) return c.getLiterals().iterator().next();
@@ -364,7 +362,7 @@ public class OptimizedPropositionalSentenceParserHelper {
         clauses.addAll(rightCNF.getClauses());
 
         try {
-            PropositionalCNFSentence optCnf = Sentences.optimizeCNF(new PropositionalCNFSentence(clauses));
+            PropositionalCNFSentence optCnf = (PropositionalCNFSentence) Sentences.optimizeCNF(new PropositionalCNFSentence(clauses));
             if (optCnf.size() == 1) {
                 PropositionalClause c = optCnf.getClauses().iterator().next();
                 if (c.size() == 1) return c.getLiterals().iterator().next();
@@ -409,7 +407,7 @@ public class OptimizedPropositionalSentenceParserHelper {
                 SentenceUtils.OPENING_PARENTHESES + clause + SentenceUtils.CLOSING_PARENTHESES);
 
         try {
-            PropositionalCNFSentence cnf = Sentences.optimizeCNF(new PropositionalCNFSentence(new PropositionalClause(literal), clause));
+            PropositionalCNFSentence cnf = (PropositionalCNFSentence) Sentences.optimizeCNF(new PropositionalCNFSentence(new PropositionalClause(literal), clause));
             if (cnf.size() == 1) {
                 PropositionalClause c = cnf.getClauses().iterator().next();
                 if (c.size() == 1) {
@@ -482,7 +480,7 @@ public class OptimizedPropositionalSentenceParserHelper {
         clauses.add(new PropositionalClause(literal));
 
         try {
-            PropositionalCNFSentence optCnf = Sentences.optimizeCNF(new PropositionalCNFSentence(clauses));
+            PropositionalCNFSentence optCnf = (PropositionalCNFSentence) Sentences.optimizeCNF(new PropositionalCNFSentence(clauses));
             if (optCnf.size() == 1) {
                 PropositionalClause c = optCnf.getClauses().iterator().next();
                 if (c.size() == 1) {
@@ -535,7 +533,7 @@ public class OptimizedPropositionalSentenceParserHelper {
                 SentenceUtils.OPENING_PARENTHESES + clause1 + SentenceUtils.CLOSING_PARENTHESES);
 
         try {
-            PropositionalCNFSentence cnf = Sentences.optimizeCNF(new PropositionalCNFSentence(clause1, clause2));
+            PropositionalCNFSentence cnf = (PropositionalCNFSentence) Sentences.optimizeCNF(new PropositionalCNFSentence(clause1, clause2));
             if (cnf.size() == 1) {
                 PropositionalClause c = cnf.getClauses().iterator().next();
                 if (c.size() == 1) {
@@ -577,7 +575,7 @@ public class OptimizedPropositionalSentenceParserHelper {
         clauses.add(clause);
 
         try {
-            PropositionalCNFSentence optCnf = Sentences.optimizeCNF(new PropositionalCNFSentence(clauses));
+            PropositionalCNFSentence optCnf = (PropositionalCNFSentence) Sentences.optimizeCNF(new PropositionalCNFSentence(clauses));
             if (optCnf.size() == 1) {
                 PropositionalClause c = optCnf.getClauses().iterator().next();
                 if (c.size() == 1) {
@@ -654,7 +652,7 @@ public class OptimizedPropositionalSentenceParserHelper {
         clauses.addAll(cnf2.getClauses());
 
         try {
-            PropositionalCNFSentence optCnf = Sentences.optimizeCNF(new PropositionalCNFSentence(clauses));
+            PropositionalCNFSentence optCnf = (PropositionalCNFSentence) Sentences.optimizeCNF(new PropositionalCNFSentence(clauses));
             if (optCnf.size() == 1) {
                 PropositionalClause c = optCnf.getClauses().iterator().next();
                 if (c.size() == 1) {

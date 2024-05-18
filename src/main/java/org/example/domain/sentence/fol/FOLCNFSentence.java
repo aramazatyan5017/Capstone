@@ -3,7 +3,11 @@ package org.example.domain.sentence.fol;
 import org.example.domain.LogicType;
 import org.example.domain.FOLSentenceType;
 import org.example.domain.Sentences;
+import org.example.domain.sentence.CNFSentence;
 import org.example.domain.sentence.Clause;
+import org.example.domain.sentence.propositional.PropositionalCNFSentence;
+import org.example.exception.ContradictionException;
+import org.example.exception.TautologyException;
 import org.example.util.SentenceUtils;
 
 import java.text.ParseException;
@@ -39,50 +43,50 @@ public final class FOLCNFSentence implements FOLSentence, CNFSentence {
         this.clauses = cnfSentence.getClauses();
     }
 
-//    //-- returns true if and only if really canonical (will mostly be used for minimal CNFs)
-//    public boolean isCanonical() {
-//        if (isCanonical != null) return isCanonical;
-//
-//        Set<String> clauseLiteralNames = null;
-//        OUTER: for (Clause clause : clauses) {
-//            if (clause.getLiterals().contains(Literal.TRUE) || clause.getLiterals().contains(Literal.FALSE)) {
-//                isCanonical = false;
-//                break;
-//            }
-//
-//            if (clauseLiteralNames == null) {
-//                clauseLiteralNames = clause.getLiterals().stream()
-//                        .map(Literal::getName)
-//                        .collect(Collectors.toCollection(LinkedHashSet::new));
-//
-//                if (clauseLiteralNames.size() != clause.size()) {
-//                    isCanonical = false;
-//                    break;
-//                }
-//                continue;
-//            }
-//
-//            if (clauseLiteralNames.size() != clause.size()) {
-//                isCanonical = false;
-//                break;
-//            }
-//
-//            LinkedHashSet<Literal> currentLiterals = clause.getLiterals();
-//            if (currentLiterals.size() != clauseLiteralNames.size()) {
-//                isCanonical = false;
-//                break;
-//            }
-//            for (Literal literal : currentLiterals) {
-//                if (!clauseLiteralNames.contains(literal.getName())) {
-//                    isCanonical = false;
-//                    break OUTER;
-//                }
-//            }
-//        }
-//
-//        if (isCanonical == null) isCanonical = true;
-//        return isCanonical;
-//    }
+    //-- returns true if and only if really canonical (will mostly be used for minimal CNFs)
+    public boolean isCanonical() {
+        if (isCanonical != null) return isCanonical;
+
+        Set<String> clausePredicateNames = null;
+        OUTER: for (FOLClause clause : clauses) {
+            if (clause.getPredicates().contains(Predicate.TRUE) || clause.getPredicates().contains(Predicate.FALSE)) {
+                isCanonical = false;
+                break;
+            }
+
+            if (clausePredicateNames == null) {
+                clausePredicateNames = clause.getPredicates().stream()
+                        .map(Predicate::getName)
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
+
+                if (clausePredicateNames.size() != clause.size()) {
+                    isCanonical = false;
+                    break;
+                }
+                continue;
+            }
+
+            if (clausePredicateNames.size() != clause.size()) {
+                isCanonical = false;
+                break;
+            }
+
+            LinkedHashSet<Predicate> currentPredicates = clause.getPredicates();
+            if (currentPredicates.size() != clausePredicateNames.size()) {
+                isCanonical = false;
+                break;
+            }
+            for (Predicate literal : currentPredicates) {
+                if (!clausePredicateNames.contains(literal.getName())) {
+                    isCanonical = false;
+                    break OUTER;
+                }
+            }
+        }
+
+        if (isCanonical == null) isCanonical = true;
+        return isCanonical;
+    }
 
     public List<FOLClause> getClauseList() {
         return getClauses().stream().toList();
@@ -109,13 +113,13 @@ public final class FOLCNFSentence implements FOLSentence, CNFSentence {
         return (LinkedHashSet<Clause>) temp;
     }
 
-//    @Override
-//    protected CNFSentence convertToMinimalCNF() throws TautologyException, ContradictionException {
-////        return Sentences.optimizeCNF(this);
-//        CNFSentence possCNF = Sentences.optimizeCNF(this);
-//        if (possCNF.size() == 1) return possCNF;
-//        return possCNF.isCanonical() ? Sentences.optimizeCanonicalCNF(possCNF) : possCNF;
-//    }
+    @Override
+    public FOLCNFSentence minimalCNF() throws TautologyException, ContradictionException {
+//        return Sentences.optimizeCNF(this);
+        FOLCNFSentence possCNF = (FOLCNFSentence) Sentences.optimizeCNF(this);
+        if (possCNF.size() == 1) return possCNF;
+        return possCNF.isCanonical() ? (FOLCNFSentence) Sentences.optimizeCanonicalCNF(possCNF) : possCNF;
+    }
 
     @Override
     public String toString() {
@@ -131,17 +135,17 @@ public final class FOLCNFSentence implements FOLSentence, CNFSentence {
         return stringRepresentation;
     }
 
-//    @Override
-//    public boolean equals(Object other) {
-//        if (other == this) return true;
-//        if (!(other instanceof CNFSentence that)) return false;
-//        return clauses.equals(that.getClauses());
-//    }
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) return true;
+        if (!(other instanceof FOLCNFSentence that)) return false;
+        return clauses.equals(that.getClauses());
+    }
 
-//    @Override
-//    public int hashCode() {
-//        return clauses.hashCode();
-//    }
+    @Override
+    public int hashCode() {
+        return clauses.hashCode();
+    }
 
     public LinkedHashSet<FOLClause> getClauses() {
         return new LinkedHashSet<>(clauses);

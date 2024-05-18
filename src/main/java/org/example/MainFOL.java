@@ -1,5 +1,8 @@
 package org.example;
 
+import org.example.domain.sentence.fol.term.Constant;
+import org.example.domain.sentence.fol.term.Variable;
+import org.example.domain.sentence.propositional.Literal;
 import org.example.domain.sentence.propositional.PropositionalCNFSentence;
 import org.example.domain.sentence.propositional.PropositionalClause;
 import org.example.parser.FOLCNFExpressionParser;
@@ -7,6 +10,8 @@ import org.example.domain.sentence.fol.term.Function;
 import org.example.domain.sentence.fol.GenericComplexFOLSentence;
 import org.example.domain.sentence.fol.Predicate;
 import org.example.parser.FOLInfixExpressionParser;
+
+import java.util.Arrays;
 
 /**
  * @author aram.azatyan | 4/17/2024 8:55 PM
@@ -56,5 +61,19 @@ public class MainFOL {
         // (a & !a)
         // (Wow(x, y) & !Wow(y, x))
         // Wow(a, b, c) & !Wow(d, e, f)
+
+        System.out.println((int) '∀');
+        System.out.println((int) '∃');
+
+        System.out.println((char) 8704);
+        System.out.println((char) 8707);
+
+        Arrays.stream("5A6ABC7GGG".split("[0-9][A-Z]+")).forEach(System.out::println);
+
+        Predicate pred = new Predicate("Sells(x, y, Missile(x, Kuku(x, y)), x)");
+        pred.substitute(new Variable("x"), new Constant("ARAM"));
+        System.out.println(pred);
+
+
     }
 }

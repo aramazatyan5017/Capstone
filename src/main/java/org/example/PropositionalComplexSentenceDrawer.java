@@ -77,4 +77,8 @@ public class PropositionalComplexSentenceDrawer extends JFrame {
             return complex.getConnective().toString();
         }
     }
+
+    public static void main(String[] args) throws Exception {
+        new PropositionalComplexSentenceDrawer(new GenericComplexPropositionalSentence("(a | b) & (c | !d | e)")).setVisible(true);
+    }
 }
